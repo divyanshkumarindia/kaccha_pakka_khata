@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # my_daily_balance Flutter skeleton
 
 This folder contains a minimal Flutter project skeleton created inside the existing `my_daily_balance` workspace so you can start building the Flutter app here.
@@ -21,3 +22,7 @@ How to use (if you have Flutter installed):
    flutter run
 
 You can target a device or web (e.g., `-d chrome`).
+=======
+# my_daily_balance
+A flutter app.
+>>>>>>> fd9bff4469a4677def344f432cc176d6b9a28ece
