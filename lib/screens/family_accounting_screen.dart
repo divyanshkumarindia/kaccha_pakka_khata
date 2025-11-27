@@ -19,6 +19,9 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
   bool isBusinessIncomeExpanded = false;
   bool isGroceriesExpanded = true;
   bool isUtilitiesExpanded = false;
+  late TextEditingController periodController;
+  late TextEditingController periodStartController;
+  late TextEditingController periodEndController;
 
   @override
   void didChangeDependencies() {
@@ -29,6 +32,309 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
     } else {
       model = Provider.of<AccountingModel>(context);
     }
+    periodController = TextEditingController(text: model.periodDate);
+    periodStartController = TextEditingController(text: model.periodStartDate);
+    periodEndController = TextEditingController(text: model.periodEndDate);
+  }
+
+  Widget _buildDurationAndPeriod(bool isDark, AccountingModel model) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final full = constraints.maxWidth;
+      const gap = 16.0;
+      final half = (full - gap) / 2;
+
+      Widget durationDropdown(double width) {
+        return SizedBox(
+          width: width,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Report Duration',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: isDark
+                      ? const Color(0xFFD1D5DB)
+                      : const Color(0xFF374151),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                height: 42,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF374151) : Colors.white,
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF4B5563)
+                        : const Color(0xFFD1D5DB),
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: model.duration.toString().split('.').last,
+                    icon: const Icon(Icons.keyboard_arrow_down, size: 20),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark
+                          ? const Color(0xFFF9FAFB)
+                          : const Color(0xFF111827),
+                    ),
+                    dropdownColor:
+                        isDark ? const Color(0xFF374151) : Colors.white,
+                    items: ['Daily', 'Weekly', 'Monthly', 'Yearly']
+                        .map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        final newDur = DurationType.values.firstWhere(
+                            (d) => d.toString().split('.').last == newValue,
+                            orElse: () => DurationType.Daily);
+                        model.setDuration(newDur);
+                        setState(() {});
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      Widget weeklyPeriod() {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select Period',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color:
+                    isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 42,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF374151) : Colors.white,
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0xFF4B5563)
+                            : const Color(0xFFD1D5DB),
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: periodStartController,
+                            decoration: InputDecoration(
+                              hintText: 'dd-mm-yyyy',
+                              hintStyle: TextStyle(
+                                fontSize: 14,
+                                color: isDark
+                                    ? const Color(0xFF6B7280)
+                                    : const Color(0xFF9CA3AF),
+                              ),
+                              border: InputBorder.none,
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isDark
+                                  ? const Color(0xFFF9FAFB)
+                                  : const Color(0xFF111827),
+                            ),
+                            onChanged: (v) =>
+                                model.setPeriodRange(v, model.periodEndDate),
+                          ),
+                        ),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: isDark
+                              ? const Color(0xFF6B7280)
+                              : const Color(0xFF9CA3AF),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Container(
+                    height: 42,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF374151) : Colors.white,
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0xFF4B5563)
+                            : const Color(0xFFD1D5DB),
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: periodEndController,
+                            decoration: InputDecoration(
+                              hintText: 'dd-mm-yyyy',
+                              hintStyle: TextStyle(
+                                fontSize: 14,
+                                color: isDark
+                                    ? const Color(0xFF6B7280)
+                                    : const Color(0xFF9CA3AF),
+                              ),
+                              border: InputBorder.none,
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isDark
+                                  ? const Color(0xFFF9FAFB)
+                                  : const Color(0xFF111827),
+                            ),
+                            onChanged: (v) =>
+                                model.setPeriodRange(model.periodStartDate, v),
+                          ),
+                        ),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: isDark
+                              ? const Color(0xFF6B7280)
+                              : const Color(0xFF9CA3AF),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      }
+
+      Widget singlePeriod() {
+        return Container(
+          height: 42,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF374151) : Colors.white,
+            border: Border.all(
+              color: isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB),
+            ),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: periodController,
+                  decoration: InputDecoration(
+                    hintText: 'dd-mm-yyyy',
+                    hintStyle: TextStyle(
+                      fontSize: 14,
+                      color: isDark
+                          ? const Color(0xFF6B7280)
+                          : const Color(0xFF9CA3AF),
+                    ),
+                    border: InputBorder.none,
+                  ),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark
+                        ? const Color(0xFFF9FAFB)
+                        : const Color(0xFF111827),
+                  ),
+                  onChanged: (v) => model.setPeriodDate(v),
+                ),
+              ),
+              Icon(
+                Icons.calendar_today,
+                size: 16,
+                color:
+                    isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
+              ),
+            ],
+          ),
+        );
+      }
+
+      if (model.duration != DurationType.Daily) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 360),
+              curve: Curves.easeInOut,
+              width: full,
+              child: durationDropdown(full),
+            ),
+            const SizedBox(height: 12),
+            (model.duration == DurationType.Weekly ||
+                    model.duration == DurationType.Monthly ||
+                    model.duration == DurationType.Yearly)
+                ? weeklyPeriod()
+                : singlePeriod(),
+          ],
+        );
+      }
+
+      return Row(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 360),
+            curve: Curves.easeInOut,
+            width: half,
+            child: durationDropdown(half),
+          ),
+          const SizedBox(width: gap),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Select Period',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? const Color(0xFFD1D5DB)
+                        : const Color(0xFF374151),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                singlePeriod(),
+              ],
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    periodController.dispose();
+    periodStartController.dispose();
+    periodEndController.dispose();
+    super.dispose();
   }
 
   @override
@@ -230,154 +536,7 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
                           const SizedBox(height: 24),
 
                           // Report Duration and Select Period
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Report Duration',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: isDark
-                                            ? const Color(0xFFD1D5DB)
-                                            : const Color(0xFF374151),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Container(
-                                      height: 42,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12),
-                                      decoration: BoxDecoration(
-                                        color: isDark
-                                            ? const Color(0xFF374151)
-                                            : Colors.white,
-                                        border: Border.all(
-                                          color: isDark
-                                              ? const Color(0xFF4B5563)
-                                              : const Color(0xFFD1D5DB),
-                                        ),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: DropdownButtonHideUnderline(
-                                        child: DropdownButton<String>(
-                                          isExpanded: true,
-                                          value: model.duration
-                                              .toString()
-                                              .split('.')
-                                              .last,
-                                          icon: const Icon(
-                                              Icons.keyboard_arrow_down,
-                                              size: 20),
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: isDark
-                                                ? const Color(0xFFF9FAFB)
-                                                : const Color(0xFF111827),
-                                          ),
-                                          dropdownColor: isDark
-                                              ? const Color(0xFF374151)
-                                              : Colors.white,
-                                          items: ['Daily', 'Weekly', 'Monthly']
-                                              .map((String value) {
-                                            return DropdownMenuItem<String>(
-                                              value: value,
-                                              child: Text(value),
-                                            );
-                                          }).toList(),
-                                          onChanged: (String? newValue) {
-                                            if (newValue != null) {
-                                              final newDur = DurationType.values
-                                                  .firstWhere(
-                                                      (d) =>
-                                                          d
-                                                              .toString()
-                                                              .split('.')
-                                                              .last ==
-                                                          newValue,
-                                                      orElse: () =>
-                                                          DurationType.Daily);
-                                              model.setDuration(newDur);
-                                              setState(() {});
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Select Period',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: isDark
-                                            ? const Color(0xFFD1D5DB)
-                                            : const Color(0xFF374151),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Container(
-                                      height: 42,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12),
-                                      decoration: BoxDecoration(
-                                        color: isDark
-                                            ? const Color(0xFF374151)
-                                            : Colors.white,
-                                        border: Border.all(
-                                          color: isDark
-                                              ? const Color(0xFF4B5563)
-                                              : const Color(0xFFD1D5DB),
-                                        ),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: TextField(
-                                              decoration: InputDecoration(
-                                                hintText: 'dd-mm-yyyy',
-                                                hintStyle: TextStyle(
-                                                  fontSize: 14,
-                                                  color: isDark
-                                                      ? const Color(0xFF6B7280)
-                                                      : const Color(0xFF9CA3AF),
-                                                ),
-                                                border: InputBorder.none,
-                                              ),
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: isDark
-                                                    ? const Color(0xFFF9FAFB)
-                                                    : const Color(0xFF111827),
-                                              ),
-                                            ),
-                                          ),
-                                          Icon(
-                                            Icons.calendar_today,
-                                            size: 16,
-                                            color: isDark
-                                                ? const Color(0xFF6B7280)
-                                                : const Color(0xFF9CA3AF),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                          _buildDurationAndPeriod(isDark, model),
                           const SizedBox(height: 24),
 
                           // Opening Balances Section
