@@ -86,6 +86,50 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
     }
   }
 
+  Future<void> _pickDateRange(BuildContext ctx) async {
+    final startDate = _parseDate(model.periodStartDate);
+    final endDate = _parseDate(model.periodEndDate);
+
+    final picked = await showDateRangePicker(
+      context: ctx,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      initialDateRange: (startDate != null && endDate != null)
+          ? DateTimeRange(start: startDate, end: endDate)
+          : null,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).brightness == Brightness.dark
+                ? const ColorScheme.dark(
+                    primary: Color(0xFF4F46E5),
+                    onPrimary: Colors.white,
+                    surface: Color(0xFF1F2937),
+                    onSurface: Color(0xFFF9FAFB),
+                  )
+                : const ColorScheme.light(
+                    primary: Color(0xFF4F46E5),
+                    onPrimary: Colors.white,
+                    surface: Colors.white,
+                    onSurface: Color(0xFF111827),
+                  ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      final startStr = _formatDate(picked.start);
+      final endStr = _formatDate(picked.end);
+      setState(() {
+        periodStartController.text = startStr;
+        periodEndController.text = endStr;
+      });
+      model.setPeriodRange(startStr, endStr);
+    }
+  }
+
   Widget _buildDurationAndPeriod(bool isDark, AccountingModel model) {
     return LayoutBuilder(builder: (context, constraints) {
       final full = constraints.maxWidth;
@@ -172,6 +216,130 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
               ),
             ),
             const SizedBox(height: 4),
+            InkWell(
+              onTap: () => _pickDateRange(context),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF374151) : Colors.white,
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF4B5563)
+                        : const Color(0xFFD1D5DB),
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            periodStartController.text.isEmpty
+                                ? 'Start date'
+                                : periodStartController.text,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: periodStartController.text.isEmpty
+                                  ? (isDark
+                                      ? const Color(0xFF6B7280)
+                                      : const Color(0xFF9CA3AF))
+                                  : (isDark
+                                      ? const Color(0xFFF9FAFB)
+                                      : const Color(0xFF111827)),
+                            ),
+                          ),
+                          if (periodStartController.text.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                'Start date',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark
+                                      ? const Color(0xFF6B7280)
+                                      : const Color(0xFF9CA3AF),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward,
+                      size: 16,
+                      color: isDark
+                          ? const Color(0xFF6B7280)
+                          : const Color(0xFF9CA3AF),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            periodEndController.text.isEmpty
+                                ? 'End date'
+                                : periodEndController.text,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: periodEndController.text.isEmpty
+                                  ? (isDark
+                                      ? const Color(0xFF6B7280)
+                                      : const Color(0xFF9CA3AF))
+                                  : (isDark
+                                      ? const Color(0xFFF9FAFB)
+                                      : const Color(0xFF111827)),
+                            ),
+                          ),
+                          if (periodEndController.text.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                'End date',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark
+                                      ? const Color(0xFF6B7280)
+                                      : const Color(0xFF9CA3AF),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.calendar_today,
+                      size: 18,
+                      color: isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF6B7280),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+
+      Widget monthlyYearlyPeriod() {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select Period',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color:
+                    isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151),
+              ),
+            ),
+            const SizedBox(height: 4),
             Row(
               children: [
                 Expanded(
@@ -198,16 +366,20 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
                                 controller: periodStartController,
                                 readOnly: true,
                                 onTap: () {
-                                  final end = _parseDate(model.periodEndDate);
-                                  final DateTime? last = end != null
-                                      ? end.subtract(const Duration(days: 1))
-                                      : null;
+                                  DateTime? endDate =
+                                      _parseDate(periodEndController.text);
                                   _pickDateFor(
-                                      context,
-                                      periodStartController,
-                                      (s) => model.setPeriodRange(
-                                          s, model.periodEndDate),
-                                      lastDate: last);
+                                    context,
+                                    periodStartController,
+                                    (s) {
+                                      model.setPeriodRange(
+                                          s, periodEndController.text);
+                                    },
+                                    lastDate: endDate != null
+                                        ? endDate
+                                            .subtract(const Duration(days: 1))
+                                        : null,
+                                  );
                                 },
                                 decoration: InputDecoration(
                                   hintText: 'dd-mm-yyyy',
@@ -229,16 +401,20 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
                             ),
                             InkWell(
                               onTap: () {
-                                final end = _parseDate(model.periodEndDate);
-                                final DateTime? last = end != null
-                                    ? end.subtract(const Duration(days: 1))
-                                    : null;
+                                DateTime? endDate =
+                                    _parseDate(periodEndController.text);
                                 _pickDateFor(
-                                    context,
-                                    periodStartController,
-                                    (s) => model.setPeriodRange(
-                                        s, model.periodEndDate),
-                                    lastDate: last);
+                                  context,
+                                  periodStartController,
+                                  (s) {
+                                    model.setPeriodRange(
+                                        s, periodEndController.text);
+                                  },
+                                  lastDate: endDate != null
+                                      ? endDate
+                                          .subtract(const Duration(days: 1))
+                                      : null,
+                                );
                               },
                               child: Icon(
                                 Icons.calendar_today,
@@ -251,20 +427,20 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
                         'Start date',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: isDark
-                              ? const Color(0xFF9CA3AF)
-                              : const Color(0xFF6B7280),
+                              ? const Color(0xFF6B7280)
+                              : const Color(0xFF9CA3AF),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,17 +465,19 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
                                 controller: periodEndController,
                                 readOnly: true,
                                 onTap: () {
-                                  final start =
-                                      _parseDate(model.periodStartDate);
-                                  final DateTime? first = start != null
-                                      ? start.add(const Duration(days: 1))
-                                      : null;
+                                  DateTime? startDate =
+                                      _parseDate(periodStartController.text);
                                   _pickDateFor(
-                                      context,
-                                      periodEndController,
-                                      (s) => model.setPeriodRange(
-                                          model.periodStartDate, s),
-                                      firstDate: first);
+                                    context,
+                                    periodEndController,
+                                    (s) {
+                                      model.setPeriodRange(
+                                          periodStartController.text, s);
+                                    },
+                                    firstDate: startDate != null
+                                        ? startDate.add(const Duration(days: 1))
+                                        : null,
+                                  );
                                 },
                                 decoration: InputDecoration(
                                   hintText: 'dd-mm-yyyy',
@@ -321,16 +499,19 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
                             ),
                             InkWell(
                               onTap: () {
-                                final start = _parseDate(model.periodStartDate);
-                                final DateTime? first = start != null
-                                    ? start.add(const Duration(days: 1))
-                                    : null;
+                                DateTime? startDate =
+                                    _parseDate(periodStartController.text);
                                 _pickDateFor(
-                                    context,
-                                    periodEndController,
-                                    (s) => model.setPeriodRange(
-                                        model.periodStartDate, s),
-                                    firstDate: first);
+                                  context,
+                                  periodEndController,
+                                  (s) {
+                                    model.setPeriodRange(
+                                        periodStartController.text, s);
+                                  },
+                                  firstDate: startDate != null
+                                      ? startDate.add(const Duration(days: 1))
+                                      : null,
+                                );
                               },
                               child: Icon(
                                 Icons.calendar_today,
@@ -343,14 +524,14 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
                         'End date',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: isDark
-                              ? const Color(0xFF9CA3AF)
-                              : const Color(0xFF6B7280),
+                              ? const Color(0xFF6B7280)
+                              : const Color(0xFF9CA3AF),
                         ),
                       ),
                     ],
@@ -426,11 +607,12 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
               child: durationDropdown(full),
             ),
             const SizedBox(height: 12),
-            (model.duration == DurationType.Weekly ||
-                    model.duration == DurationType.Monthly ||
-                    model.duration == DurationType.Yearly)
+            model.duration == DurationType.Weekly
                 ? weeklyPeriod()
-                : singlePeriod(),
+                : (model.duration == DurationType.Monthly ||
+                        model.duration == DurationType.Yearly)
+                    ? monthlyYearlyPeriod()
+                    : singlePeriod(),
           ],
         );
       }
