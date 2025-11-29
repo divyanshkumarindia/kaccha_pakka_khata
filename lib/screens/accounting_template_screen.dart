@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'family_accounting_screen.dart';
+import '../widgets/accounting_form.dart';
 
-/// Thin wrapper that re-uses the existing FamilyAccountingScreen implementation
-/// so the new template route renders exactly the same UI. This keeps a single
-/// authoritative implementation while allowing routes to point to a template
-/// keyed screen. If you prefer a full copy of the file (duplicate source),
-/// I can paste the entire family file into this file instead.
+/// Template route that renders the shared `AccountingForm` widget.
+/// Each template key (family, business, institute, other) is passed through
+/// so `AccountingForm` can adapt labels/defaults if necessary.
 class AccountingTemplateScreen extends StatelessWidget {
   final String templateKey;
   const AccountingTemplateScreen({Key? key, required this.templateKey})
@@ -13,7 +11,6 @@ class AccountingTemplateScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // For now, delegate to FamilyAccountingScreen to guarantee identical UI.
-    return const FamilyAccountingScreen();
+    return AccountingForm(templateKey: templateKey);
   }
 }
