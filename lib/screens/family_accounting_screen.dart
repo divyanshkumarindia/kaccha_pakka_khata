@@ -367,12 +367,18 @@ class _FamilyAccountingScreenState extends State<FamilyAccountingScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151),
+                    color: isDark
+                        ? const Color(0xFFD1D5DB)
+                        : const Color(0xFF374151),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(Icons.clear, size: 18, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
+                  icon: Icon(Icons.clear,
+                      size: 18,
+                      color: isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF6B7280)),
                   tooltip: 'Clear selected dates',
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
