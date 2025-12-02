@@ -56,11 +56,13 @@ class DurationPeriodPicker extends StatelessWidget {
         try {
           final parts = s.split('-');
           if (parts.length == 3) {
-            return DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+            return DateTime(
+                int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
           }
         } catch (_) {}
         return null;
       }
+
       final full = constraints.maxWidth;
       const gap = 16.0;
       final half = (full - gap) / 2;
@@ -412,16 +414,18 @@ class DurationPeriodPicker extends StatelessWidget {
               children: [
                 Expanded(
                   child: InkWell(
-                      onTap: () {
-                        final endDate = parseDate(periodEndController.text);
-                        final DateTime? last = endDate != null ? endDate.subtract(const Duration(days: 1)) : null;
-                        pickDateFor(
-                          context,
-                          periodStartController,
-                          (s) => model.setPeriodRange(s, model.periodEndDate),
-                          lastDate: last,
-                        );
-                      },
+                    onTap: () {
+                      final endDate = parseDate(periodEndController.text);
+                      final DateTime? last = endDate != null
+                          ? endDate.subtract(const Duration(days: 1))
+                          : null;
+                      pickDateFor(
+                        context,
+                        periodStartController,
+                        (s) => model.setPeriodRange(s, model.periodEndDate),
+                        lastDate: last,
+                      );
+                    },
                     child: Container(
                       height: 42,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -468,16 +472,18 @@ class DurationPeriodPicker extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: InkWell(
-                      onTap: () {
-                        final startDate = parseDate(periodStartController.text);
-                        final DateTime? first = startDate != null ? startDate.add(const Duration(days: 1)) : null;
-                        pickDateFor(
-                          context,
-                          periodEndController,
-                          (s) => model.setPeriodRange(model.periodStartDate, s),
-                          firstDate: first,
-                        );
-                      },
+                    onTap: () {
+                      final startDate = parseDate(periodStartController.text);
+                      final DateTime? first = startDate != null
+                          ? startDate.add(const Duration(days: 1))
+                          : null;
+                      pickDateFor(
+                        context,
+                        periodEndController,
+                        (s) => model.setPeriodRange(model.periodStartDate, s),
+                        firstDate: first,
+                      );
+                    },
                     child: Container(
                       height: 42,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
