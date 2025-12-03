@@ -23,10 +23,8 @@ class _AccountingFormState extends State<AccountingForm> {
   late AccountingModel model;
 
   bool isOpeningBalancesExpanded = true;
-  bool isSalaryExpanded = true;
-  bool isBusinessIncomeExpanded = false;
-  bool isGroceriesExpanded = true;
-  bool isUtilitiesExpanded = false;
+  // Map to track expansion state for all categories dynamically
+  Map<String, bool> categoryExpansionState = {};
   late TextEditingController periodController;
   late TextEditingController periodStartController;
   late TextEditingController periodEndController;
@@ -615,6 +613,21 @@ class _AccountingFormState extends State<AccountingForm> {
   }
 
   Widget _buildIncomeSection(bool isDark, AccountingModel model) {
+    // Switch based on user type to call the appropriate builder
+    switch (model.userType) {
+      case UserType.personal:
+        return _buildPersonalIncome(isDark, model);
+      case UserType.business:
+        return _buildBusinessIncome(isDark, model);
+      case UserType.institute:
+        return _buildInstituteIncome(isDark, model);
+      case UserType.other:
+        return _buildOtherIncome(isDark, model);
+    }
+  }
+
+  // PERSONAL INCOME CATEGORIES
+  Widget _buildPersonalIncome(bool isDark, AccountingModel model) {
     return Column(
       children: [
         Row(
@@ -655,13 +668,14 @@ class _AccountingFormState extends State<AccountingForm> {
           'Salary / Wages',
           '₹${0.toStringAsFixed(2)}',
           const Color(0xFF059669),
-          isSalaryExpanded,
+          categoryExpansionState['salary'] ?? true,
           () {
             setState(() {
-              isSalaryExpanded = !isSalaryExpanded;
+              categoryExpansionState['salary'] =
+                  !(categoryExpansionState['salary'] ?? true);
             });
           },
-          showEntry: isSalaryExpanded,
+          showEntry: categoryExpansionState['salary'] ?? true,
           receipt: true,
         ),
         const SizedBox(height: 12),
@@ -671,10 +685,339 @@ class _AccountingFormState extends State<AccountingForm> {
           'Business Income',
           '₹${0.toStringAsFixed(2)}',
           const Color(0xFF059669),
-          isBusinessIncomeExpanded,
+          categoryExpansionState['business_income'] ?? false,
           () {
             setState(() {
-              isBusinessIncomeExpanded = !isBusinessIncomeExpanded;
+              categoryExpansionState['business_income'] =
+                  !(categoryExpansionState['business_income'] ?? false);
+            });
+          },
+          receipt: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'rental_income',
+          'Rental Income',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['rental_income'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['rental_income'] =
+                  !(categoryExpansionState['rental_income'] ?? false);
+            });
+          },
+          receipt: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'investment_returns',
+          'Investment Returns / Interest',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['investment_returns'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['investment_returns'] =
+                  !(categoryExpansionState['investment_returns'] ?? false);
+            });
+          },
+          receipt: true,
+        ),
+      ],
+    );
+  }
+
+  // BUSINESS INCOME CATEGORIES
+  Widget _buildBusinessIncome(bool isDark, AccountingModel model) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Sales (Receipts)',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF059669),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () {
+                model.addEntryToAccount('sales', receipt: true);
+              },
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('Add New Entry Box'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF059669),
+                side: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF15803D)
+                      : const Color(0xFF86EFAC),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                textStyle: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'sales',
+          'Sales Revenue',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['sales'] ?? true,
+          () {
+            setState(() {
+              categoryExpansionState['sales'] =
+                  !(categoryExpansionState['sales'] ?? true);
+            });
+          },
+          showEntry: categoryExpansionState['sales'] ?? true,
+          receipt: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'service_income',
+          'Service Income',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['service_income'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['service_income'] =
+                  !(categoryExpansionState['service_income'] ?? false);
+            });
+          },
+          receipt: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'interest_received',
+          'Interest Received',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['interest_received'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['interest_received'] =
+                  !(categoryExpansionState['interest_received'] ?? false);
+            });
+          },
+          receipt: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'commission_received',
+          'Commission Received',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['commission_received'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['commission_received'] =
+                  !(categoryExpansionState['commission_received'] ?? false);
+            });
+          },
+          receipt: true,
+        ),
+      ],
+    );
+  }
+
+  // INSTITUTE/ORGANIZATION INCOME CATEGORIES
+  Widget _buildInstituteIncome(bool isDark, AccountingModel model) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Receipts',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF059669),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () {
+                model.addEntryToAccount('fees_collected', receipt: true);
+              },
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('Add New Entry Box'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF059669),
+                side: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF15803D)
+                      : const Color(0xFF86EFAC),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                textStyle: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'fees_collected',
+          'Fees Collected (Tuition / Admission)',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['fees_collected'] ?? true,
+          () {
+            setState(() {
+              categoryExpansionState['fees_collected'] =
+                  !(categoryExpansionState['fees_collected'] ?? true);
+            });
+          },
+          showEntry: categoryExpansionState['fees_collected'] ?? true,
+          receipt: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'exam_fees',
+          'Exam Fees',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['exam_fees'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['exam_fees'] =
+                  !(categoryExpansionState['exam_fees'] ?? false);
+            });
+          },
+          receipt: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'donations',
+          'Donations Received',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['donations'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['donations'] =
+                  !(categoryExpansionState['donations'] ?? false);
+            });
+          },
+          receipt: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'grants',
+          'Grants / Subsidies',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['grants'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['grants'] =
+                  !(categoryExpansionState['grants'] ?? false);
+            });
+          },
+          receipt: true,
+        ),
+      ],
+    );
+  }
+
+  // OTHER INCOME CATEGORIES
+  Widget _buildOtherIncome(bool isDark, AccountingModel model) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Receipts',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF059669),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () {
+                model.addEntryToAccount('income_1', receipt: true);
+              },
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('Add New Entry Box'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF059669),
+                side: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF15803D)
+                      : const Color(0xFF86EFAC),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                textStyle: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'income_1',
+          'Income Source 1',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['income_1'] ?? true,
+          () {
+            setState(() {
+              categoryExpansionState['income_1'] =
+                  !(categoryExpansionState['income_1'] ?? true);
+            });
+          },
+          showEntry: categoryExpansionState['income_1'] ?? true,
+          receipt: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'income_2',
+          'Income Source 2',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['income_2'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['income_2'] =
+                  !(categoryExpansionState['income_2'] ?? false);
+            });
+          },
+          receipt: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'income_3',
+          'Income Source 3',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFF059669),
+          categoryExpansionState['income_3'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['income_3'] =
+                  !(categoryExpansionState['income_3'] ?? false);
             });
           },
           receipt: true,
@@ -684,6 +1027,21 @@ class _AccountingFormState extends State<AccountingForm> {
   }
 
   Widget _buildExpensesSection(bool isDark, AccountingModel model) {
+    // Switch based on user type to call the appropriate builder
+    switch (model.userType) {
+      case UserType.personal:
+        return _buildPersonalExpenses(isDark, model);
+      case UserType.business:
+        return _buildBusinessExpenses(isDark, model);
+      case UserType.institute:
+        return _buildInstituteExpenses(isDark, model);
+      case UserType.other:
+        return _buildOtherExpenses(isDark, model);
+    }
+  }
+
+  // PERSONAL EXPENSES CATEGORIES
+  Widget _buildPersonalExpenses(bool isDark, AccountingModel model) {
     return Column(
       children: [
         Row(
@@ -724,26 +1082,356 @@ class _AccountingFormState extends State<AccountingForm> {
           'Groceries / Food',
           '₹${0.toStringAsFixed(2)}',
           const Color(0xFFDC2626),
-          isGroceriesExpanded,
+          categoryExpansionState['groceries'] ?? true,
           () {
             setState(() {
-              isGroceriesExpanded = !isGroceriesExpanded;
+              categoryExpansionState['groceries'] =
+                  !(categoryExpansionState['groceries'] ?? true);
             });
           },
-          showEntry: isGroceriesExpanded,
+          showEntry: categoryExpansionState['groceries'] ?? true,
           isExpense: true,
         ),
         const SizedBox(height: 12),
         _buildCategoryCard(
           isDark,
-          'other_expenses',
-          'Utilities (Electricity / Water / Gas)',
+          'rent_payment',
+          'Rent / EMI Payment',
           '₹${0.toStringAsFixed(2)}',
           const Color(0xFFDC2626),
-          isUtilitiesExpanded,
+          categoryExpansionState['rent_payment'] ?? false,
           () {
             setState(() {
-              isUtilitiesExpanded = !isUtilitiesExpanded;
+              categoryExpansionState['rent_payment'] =
+                  !(categoryExpansionState['rent_payment'] ?? false);
+            });
+          },
+          isExpense: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'education',
+          'Education Expenses',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['education'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['education'] =
+                  !(categoryExpansionState['education'] ?? false);
+            });
+          },
+          isExpense: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'transport',
+          'Transport / Fuel',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['transport'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['transport'] =
+                  !(categoryExpansionState['transport'] ?? false);
+            });
+          },
+          isExpense: true,
+        ),
+      ],
+    );
+  }
+
+  // BUSINESS EXPENSES CATEGORIES
+  Widget _buildBusinessExpenses(bool isDark, AccountingModel model) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Purchases (Payments)',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFFDC2626),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () {
+                model.addEntryToAccount('purchases', receipt: false);
+              },
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('Add New Entry Box'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFDC2626),
+                side: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF991B1B)
+                      : const Color(0xFFFCA5A5),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                textStyle: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'purchases',
+          'Raw Material / Goods Purchase',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['purchases'] ?? true,
+          () {
+            setState(() {
+              categoryExpansionState['purchases'] =
+                  !(categoryExpansionState['purchases'] ?? true);
+            });
+          },
+          showEntry: categoryExpansionState['purchases'] ?? true,
+          isExpense: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'salaries',
+          'Salaries / Wages',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['salaries'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['salaries'] =
+                  !(categoryExpansionState['salaries'] ?? false);
+            });
+          },
+          isExpense: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'rent_commercial',
+          'Rent / Lease',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['rent_commercial'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['rent_commercial'] =
+                  !(categoryExpansionState['rent_commercial'] ?? false);
+            });
+          },
+          isExpense: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'utilities_business',
+          'Utilities (Power / Water / Internet)',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['utilities_business'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['utilities_business'] =
+                  !(categoryExpansionState['utilities_business'] ?? false);
+            });
+          },
+          isExpense: true,
+        ),
+      ],
+    );
+  }
+
+  // INSTITUTE/ORGANIZATION EXPENSES CATEGORIES
+  Widget _buildInstituteExpenses(bool isDark, AccountingModel model) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Payments',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFFDC2626),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () {
+                model.addEntryToAccount('staff_salaries', receipt: false);
+              },
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('Add New Entry Box'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFDC2626),
+                side: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF991B1B)
+                      : const Color(0xFFFCA5A5),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                textStyle: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'staff_salaries',
+          'Staff Salaries (Teaching)',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['staff_salaries'] ?? true,
+          () {
+            setState(() {
+              categoryExpansionState['staff_salaries'] =
+                  !(categoryExpansionState['staff_salaries'] ?? true);
+            });
+          },
+          showEntry: categoryExpansionState['staff_salaries'] ?? true,
+          isExpense: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'non_teaching_salaries',
+          'Non-Teaching Staff Salaries',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['non_teaching_salaries'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['non_teaching_salaries'] =
+                  !(categoryExpansionState['non_teaching_salaries'] ?? false);
+            });
+          },
+          isExpense: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'utilities_inst',
+          'Utilities (Electricity / Water / Internet)',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['utilities_inst'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['utilities_inst'] =
+                  !(categoryExpansionState['utilities_inst'] ?? false);
+            });
+          },
+          isExpense: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'library_supplies',
+          'Library / Books / Supplies',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['library_supplies'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['library_supplies'] =
+                  !(categoryExpansionState['library_supplies'] ?? false);
+            });
+          },
+          isExpense: true,
+        ),
+      ],
+    );
+  }
+
+  // OTHER EXPENSES CATEGORIES
+  Widget _buildOtherExpenses(bool isDark, AccountingModel model) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Payments',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFFDC2626),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () {
+                model.addEntryToAccount('expense_1', receipt: false);
+              },
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('Add New Entry Box'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFDC2626),
+                side: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF991B1B)
+                      : const Color(0xFFFCA5A5),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                textStyle: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'expense_1',
+          'Expense Category 1',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['expense_1'] ?? true,
+          () {
+            setState(() {
+              categoryExpansionState['expense_1'] =
+                  !(categoryExpansionState['expense_1'] ?? true);
+            });
+          },
+          showEntry: categoryExpansionState['expense_1'] ?? true,
+          isExpense: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'expense_2',
+          'Expense Category 2',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['expense_2'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['expense_2'] =
+                  !(categoryExpansionState['expense_2'] ?? false);
+            });
+          },
+          isExpense: true,
+        ),
+        const SizedBox(height: 12),
+        _buildCategoryCard(
+          isDark,
+          'expense_3',
+          'Expense Category 3',
+          '₹${0.toStringAsFixed(2)}',
+          const Color(0xFFDC2626),
+          categoryExpansionState['expense_3'] ?? false,
+          () {
+            setState(() {
+              categoryExpansionState['expense_3'] =
+                  !(categoryExpansionState['expense_3'] ?? false);
             });
           },
           isExpense: true,

@@ -148,7 +148,27 @@ class AccountingModel extends ChangeNotifier {
       if (pl != null) {
         paymentLabels = pl.map((k, v) => MapEntry(k, v.toString()));
       }
+      // Notify listeners about the basic loaded data
       notifyListeners();
+
+      // Try to load per-userType label overrides (so each template/userType can have its own titles)
+      try {
+        final rKey = 'receipt_labels_${userType.toString()}';
+        final savedReceipts = prefs.getString(rKey);
+        if (savedReceipts != null && savedReceipts.isNotEmpty) {
+          final map = jsonDecode(savedReceipts) as Map<String, dynamic>;
+          receiptLabels = map.map((k, v) => MapEntry(k, v.toString()));
+        }
+      } catch (_) {}
+
+      try {
+        final pKey = 'payment_labels_${userType.toString()}';
+        final savedPayments = prefs.getString(pKey);
+        if (savedPayments != null && savedPayments.isNotEmpty) {
+          final map = jsonDecode(savedPayments) as Map<String, dynamic>;
+          paymentLabels = map.map((k, v) => MapEntry(k, v.toString()));
+        }
+      } catch (_) {}
 
       // Also try to read a per-userType quick key (IndexScreen uses this)
       try {
@@ -176,12 +196,18 @@ class AccountingModel extends ChangeNotifier {
     receiptLabels[key] = label;
     notifyListeners();
     _persist();
+    // persist per-userType receipt labels so edits are isolated per template/userType
+    SharedPreferences.getInstance().then((p) => p.setString(
+        'receipt_labels_${userType.toString()}', jsonEncode(receiptLabels)));
   }
 
   void setPaymentLabel(String key, String label) {
     paymentLabels[key] = label;
     notifyListeners();
     _persist();
+    // persist per-userType payment labels so edits are isolated per template/userType
+    SharedPreferences.getInstance().then((p) => p.setString(
+        'payment_labels_${userType.toString()}', jsonEncode(paymentLabels)));
   }
 
   // helper to call save without awaiting
