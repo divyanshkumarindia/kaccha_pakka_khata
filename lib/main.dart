@@ -15,7 +15,7 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  @override
+  @override 
   Widget build(BuildContext context) {
     // We provide a default AccountingModel for safe access; IndexScreen will push a configured model
     return ChangeNotifierProvider<AccountingModel>(

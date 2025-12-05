@@ -1474,11 +1474,10 @@ class _AccountingFormState extends State<AccountingForm> {
     bool isExpense = false,
     bool receipt = false,
   }) {
-    // Read labels from the provider with listen=true so UI rebuilds when labels change
-    final m = Provider.of<AccountingModel>(context);
+    // Read labels from the model that was already loaded in didChangeDependencies
     final displayTitle = isExpense
-        ? (m.paymentLabels[accountKey] ?? title)
-        : (m.receiptLabels[accountKey] ?? title);
+        ? (model.paymentLabels[accountKey] ?? title)
+        : (model.receiptLabels[accountKey] ?? title);
 
     return Container(
       padding: const EdgeInsets.all(16),
