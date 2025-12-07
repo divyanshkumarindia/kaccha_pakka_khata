@@ -610,7 +610,43 @@ class _AccountingFormState extends State<AccountingForm> {
   }
 
   Widget _buildBalanceCard(bool isDark, String title, String amount) {
-    return BalanceCard(isDark: isDark, title: title, amount: amount);
+    return BalanceCard(
+      isDark: isDark,
+      title: title,
+      amount: amount,
+      onTitleChanged: (newTitle) {
+        // Title will be persisted per card type in the future
+        // For now, just log the change
+        debugPrint('Balance card title changed to: $newTitle');
+      },
+      onDescriptionChanged: (newDescription) {
+        // Description will be persisted per card type in the future
+        debugPrint('Balance card description changed to: $newDescription');
+      },
+      onAmountChanged: (newAmount) {
+        final value = double.tryParse(newAmount) ?? 0.0;
+        // Determine which balance to update based on title
+        if (title.contains('Cash Book')) {
+          model.setOpeningBalances(
+            cash: value,
+            bank: model.openingBank,
+            other: model.openingOther,
+          );
+        } else if (title.contains('Bank')) {
+          model.setOpeningBalances(
+            cash: model.openingCash,
+            bank: value,
+            other: model.openingOther,
+          );
+        } else if (title.contains('Other Funds')) {
+          model.setOpeningBalances(
+            cash: model.openingCash,
+            bank: model.openingBank,
+            other: value,
+          );
+        }
+      },
+    );
   }
 
   Widget _buildIncomeSection(bool isDark, AccountingModel model) {
