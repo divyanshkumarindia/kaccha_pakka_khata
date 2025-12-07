@@ -210,6 +210,45 @@ class AccountingModel extends ChangeNotifier {
         'payment_labels_${userType.toString()}', jsonEncode(paymentLabels)));
   }
 
+  // Balance card title and description persistence
+  Future<String?> getBalanceCardTitle(String cardType) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs
+          .getString('balance_${cardType}_title_${userType.toString()}');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<String?> getBalanceCardDescription(String cardType) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('balance_${cardType}_desc_${userType.toString()}');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> setBalanceCardTitle(String cardType, String title) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+          'balance_${cardType}_title_${userType.toString()}', title);
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  Future<void> setBalanceCardDescription(
+      String cardType, String description) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+          'balance_${cardType}_desc_${userType.toString()}', description);
+      notifyListeners();
+    } catch (_) {}
+  }
+
   // helper to call save without awaiting
   void _persist() {
     saveToPrefs();

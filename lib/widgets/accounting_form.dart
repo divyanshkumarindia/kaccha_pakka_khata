@@ -30,6 +30,29 @@ class _AccountingFormState extends State<AccountingForm> {
   late TextEditingController periodStartController;
   late TextEditingController periodEndController;
 
+  // Balance card custom titles and descriptions
+  Map<String, String> balanceCardTitles = {
+    'cash': 'Balance B/F (Cash Book)',
+    'bank': 'Balance B/F (Bank)',
+    'other': 'Balance B/F (Other Funds)',
+  };
+  Map<String, String> balanceCardDescriptions = {
+    'cash': 'Previous End Date',
+    'bank': 'Previous End Date',
+    'other': 'Previous End Date',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBalanceCardData();
+  }
+
+  Future<void> _loadBalanceCardData() async {
+    // This will be called after model is set in didChangeDependencies
+    // We'll load it there instead
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -44,6 +67,22 @@ class _AccountingFormState extends State<AccountingForm> {
     periodController = TextEditingController(text: model.periodDate);
     periodStartController = TextEditingController(text: model.periodStartDate);
     periodEndController = TextEditingController(text: model.periodEndDate);
+
+    // Load balance card titles and descriptions
+    _loadBalanceCardTitlesAndDescriptions();
+  }
+
+  Future<void> _loadBalanceCardTitlesAndDescriptions() async {
+    for (String cardType in ['cash', 'bank', 'other']) {
+      final title = await model.getBalanceCardTitle(cardType);
+      final desc = await model.getBalanceCardDescription(cardType);
+      if (mounted) {
+        setState(() {
+          if (title != null) balanceCardTitles[cardType] = title;
+          if (desc != null) balanceCardDescriptions[cardType] = desc;
+        });
+      }
+    }
   }
 
   String _formatDate(DateTime d) =>
@@ -595,50 +634,67 @@ class _AccountingFormState extends State<AccountingForm> {
           ),
           if (isOpeningBalancesExpanded) ...[
             const SizedBox(height: 12),
-            _buildBalanceCard(isDark, 'Balance B/F (Cash Book)',
-                model.openingCash.toStringAsFixed(2)),
+            _buildBalanceCard(
+                isDark,
+                'cash',
+                balanceCardTitles['cash']!,
+                model.openingCash.toStringAsFixed(2),
+                balanceCardDescriptions['cash']!),
             const SizedBox(height: 12),
-            _buildBalanceCard(isDark, 'Balance B/F (Bank)',
-                model.openingBank.toStringAsFixed(2)),
+            _buildBalanceCard(
+                isDark,
+                'bank',
+                balanceCardTitles['bank']!,
+                model.openingBank.toStringAsFixed(2),
+                balanceCardDescriptions['bank']!),
             const SizedBox(height: 12),
-            _buildBalanceCard(isDark, 'Balance B/F (Other Funds)',
-                model.openingOther.toStringAsFixed(2)),
+            _buildBalanceCard(
+                isDark,
+                'other',
+                balanceCardTitles['other']!,
+                model.openingOther.toStringAsFixed(2),
+                balanceCardDescriptions['other']!),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildBalanceCard(bool isDark, String title, String amount) {
+  Widget _buildBalanceCard(bool isDark, String cardType, String title,
+      String amount, String description) {
     return BalanceCard(
       isDark: isDark,
       title: title,
       amount: amount,
+      initialDescription: description,
       onTitleChanged: (newTitle) {
-        // Title will be persisted per card type in the future
-        // For now, just log the change
-        debugPrint('Balance card title changed to: $newTitle');
+        model.setBalanceCardTitle(cardType, newTitle);
+        setState(() {
+          balanceCardTitles[cardType] = newTitle;
+        });
       },
       onDescriptionChanged: (newDescription) {
-        // Description will be persisted per card type in the future
-        debugPrint('Balance card description changed to: $newDescription');
+        model.setBalanceCardDescription(cardType, newDescription);
+        setState(() {
+          balanceCardDescriptions[cardType] = newDescription;
+        });
       },
       onAmountChanged: (newAmount) {
         final value = double.tryParse(newAmount) ?? 0.0;
-        // Determine which balance to update based on title
-        if (title.contains('Cash Book')) {
+        // Determine which balance to update based on cardType
+        if (cardType == 'cash') {
           model.setOpeningBalances(
             cash: value,
             bank: model.openingBank,
             other: model.openingOther,
           );
-        } else if (title.contains('Bank')) {
+        } else if (cardType == 'bank') {
           model.setOpeningBalances(
             cash: model.openingCash,
             bank: value,
             other: model.openingOther,
           );
-        } else if (title.contains('Other Funds')) {
+        } else if (cardType == 'other') {
           model.setOpeningBalances(
             cash: model.openingCash,
             bank: model.openingBank,

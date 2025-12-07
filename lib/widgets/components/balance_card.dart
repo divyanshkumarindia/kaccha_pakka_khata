@@ -5,6 +5,7 @@ class BalanceCard extends StatefulWidget {
   final bool isDark;
   final String title;
   final String amount;
+  final String? initialDescription;
   final Function(String)? onTitleChanged;
   final Function(String)? onDescriptionChanged;
   final Function(String)? onAmountChanged;
@@ -14,6 +15,7 @@ class BalanceCard extends StatefulWidget {
     required this.isDark,
     required this.title,
     required this.amount,
+    this.initialDescription,
     this.onTitleChanged,
     this.onDescriptionChanged,
     this.onAmountChanged,
@@ -30,7 +32,8 @@ class _BalanceCardState extends State<BalanceCard> {
   @override
   void initState() {
     super.initState();
-    descriptionController = TextEditingController(text: 'Previous End Date');
+    descriptionController = TextEditingController(
+        text: widget.initialDescription ?? 'Previous End Date');
     amountController = TextEditingController(text: widget.amount);
   }
 
