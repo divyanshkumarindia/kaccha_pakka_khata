@@ -37,9 +37,9 @@ class _AccountingFormState extends State<AccountingForm> {
     'other': 'Balance B/F (Other Funds)',
   };
   Map<String, String> balanceCardDescriptions = {
-    'cash': 'Previous End Date',
-    'bank': 'Previous End Date',
-    'other': 'Previous End Date',
+    'cash': '', // Empty by default, will show ghost text
+    'bank': '',
+    'other': '',
   };
 
   @override
@@ -638,26 +638,40 @@ class _AccountingFormState extends State<AccountingForm> {
                 isDark,
                 'cash',
                 balanceCardTitles['cash']!,
-                model.openingCash.toStringAsFixed(2),
+                _formatBalanceAmount(model.openingCash),
                 balanceCardDescriptions['cash']!),
             const SizedBox(height: 12),
             _buildBalanceCard(
                 isDark,
                 'bank',
                 balanceCardTitles['bank']!,
-                model.openingBank.toStringAsFixed(2),
+                _formatBalanceAmount(model.openingBank),
                 balanceCardDescriptions['bank']!),
             const SizedBox(height: 12),
             _buildBalanceCard(
                 isDark,
                 'other',
                 balanceCardTitles['other']!,
-                model.openingOther.toStringAsFixed(2),
+                _formatBalanceAmount(model.openingOther),
                 balanceCardDescriptions['other']!),
           ],
         ],
       ),
     );
+  }
+
+  // Helper to format opening balance amounts like "0" instead of "0.00"
+  String _formatBalanceAmount(double amount) {
+    if (amount == 0) {
+      return ''; // Return empty string so ghost text "0" shows
+    }
+    // Remove trailing zeros and decimal point if not needed
+    String formatted = amount.toStringAsFixed(2);
+    if (formatted.endsWith('.00')) {
+      return amount.toInt().toString();
+    }
+    // Remove trailing zeros after decimal
+    return formatted.replaceAll(RegExp(r'\.?0+$'), '');
   }
 
   Widget _buildBalanceCard(bool isDark, String cardType, String title,

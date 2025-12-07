@@ -32,8 +32,12 @@ class _BalanceCardState extends State<BalanceCard> {
   @override
   void initState() {
     super.initState();
+    // Use saved description or empty string (will show as ghost text)
     descriptionController = TextEditingController(
-        text: widget.initialDescription ?? 'Previous End Date');
+        text: (widget.initialDescription != null &&
+                widget.initialDescription!.isNotEmpty)
+            ? widget.initialDescription
+            : '');
     amountController = TextEditingController(text: widget.amount);
   }
 
@@ -144,7 +148,7 @@ class _BalanceCardState extends State<BalanceCard> {
                       controller: descriptionController,
                       onChanged: widget.onDescriptionChanged,
                       decoration: InputDecoration(
-                        hintText: 'e.g., Previous balance',
+                        hintText: 'Previous End Date',
                         hintStyle: TextStyle(
                           fontSize: 12,
                           color: widget.isDark
