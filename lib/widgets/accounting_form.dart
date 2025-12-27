@@ -1608,7 +1608,7 @@ class _AccountingFormState extends State<AccountingForm> {
                             final displayTitle = isExpense
                                 ? (model.paymentLabels[accountKey] ?? title)
                                 : (model.receiptLabels[accountKey] ?? title);
-                            
+
                             return Text(
                               displayTitle,
                               style: TextStyle(
