@@ -1585,11 +1585,6 @@ class _AccountingFormState extends State<AccountingForm> {
     bool isExpense = false,
     bool receipt = false,
   }) {
-    // Read labels from the model that was already loaded in didChangeDependencies
-    final displayTitle = isExpense
-        ? (model.paymentLabels[accountKey] ?? title)
-        : (model.receiptLabels[accountKey] ?? title);
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1608,21 +1603,32 @@ class _AccountingFormState extends State<AccountingForm> {
                   child: Row(
                     children: [
                       Flexible(
-                        child: Text(
-                          displayTitle,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? const Color(0xFFF9FAFB)
-                                : const Color(0xFF1F2937),
-                          ),
+                        child: Consumer<AccountingModel>(
+                          builder: (context, model, child) {
+                            final displayTitle = isExpense
+                                ? (model.paymentLabels[accountKey] ?? title)
+                                : (model.receiptLabels[accountKey] ?? title);
+                            
+                            return Text(
+                              displayTitle,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: isDark
+                                    ? const Color(0xFFF9FAFB)
+                                    : const Color(0xFF1F2937),
+                              ),
+                            );
+                          },
                         ),
                       ),
                       const SizedBox(width: 8),
                       GestureDetector(
                         onTap: () async {
-                          final current = displayTitle;
+                          // Read current title from model
+                          final current = isExpense
+                              ? (model.paymentLabels[accountKey] ?? title)
+                              : (model.receiptLabels[accountKey] ?? title);
                           final controller =
                               TextEditingController(text: current);
                           final res = await showDialog<String>(
@@ -1648,12 +1654,10 @@ class _AccountingFormState extends State<AccountingForm> {
                             ),
                           );
                           if (res != null && res.isNotEmpty) {
-                            final m = Provider.of<AccountingModel>(context,
-                                listen: false);
                             if (isExpense) {
-                              m.setPaymentLabel(accountKey, res);
+                              model.setPaymentLabel(accountKey, res);
                             } else {
-                              m.setReceiptLabel(accountKey, res);
+                              model.setReceiptLabel(accountKey, res);
                             }
                           }
                         },
