@@ -537,6 +537,70 @@ class _AccountingFormState extends State<AccountingForm> {
 
                           // Report Duration and Select Period
                           _buildDurationAndPeriod(isDark, model),
+                          const SizedBox(height: 16),
+
+                          // Report Buttons
+                          Row(
+                            children: [
+                              // View Report Button
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    // TODO: Show basic report
+                                  },
+                                  icon: const Icon(Icons.description, size: 20),
+                                  label: const Text(
+                                    'View Report',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF6366F1),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    elevation: 2,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              // Detailed View Report Button
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    // TODO: Show detailed report
+                                  },
+                                  icon: const Icon(Icons.article, size: 20),
+                                  label: const Text(
+                                    'Detailed View',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF10B981),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    elevation: 2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 24),
 
                           // Opening Balances Section
@@ -553,34 +617,7 @@ class _AccountingFormState extends State<AccountingForm> {
 
                           // Financial Summary
                           _buildFinancialSummary(isDark, model),
-                          const SizedBox(height: 16),
-
-                          // View Report Button
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                // show report modal or navigate to report
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF4F46E5),
-                                foregroundColor: Colors.white,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                elevation: 1,
-                              ),
-                              child: const Text(
-                                'View Report',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     ),
