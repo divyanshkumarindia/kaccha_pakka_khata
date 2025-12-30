@@ -2195,7 +2195,7 @@ class _AccountingFormState extends State<AccountingForm> {
   String _formatCategoryTotal(String accountKey, bool isExpense) {
     final total =
         model.calculateAccountTotalByKey(accountKey, receipt: !isExpense);
-    return '₹${total.toStringAsFixed(2)}';
+    return '${_getCurrencySymbol(model.currency)}${total.toStringAsFixed(2)}';
   }
 
   double _calculateTotalIncome() {
@@ -3510,7 +3510,7 @@ class _AccountingFormState extends State<AccountingForm> {
                             accountKey,
                             receipt: !isExpense);
                         return Text(
-                          '₹${total.toStringAsFixed(2)}',
+                          '${_getCurrencySymbol(model.currency)}${total.toStringAsFixed(2)}',
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,

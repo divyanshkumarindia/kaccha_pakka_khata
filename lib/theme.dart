@@ -67,8 +67,45 @@ class AppTheme {
 
   // Simple currency formatter used across widgets (small helper for parity)
   static String formatCurrency(double amount, {String currency = 'INR'}) {
-    final symbol = currency == 'INR' ? '₹' : '$currency ';
+    final symbol = _getCurrencySymbol(currency);
     return '$symbol${amount.toStringAsFixed(2)}';
+  }
+
+  // Currency symbol helper
+  static String _getCurrencySymbol(String currencyCode) {
+    const currencySymbols = {
+      'INR': '₹',
+      'USD': '\$',
+      'EUR': '€',
+      'GBP': '£',
+      'JPY': '¥',
+      'AUD': 'A\$',
+      'CAD': 'C\$',
+      'CHF': 'CHF',
+      'CNY': '¥',
+      'SEK': 'kr',
+      'NZD': 'NZ\$',
+      'SGD': 'S\$',
+      'HKD': 'HK\$',
+      'NOK': 'kr',
+      'KRW': '₩',
+      'TRY': '₺',
+      'RUB': '₽',
+      'BRL': 'R\$',
+      'ZAR': 'R',
+      'MXN': 'Mex\$',
+      'AED': 'AED',
+      'SAR': 'SAR',
+      'THB': '฿',
+      'MYR': 'RM',
+      'IDR': 'Rp',
+      'PHP': '₱',
+      'PKR': 'Rs',
+      'BDT': '৳',
+      'LKR': 'Rs',
+      'NPR': 'Rs',
+    };
+    return currencySymbols[currencyCode] ?? currencyCode;
   }
 
   // Primary gradient used in the index hero and other accents
