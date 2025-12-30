@@ -329,6 +329,1363 @@ class _AccountingFormState extends State<AccountingForm> {
     );
   }
 
+  // Show Basic Report Dialog
+  void _showBasicReport(BuildContext context, AccountingModel model) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currencySymbol = model.currency == 'INR' ? '₹' : model.currency;
+
+    // Calculate closing balance
+    final closingBalance = model.netBalance;
+    final netReceipts = model.receiptsTotal;
+    final netPayments = model.paymentsTotal;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 850, maxHeight: 750),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with title and period
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF374151) : Colors.white,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDark
+                          ? const Color(0xFF4B5563)
+                          : const Color(0xFFE5E7EB),
+                    ),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          model.firmName.isNotEmpty
+                              ? model.firmName
+                              : 'Financial Report',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF6366F1),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.close, size: 20),
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _getReportPeriodText(model),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Action Buttons
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF111827)
+                      : const Color(0xFFF9FAFB),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDark
+                          ? const Color(0xFF374151)
+                          : const Color(0xFFE5E7EB),
+                    ),
+                  ),
+                ),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildActionButton(
+                      'Save Report',
+                      Icons.save,
+                      const Color(0xFF6366F1),
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Save feature coming soon!')),
+                        );
+                      },
+                    ),
+                    _buildActionButton(
+                      'Download Excel',
+                      Icons.file_download,
+                      const Color(0xFF10B981),
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Excel export coming soon!')),
+                        );
+                      },
+                    ),
+                    _buildActionButton(
+                      'Download PDF',
+                      Icons.picture_as_pdf,
+                      const Color(0xFFDC2626),
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('PDF export coming soon!')),
+                        );
+                      },
+                    ),
+                    _buildActionButton(
+                      'Print',
+                      Icons.print,
+                      isDark
+                          ? const Color(0xFF6B7280)
+                          : const Color(0xFF374151),
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Print feature coming soon!')),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              // Main Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      // Firm Name and Period Header
+                      Text(
+                        model.firmName.isNotEmpty
+                            ? model.firmName
+                            : 'Financial Report',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _getReportPeriodText(model),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '(All amounts in ${model.currency == 'INR' ? 'Indian Rupees ₹' : model.currency})',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.grey[500] : Colors.grey[500],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Two Column Layout - Receipts and Payments
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Receipts Column
+                          Expanded(
+                            child: Column(
+                              children: [
+                                // Receipts Header
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF10B981),
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(8),
+                                      topRight: Radius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Receipts ($currencySymbol)',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                // Receipts Content
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF111827)
+                                        : const Color(0xFFF0FDF4),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? const Color(0xFF374151)
+                                          : const Color(0xFF86EFAC),
+                                    ),
+                                    borderRadius: const BorderRadius.only(
+                                      bottomLeft: Radius.circular(8),
+                                      bottomRight: Radius.circular(8),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Opening Balance
+                                      _buildReportItemRow(
+                                        'Opening Balances B/F',
+                                        '',
+                                        isDark,
+                                        isBold: true,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      _buildReportItemRow(
+                                        '  Balance B/F:',
+                                        '$currencySymbol${(model.openingCash + model.openingBank + model.openingOther).toStringAsFixed(2)}',
+                                        isDark,
+                                      ),
+                                      const Divider(height: 16),
+                                      // Income Categories
+                                      ...model.receiptAccounts.entries
+                                          .map((entry) {
+                                        final categoryTotal =
+                                            entry.value.fold<double>(
+                                          0.0,
+                                          (sum, e) =>
+                                              sum +
+                                              e.rows.fold<double>(
+                                                  0.0,
+                                                  (s, row) =>
+                                                      s + row.cash + row.bank),
+                                        );
+                                        if (categoryTotal > 0) {
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 8),
+                                            child: _buildReportItemRow(
+                                              model.receiptLabels[entry.key] ??
+                                                  entry.key,
+                                              '$currencySymbol${categoryTotal.toStringAsFixed(2)}',
+                                              isDark,
+                                            ),
+                                          );
+                                        }
+                                        return const SizedBox.shrink();
+                                      }).toList(),
+                                      const Divider(height: 16, thickness: 2),
+                                      // Total Receipts
+                                      _buildReportItemRow(
+                                        'Total Receipts:',
+                                        '$currencySymbol${netReceipts.toStringAsFixed(2)}',
+                                        isDark,
+                                        isBold: true,
+                                        color: const Color(0xFF059669),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          // Payments Column
+                          Expanded(
+                            child: Column(
+                              children: [
+                                // Payments Header
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDC2626),
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(8),
+                                      topRight: Radius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Payments ($currencySymbol)',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                // Payments Content
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF111827)
+                                        : const Color(0xFFFEF2F2),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? const Color(0xFF374151)
+                                          : const Color(0xFFFCA5A5),
+                                    ),
+                                    borderRadius: const BorderRadius.only(
+                                      bottomLeft: Radius.circular(8),
+                                      bottomRight: Radius.circular(8),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Expense Categories
+                                      ...model.paymentAccounts.entries
+                                          .map((entry) {
+                                        final categoryTotal =
+                                            entry.value.fold<double>(
+                                          0.0,
+                                          (sum, e) =>
+                                              sum +
+                                              e.rows.fold<double>(
+                                                  0.0,
+                                                  (s, row) =>
+                                                      s + row.cash + row.bank),
+                                        );
+                                        if (categoryTotal > 0) {
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 8),
+                                            child: _buildReportItemRow(
+                                              model.paymentLabels[entry.key] ??
+                                                  entry.key,
+                                              '$currencySymbol${categoryTotal.toStringAsFixed(2)}',
+                                              isDark,
+                                            ),
+                                          );
+                                        }
+                                        return const SizedBox.shrink();
+                                      }).toList(),
+                                      const Divider(height: 16),
+                                      // Closing Balance C/F
+                                      _buildReportItemRow(
+                                        'Closing Balance C/F',
+                                        '',
+                                        isDark,
+                                        isBold: true,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      _buildReportItemRow(
+                                        '  Balance:',
+                                        '$currencySymbol${closingBalance.toStringAsFixed(2)}',
+                                        isDark,
+                                      ),
+                                      const Divider(height: 16, thickness: 2),
+                                      // Total Payments
+                                      _buildReportItemRow(
+                                        'Total Payments:',
+                                        '$currencySymbol${netPayments.toStringAsFixed(2)}',
+                                        isDark,
+                                        isBold: true,
+                                        color: const Color(0xFFDC2626),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Net Receipts and Net Payments Row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFECFDF5),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                    color: const Color(0xFF10B981), width: 1.5),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Net Receipts',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: const Color(0xFF059669),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '$currencySymbol${netReceipts.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF059669),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF2F2),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                    color: const Color(0xFFDC2626), width: 1.5),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Net Payments',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: const Color(0xFFDC2626),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '$currencySymbol${netPayments.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFFDC2626),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Closing Balance (Prominent)
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEEF2FF),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                              color: const Color(0xFF6366F1), width: 2),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Closing Balance',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF4F46E5),
+                              ),
+                            ),
+                            Text(
+                              '$currencySymbol${closingBalance.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF4F46E5),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper: Build action button for report dialogs
+  Widget _buildActionButton(
+      String label, IconData icon, Color color, VoidCallback onPressed) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label, style: const TextStyle(fontSize: 13)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        elevation: 1,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      ),
+    );
+  }
+
+  // Helper: Build report item row for basic report
+  Widget _buildReportItemRow(String label, String value, bool isDark,
+      {bool isBold = false, Color? color}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 3,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
+              color: color ?? (isDark ? Colors.grey[300] : Colors.black87),
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+              color: color ?? (isDark ? Colors.white : Colors.black87),
+            ),
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Show Detailed Report Dialog
+  void _showDetailedReport(BuildContext context, AccountingModel model) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currencySymbol = model.currency == 'INR' ? '₹' : model.currency;
+
+    // Calculate totals
+    double totalReceiptsCash = model.openingCash;
+    double totalReceiptsBank = model.openingBank + model.openingOther;
+    double totalPaymentsCash = 0.0;
+    double totalPaymentsBank = 0.0;
+
+    // Calculate receipts
+    model.receiptAccounts.forEach((key, entries) {
+      entries.forEach((entry) {
+        entry.rows.forEach((row) {
+          totalReceiptsCash += row.cash;
+          totalReceiptsBank += row.bank;
+        });
+      });
+    });
+
+    // Calculate payments
+    model.paymentAccounts.forEach((key, entries) {
+      entries.forEach((entry) {
+        entry.rows.forEach((row) {
+          totalPaymentsCash += row.cash;
+          totalPaymentsBank += row.bank;
+        });
+      });
+    });
+
+    final closingCash = totalReceiptsCash - totalPaymentsCash;
+    final closingBank = totalReceiptsBank - totalPaymentsBank;
+    final totalClosing = closingCash + closingBank;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 900, maxHeight: 800),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with title and period
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF374151) : Colors.white,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDark
+                          ? const Color(0xFF4B5563)
+                          : const Color(0xFFE5E7EB),
+                    ),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          model.firmName.isNotEmpty
+                              ? model.firmName
+                              : 'Financial Report',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF6366F1),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.close, size: 20),
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _getReportPeriodText(model),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Action Buttons
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF111827)
+                      : const Color(0xFFF9FAFB),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDark
+                          ? const Color(0xFF374151)
+                          : const Color(0xFFE5E7EB),
+                    ),
+                  ),
+                ),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildActionButton(
+                      'Save Report',
+                      Icons.save,
+                      const Color(0xFF6366F1),
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Save feature coming soon!')),
+                        );
+                      },
+                    ),
+                    _buildActionButton(
+                      'Download Excel',
+                      Icons.file_download,
+                      const Color(0xFF10B981),
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Excel export coming soon!')),
+                        );
+                      },
+                    ),
+                    _buildActionButton(
+                      'Download PDF',
+                      Icons.picture_as_pdf,
+                      const Color(0xFFDC2626),
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('PDF export coming soon!')),
+                        );
+                      },
+                    ),
+                    _buildActionButton(
+                      'Print',
+                      Icons.print,
+                      isDark
+                          ? const Color(0xFF6B7280)
+                          : const Color(0xFF374151),
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Print feature coming soon!')),
+                        );
+                      },
+                    ),
+                    _buildActionButton(
+                      'Close',
+                      Icons.close,
+                      isDark
+                          ? const Color(0xFF6B7280)
+                          : const Color(0xFF9CA3AF),
+                      () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Main Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      // Firm Name and Period Header
+                      Text(
+                        model.firmName.isNotEmpty
+                            ? model.firmName
+                            : 'Financial Report',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _getReportPeriodText(model),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '(All amounts in ${model.currency == 'INR' ? 'Indian Rupees ₹' : model.currency})',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.grey[500] : Colors.grey[500],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Receipts Table
+                      _buildDetailedTable(
+                        'Receipts ($currencySymbol)',
+                        const Color(0xFF10B981),
+                        isDark
+                            ? const Color(0xFF111827)
+                            : const Color(0xFFF0FDF4),
+                        [
+                          // Table Header
+                          _buildTableRow(
+                            [
+                              'Particulars',
+                              'Cash ($currencySymbol)',
+                              'Bank ($currencySymbol)',
+                              'Total ($currencySymbol)'
+                            ],
+                            isDark,
+                            isHeader: true,
+                          ),
+                          // Opening Balance
+                          _buildTableRow(
+                            ['Opening Balances B/F', '', '', ''],
+                            isDark,
+                            isBold: true,
+                          ),
+                          _buildTableRow(
+                            [
+                              '   Balance B/F',
+                              model.openingCash.toStringAsFixed(2),
+                              (model.openingBank + model.openingOther)
+                                  .toStringAsFixed(2),
+                              (model.openingCash +
+                                      model.openingBank +
+                                      model.openingOther)
+                                  .toStringAsFixed(2)
+                            ],
+                            isDark,
+                          ),
+                          // Income Categories
+                          ...model.receiptAccounts.entries.expand((entry) {
+                            double cash = 0, bank = 0;
+                            entry.value.forEach((e) {
+                              e.rows.forEach((row) {
+                                cash += row.cash;
+                                bank += row.bank;
+                              });
+                            });
+                            if (cash + bank > 0) {
+                              return [
+                                _buildTableRow(
+                                  [
+                                    model.receiptLabels[entry.key] ?? entry.key,
+                                    cash.toStringAsFixed(2),
+                                    bank.toStringAsFixed(2),
+                                    (cash + bank).toStringAsFixed(2)
+                                  ],
+                                  isDark,
+                                )
+                              ];
+                            }
+                            return <Widget>[];
+                          }).toList(),
+                          // Divider
+                          Divider(
+                              height: 1,
+                              thickness: 2,
+                              color: isDark
+                                  ? const Color(0xFF4B5563)
+                                  : const Color(0xFF10B981)),
+                          // Total Receipts
+                          _buildTableRow(
+                            [
+                              'Total Receipts',
+                              totalReceiptsCash.toStringAsFixed(2),
+                              totalReceiptsBank.toStringAsFixed(2),
+                              (totalReceiptsCash + totalReceiptsBank)
+                                  .toStringAsFixed(2)
+                            ],
+                            isDark,
+                            isBold: true,
+                            color: const Color(0xFF059669),
+                          ),
+                        ],
+                        isDark,
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Payments Table
+                      _buildDetailedTable(
+                        'Payments ($currencySymbol)',
+                        const Color(0xFFDC2626),
+                        isDark
+                            ? const Color(0xFF111827)
+                            : const Color(0xFFFEF2F2),
+                        [
+                          // Table Header
+                          _buildTableRow(
+                            [
+                              'Particulars',
+                              'Cash ($currencySymbol)',
+                              'Bank ($currencySymbol)',
+                              'Total ($currencySymbol)'
+                            ],
+                            isDark,
+                            isHeader: true,
+                          ),
+                          // Expense Categories
+                          ...model.paymentAccounts.entries.expand((entry) {
+                            double cash = 0, bank = 0;
+                            entry.value.forEach((e) {
+                              e.rows.forEach((row) {
+                                cash += row.cash;
+                                bank += row.bank;
+                              });
+                            });
+                            if (cash + bank > 0) {
+                              return [
+                                _buildTableRow(
+                                  [
+                                    model.paymentLabels[entry.key] ?? entry.key,
+                                    cash.toStringAsFixed(2),
+                                    bank.toStringAsFixed(2),
+                                    (cash + bank).toStringAsFixed(2)
+                                  ],
+                                  isDark,
+                                )
+                              ];
+                            }
+                            return <Widget>[];
+                          }).toList(),
+                          // Closing Balance C/F
+                          _buildTableRow(
+                            [
+                              'Closing Balance C/F',
+                              closingCash.toStringAsFixed(2),
+                              closingBank.toStringAsFixed(2),
+                              totalClosing.toStringAsFixed(2)
+                            ],
+                            isDark,
+                            isBold: true,
+                          ),
+                          // Divider
+                          Divider(
+                              height: 1,
+                              thickness: 2,
+                              color: isDark
+                                  ? const Color(0xFF4B5563)
+                                  : const Color(0xFFDC2626)),
+                          // Total Payments
+                          _buildTableRow(
+                            [
+                              'Total Payments',
+                              (totalPaymentsCash + closingCash)
+                                  .toStringAsFixed(2),
+                              (totalPaymentsBank + closingBank)
+                                  .toStringAsFixed(2),
+                              (totalPaymentsCash +
+                                      totalPaymentsBank +
+                                      totalClosing)
+                                  .toStringAsFixed(2)
+                            ],
+                            isDark,
+                            isBold: true,
+                            color: const Color(0xFFDC2626),
+                          ),
+                        ],
+                        isDark,
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Closing Balance Summary
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color:
+                              isDark ? const Color(0xFF111827) : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isDark
+                                ? const Color(0xFF374151)
+                                : const Color(0xFFE5E7EB),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Closing Balance Summary',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Closing Cash',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: isDark
+                                              ? Colors.grey[400]
+                                              : Colors.grey[600],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        '$currencySymbol${closingCash.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: closingCash >= 0
+                                              ? const Color(0xFF059669)
+                                              : const Color(0xFFDC2626),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  width: 1,
+                                  height: 50,
+                                  color: isDark
+                                      ? const Color(0xFF374151)
+                                      : const Color(0xFFE5E7EB),
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Closing Bank',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: isDark
+                                              ? Colors.grey[400]
+                                              : Colors.grey[600],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        '$currencySymbol${closingBank.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: closingBank >= 0
+                                              ? const Color(0xFF059669)
+                                              : const Color(0xFFDC2626),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  width: 1,
+                                  height: 50,
+                                  color: isDark
+                                      ? const Color(0xFF374151)
+                                      : const Color(0xFFE5E7EB),
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Total Closing',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: isDark
+                                              ? Colors.grey[400]
+                                              : Colors.grey[600],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        '$currencySymbol${totalClosing.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color(0xFF4F46E5),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper: Build detailed table
+  Widget _buildDetailedTable(String title, Color headerColor, Color bgColor,
+      List<Widget> rows, bool isDark) {
+    return Column(
+      children: [
+        // Table Header
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: headerColor,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        // Table Content
+        Container(
+          decoration: BoxDecoration(
+            color: bgColor,
+            border: Border.all(
+              color: isDark
+                  ? const Color(0xFF374151)
+                  : headerColor.withOpacity(0.3),
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(8),
+              bottomRight: Radius.circular(8),
+            ),
+          ),
+          child: Column(
+            children: rows,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper: Build table row for detailed report
+  Widget _buildTableRow(List<String> cells, bool isDark,
+      {bool isHeader = false, bool isBold = false, Color? color}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Particulars (40%)
+          Expanded(
+            flex: 40,
+            child: Text(
+              cells[0],
+              style: TextStyle(
+                fontSize: isHeader ? 12 : 13,
+                fontWeight:
+                    isHeader || isBold ? FontWeight.bold : FontWeight.normal,
+                color: color ??
+                    (isDark
+                        ? (isHeader ? Colors.grey[300] : Colors.grey[300])
+                        : (isHeader ? Colors.black87 : Colors.black87)),
+              ),
+            ),
+          ),
+          // Cash (20%)
+          Expanded(
+            flex: 20,
+            child: Text(
+              cells[1],
+              style: TextStyle(
+                fontSize: isHeader ? 12 : 13,
+                fontWeight:
+                    isHeader || isBold ? FontWeight.bold : FontWeight.w500,
+                color: color ?? (isDark ? Colors.white : Colors.black87),
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+          // Bank (20%)
+          Expanded(
+            flex: 20,
+            child: Text(
+              cells[2],
+              style: TextStyle(
+                fontSize: isHeader ? 12 : 13,
+                fontWeight:
+                    isHeader || isBold ? FontWeight.bold : FontWeight.w500,
+                color: color ?? (isDark ? Colors.white : Colors.black87),
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+          // Total (20%)
+          Expanded(
+            flex: 20,
+            child: Text(
+              cells[3],
+              style: TextStyle(
+                fontSize: isHeader ? 12 : 13,
+                fontWeight:
+                    isHeader || isBold ? FontWeight.bold : FontWeight.w500,
+                color: color ?? (isDark ? Colors.white : Colors.black87),
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper: Get report period text
+  String _getReportPeriodText(AccountingModel model) {
+    switch (model.duration) {
+      case DurationType.Daily:
+        return 'Daily Report - ${model.periodDate.isEmpty ? "No date selected" : model.periodDate}';
+      case DurationType.Weekly:
+        if (model.periodStartDate.isEmpty || model.periodEndDate.isEmpty) {
+          return 'Weekly Report - No period selected';
+        }
+        return 'Weekly Report - ${model.periodStartDate} to ${model.periodEndDate}';
+      case DurationType.Monthly:
+        return 'Monthly Report - ${model.periodDate.isEmpty ? "No month selected" : model.periodDate}';
+      case DurationType.Yearly:
+        return 'Yearly Report - ${model.periodDate.isEmpty ? "No year selected" : model.periodDate}';
+      default:
+        return 'Report';
+    }
+  }
+
+  // Helper: Calculate receipts without opening balances
+  double _calculateReceiptsOnly(AccountingModel model) {
+    return model.receiptsTotal -
+        (model.openingCash + model.openingBank + model.openingOther);
+  }
+
+  // Helper: Build report section
+  Widget _buildReportSection(String title, List<Widget> children, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF111827) : const Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB),
+            ),
+          ),
+          child: Column(
+            children: children,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper: Build report row
+  Widget _buildReportRow(
+    String label,
+    double value,
+    bool isDark, {
+    bool isBold = false,
+    Color? color,
+    bool isCount = false,
+    bool isPercentage = false,
+  }) {
+    final currency =
+        Provider.of<AccountingModel>(context, listen: false).currency;
+    final currencySymbol = currency == 'INR' ? '₹' : currency;
+
+    String valueText;
+    if (isCount) {
+      valueText = value.toInt().toString();
+    } else if (isPercentage) {
+      valueText = '${value.toStringAsFixed(1)}%';
+    } else {
+      valueText = '$currencySymbol ${value.toStringAsFixed(2)}';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
+              color: color ?? (isDark ? Colors.grey[300] : Colors.black87),
+            ),
+          ),
+          Text(
+            valueText,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+              color: color ?? (isDark ? Colors.white : Colors.black87),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper: Build category breakdown for detailed report
+  List<Widget> _buildCategoryBreakdown(
+    Map<String, List<TransactionEntry>> accounts,
+    Map<String, String> labels,
+    bool isDark,
+  ) {
+    List<Widget> widgets = [];
+    double total = 0.0;
+
+    accounts.forEach((key, entries) {
+      final categoryTotal = entries.fold<double>(
+        0.0,
+        (sum, entry) =>
+            sum +
+            entry.rows.fold<double>(0.0, (s, row) => s + row.cash + row.bank),
+      );
+      total += categoryTotal;
+
+      if (categoryTotal > 0) {
+        widgets.add(_buildReportRow(labels[key] ?? key, categoryTotal, isDark));
+      }
+    });
+
+    if (widgets.isNotEmpty) {
+      widgets.add(const Divider(height: 20));
+      widgets.add(_buildReportRow('Total', total, isDark, isBold: true));
+    } else {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            'No entries recorded',
+            style: TextStyle(
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
+  // Helper: Get total entries count
+  int _getTotalEntriesCount(AccountingModel model) {
+    int count = 0;
+    model.receiptAccounts.forEach((_, entries) {
+      count += entries.length;
+    });
+    model.paymentAccounts.forEach((_, entries) {
+      count += entries.length;
+    });
+    return count;
+  }
+
   @override
   void dispose() {
     periodController.dispose();
@@ -546,7 +1903,7 @@ class _AccountingFormState extends State<AccountingForm> {
                               Expanded(
                                 child: ElevatedButton.icon(
                                   onPressed: () {
-                                    // TODO: Show basic report
+                                    _showBasicReport(context, model);
                                   },
                                   icon: const Icon(Icons.description, size: 20),
                                   label: const Text(
@@ -575,7 +1932,7 @@ class _AccountingFormState extends State<AccountingForm> {
                               Expanded(
                                 child: ElevatedButton.icon(
                                   onPressed: () {
-                                    // TODO: Show detailed report
+                                    _showDetailedReport(context, model);
                                   },
                                   icon: const Icon(Icons.article, size: 20),
                                   label: const Text(
