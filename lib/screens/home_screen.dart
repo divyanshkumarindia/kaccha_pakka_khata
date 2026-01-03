@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
 import '../services/recent_service.dart';
@@ -14,10 +16,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   UserType? selectedUseCase;
+  String? selectedCustomPageId; // For custom pages
+  String?
+      selectedPageId; // Combined selector: 'standard_personal', 'standard_business', or custom page ID
   String description = 'Description will appear here';
 
   // display titles for dropdown; can be overridden by user-saved values
   final Map<UserType, String> displayTitles = {};
+
+  // Store custom pages: id -> title
+  Map<String, String> customPages = {};
 
   final Map<UserType, String> descriptions = {
     UserType.personal:
@@ -32,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadPageTitles();
+    _loadCustomPages();
     _loadRecents();
     // Load default page type after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -45,6 +54,25 @@ class _HomeScreenState extends State<HomeScreen> {
     // Reload page titles whenever this screen becomes visible
     // This ensures dropdown shows updated custom names
     _loadPageTitles();
+    _loadCustomPages();
+  }
+
+  Future<void> _loadCustomPages() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedPages = prefs.getString('custom_pages');
+    if (savedPages != null) {
+      final decoded = jsonDecode(savedPages) as Map<String, dynamic>;
+      if (mounted) {
+        setState(() {
+          customPages = decoded.map((k, v) => MapEntry(k, v.toString()));
+        });
+      }
+    }
+  }
+
+  Future<void> _saveCustomPages() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('custom_pages', jsonEncode(customPages));
   }
 
   Future<void> _loadDefaultPageType() async {
@@ -132,100 +160,137 @@ class _HomeScreenState extends State<HomeScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(Icons.add_circle_outline, color: Color(0xFF6366F1)),
-            SizedBox(width: 12),
-            Text('New Accounting Page'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Enter a name for your new accounting page:',
-              style: TextStyle(
-                fontSize: 14,
-                color: isDark ? Color(0xFF9CA3AF) : Color(0xFF6B7280),
-              ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final hasText = controller.text.trim().isNotEmpty;
+
+          return AlertDialog(
+            backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: [
+                Icon(Icons.add_circle_outline, color: Color(0xFF6366F1)),
+                SizedBox(width: 12),
+                Text('New Accounting Page'),
+              ],
             ),
-            SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'e.g., My Custom Page',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? const Color(0xFF374151)
-                        : const Color(0xFFE5E7EB),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Enter a name for your new accounting page:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark ? Color(0xFF9CA3AF) : Color(0xFF6B7280),
                   ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide:
-                      const BorderSide(color: Color(0xFF6366F1), width: 2),
+                SizedBox(height: 12),
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  onChanged: (value) {
+                    setDialogState(
+                        () {}); // Rebuild dialog to update button state
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'e.g., Rental Property, Side Business',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? const Color(0xFF374151)
+                            : const Color(0xFFE5E7EB),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide:
+                          const BorderSide(color: Color(0xFF6366F1), width: 2),
+                    ),
+                    filled: true,
+                    fillColor: isDark
+                        ? const Color(0xFF374151)
+                        : const Color(0xFFF9FAFB),
+                  ),
                 ),
-                filled: true,
-                fillColor:
-                    isDark ? const Color(0xFF374151) : const Color(0xFFF9FAFB),
-              ),
+                if (!hasText)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Title is required',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.red.shade400,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color:
-                    isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: isDark
+                        ? const Color(0xFF9CA3AF)
+                        : const Color(0xFF6B7280),
+                  ),
+                ),
               ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              String pageName = controller.text.trim();
-              if (pageName.isEmpty) {
-                pageName =
-                    'Custom Page ${DateTime.now().millisecondsSinceEpoch % 1000}';
-              }
-              Navigator.pop(context);
-              _navigateToNewCustomPage(pageName);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6366F1),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+              ElevatedButton(
+                onPressed: hasText
+                    ? () {
+                        String pageName = controller.text.trim();
+                        Navigator.pop(context);
+                        _createAndNavigateToCustomPage(pageName);
+                      }
+                    : null, // Disable if no text
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6366F1),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: isDark
+                      ? const Color(0xFF374151)
+                      : const Color(0xFFE5E7EB),
+                  disabledForegroundColor: isDark
+                      ? const Color(0xFF6B7280)
+                      : const Color(0xFF9CA3AF),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('Create'),
               ),
-            ),
-            child: const Text('Create'),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
 
-  void _navigateToNewCustomPage(String pageName) {
-    // Navigate to accounting screen with the custom page name
-    // We'll use the 'other' template as the base for custom pages
+  void _createAndNavigateToCustomPage(String pageName) async {
+    // Generate unique ID for the custom page
+    final pageId = 'custom_${DateTime.now().millisecondsSinceEpoch}';
+
+    // Save to custom pages
+    setState(() {
+      customPages[pageId] = pageName;
+    });
+    await _saveCustomPages();
+
+    // Navigate to the new custom page
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AccountingTemplateScreen(
           templateKey: 'other',
           customTitle: pageName,
+          customPageId: pageId,
         ),
       ),
     );
@@ -329,8 +394,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             child: DropdownButtonHideUnderline(
-                              child: DropdownButton<UserType>(
-                                value: selectedUseCase,
+                              child: DropdownButton<String>(
+                                value: selectedPageId,
                                 hint: Text(
                                   'Choose...',
                                   style: TextStyle(
@@ -349,25 +414,76 @@ class _HomeScreenState extends State<HomeScreen> {
                                 dropdownColor: isDark
                                     ? const Color(0xFF3F3F46)
                                     : Colors.white,
-                                items: UserType.values.map((ut) {
-                                  return DropdownMenuItem(
-                                    value: ut,
-                                    child: Text(
-                                      displayTitles[ut] ??
-                                          userTypeConfigs[ut]!.name,
-                                      style: TextStyle(
-                                        color: isDark
-                                            ? Colors.white
-                                            : const Color(0xFF0F172A),
+                                items: [
+                                  // Standard page types
+                                  ...UserType.values.map((ut) {
+                                    final pageId =
+                                        'standard_${ut.toString().split('.').last}';
+                                    return DropdownMenuItem<String>(
+                                      value: pageId,
+                                      child: Text(
+                                        displayTitles[ut] ??
+                                            userTypeConfigs[ut]!.name,
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? Colors.white
+                                              : const Color(0xFF0F172A),
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                }).toList(),
+                                    );
+                                  }).toList(),
+                                  // Custom pages
+                                  ...customPages.entries.map((entry) {
+                                    return DropdownMenuItem<String>(
+                                      value: entry.key,
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.star,
+                                            size: 16,
+                                            color: Color(0xFF6366F1),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              entry.value,
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : const Color(0xFF0F172A),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ],
                                 onChanged: (val) {
+                                  if (val == null) return;
                                   setState(() {
-                                    selectedUseCase = val;
-                                    description = descriptions[val] ??
-                                        'Description will appear here';
+                                    selectedPageId = val;
+                                    if (val.startsWith('standard_')) {
+                                      // Standard page
+                                      final typeName =
+                                          val.replaceFirst('standard_', '');
+                                      selectedUseCase =
+                                          UserType.values.firstWhere(
+                                        (ut) =>
+                                            ut.toString().split('.').last ==
+                                            typeName,
+                                      );
+                                      selectedCustomPageId = null;
+                                      description =
+                                          descriptions[selectedUseCase] ??
+                                              'Description will appear here';
+                                    } else {
+                                      // Custom page
+                                      selectedCustomPageId = val;
+                                      selectedUseCase = null;
+                                      description =
+                                          'Your custom accounting page: ${customPages[val]}';
+                                    }
                                   });
                                 },
                               ),
@@ -426,30 +542,48 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: selectedUseCase == null
+                          onPressed: selectedPageId == null
                               ? null
                               : () async {
-                                  final model = AccountingModel(
-                                      userType: selectedUseCase!);
-                                  await model.loadFromPrefs();
-                                  String route = '/accounting';
-                                  switch (selectedUseCase!) {
-                                    case UserType.personal:
-                                      route = '/accounting/family';
-                                      break;
-                                    case UserType.business:
-                                      route = '/accounting/business';
-                                      break;
-                                    case UserType.institute:
-                                      route = '/accounting/institute';
-                                      break;
-                                    case UserType.other:
-                                      route = '/accounting/other';
-                                      break;
+                                  if (selectedCustomPageId != null) {
+                                    // Navigate to custom page
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            AccountingTemplateScreen(
+                                          templateKey: 'other',
+                                          customTitle:
+                                              customPages[selectedCustomPageId],
+                                          customPageId: selectedCustomPageId,
+                                        ),
+                                      ),
+                                    );
+                                    await _loadCustomPages();
+                                  } else if (selectedUseCase != null) {
+                                    // Navigate to standard page
+                                    final model = AccountingModel(
+                                        userType: selectedUseCase!);
+                                    await model.loadFromPrefs();
+                                    String route = '/accounting';
+                                    switch (selectedUseCase!) {
+                                      case UserType.personal:
+                                        route = '/accounting/family';
+                                        break;
+                                      case UserType.business:
+                                        route = '/accounting/business';
+                                        break;
+                                      case UserType.institute:
+                                        route = '/accounting/institute';
+                                        break;
+                                      case UserType.other:
+                                        route = '/accounting/other';
+                                        break;
+                                    }
+                                    await Navigator.pushNamed(context, route,
+                                        arguments: model);
+                                    await _loadPageTitles();
                                   }
-                                  await Navigator.pushNamed(context, route,
-                                      arguments: model);
-                                  await _loadPageTitles();
                                   await _loadRecents();
                                 },
                           style: ElevatedButton.styleFrom(

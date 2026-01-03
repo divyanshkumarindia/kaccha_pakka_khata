@@ -7,11 +7,13 @@ import '../widgets/accounting_form.dart';
 class AccountingTemplateScreen extends StatelessWidget {
   final String templateKey;
   final String? customTitle;
+  final String? customPageId;
 
   const AccountingTemplateScreen({
     Key? key,
     required this.templateKey,
     this.customTitle,
+    this.customPageId,
   }) : super(key: key);
 
   @override
@@ -19,6 +21,7 @@ class AccountingTemplateScreen extends StatelessWidget {
     return AccountingForm(
       templateKey: templateKey,
       customTitle: customTitle,
+      customPageId: customPageId,
     );
   }
 }

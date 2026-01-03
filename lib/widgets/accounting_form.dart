@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
 import '../theme.dart';
@@ -13,12 +15,14 @@ class AccountingForm extends StatefulWidget {
   final String templateKey;
   final AccountingModel? providedModel;
   final String? customTitle;
+  final String? customPageId;
 
   const AccountingForm({
     Key? key,
     required this.templateKey,
     this.providedModel,
     this.customTitle,
+    this.customPageId,
   }) : super(key: key);
 
   @override
@@ -446,6 +450,71 @@ class _AccountingFormState extends State<AccountingForm> {
       pickDateRange: _pickDateRange,
       pickYear: _pickYear,
     );
+  }
+
+  // Show Delete Page Dialog for custom pages
+  void _showDeletePageDialog(BuildContext context) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange.shade400),
+            SizedBox(width: 12),
+            Text('Delete Page?'),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to delete this custom page? This action cannot be undone.',
+          style: TextStyle(
+            color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color:
+                    isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade500,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && widget.customPageId != null) {
+      // Delete from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final savedPages = prefs.getString('custom_pages');
+      if (savedPages != null) {
+        final decoded = jsonDecode(savedPages) as Map<String, dynamic>;
+        decoded.remove(widget.customPageId);
+        await prefs.setString('custom_pages', jsonEncode(decoded));
+      }
+
+      // Navigate back
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
   }
 
   // Show Basic Report Dialog
@@ -1919,6 +1988,18 @@ class _AccountingFormState extends State<AccountingForm> {
                                         : const Color(0xFF6B7280),
                                   ),
                                 ),
+                                // Show delete button for custom pages
+                                if (widget.customPageId != null) ...[
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () => _showDeletePageDialog(context),
+                                    child: Icon(
+                                      Icons.delete_outline,
+                                      size: 18,
+                                      color: Colors.red.shade400,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
