@@ -638,7 +638,7 @@ class AccountingModel extends ChangeNotifier {
   String _selectedCurrency = 'INR';
   String get selectedCurrency => _selectedCurrency;
 
-  String _themeMode = 'system'; // 'light', 'dark', 'system'
+  String _themeMode = 'light'; // 'light', 'dark', 'system'
   String get themeMode => _themeMode;
 
   String _themeColor =
@@ -664,7 +664,7 @@ class AccountingModel extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       _selectedCurrency = prefs.getString('selected_currency') ?? 'INR';
-      _themeMode = prefs.getString('theme_mode') ?? 'system';
+      _themeMode = prefs.getString('theme_mode') ?? 'light';
       _themeColor = prefs.getString('theme_color') ?? 'blue';
       _isDarkMode = prefs.getBool('dark_mode') ?? false;
       _autoSaveReports = prefs.getBool('auto_save_reports') ?? false;
