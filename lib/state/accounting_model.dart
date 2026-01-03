@@ -675,7 +675,8 @@ class AccountingModel extends ChangeNotifier {
       _isDarkMode = prefs.getBool('dark_mode') ?? false;
       _autoSaveReports = prefs.getBool('auto_save_reports') ?? false;
       _businessName = prefs.getString('business_name');
-      _defaultPageType = prefs.getString('default_page_type') ?? 'Personal';
+      _defaultPageType =
+          prefs.getString('default_page_type'); // Default to null (None)
       _defaultReportFormat =
           prefs.getString('default_report_format') ?? 'Basic';
       notifyListeners();

@@ -421,6 +421,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // Reload custom pages to ensure we have the latest list
     await _loadCustomPages();
 
+    // Add "None" option first
+    final noneOption = {
+      'display': 'None',
+      'value': 'None',
+      'isCustom': false,
+      'isNone': true,
+    };
+
     // Build dynamic list of page types with their custom names
     final pageTypeOptions = UserType.values.map((userType) {
       String displayName =
@@ -433,6 +441,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'display': displayName,
         'value': typeValue,
         'isCustom': false,
+        'isNone': false,
       };
     }).toList();
 
@@ -442,10 +451,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'display': entry.value,
         'value': entry.key,
         'isCustom': true,
+        'isNone': false,
       };
     }).toList();
 
-    final allOptions = [...pageTypeOptions, ...customPageOptions];
+    final allOptions = [noneOption, ...pageTypeOptions, ...customPageOptions];
 
     showDialog(
       context: context,
@@ -458,6 +468,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             mainAxisSize: MainAxisSize.min,
             children: allOptions.map((option) {
               final isCustom = option['isCustom'] == true;
+              final isNone = option['isNone'] == true;
               final displayText = option['display'] as String;
               final valueText = option['value'] as String;
 
@@ -472,14 +483,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       SizedBox(width: 8),
                     ],
+                    if (isNone) ...[
+                      Icon(
+                        Icons.block,
+                        size: 16,
+                        color: isDark ? Color(0xFF9CA3AF) : Color(0xFF6B7280),
+                      ),
+                      SizedBox(width: 8),
+                    ],
                     Expanded(child: Text(displayText)),
                   ],
                 ),
                 value: valueText,
-                groupValue: model.defaultPageType,
+                groupValue: model.defaultPageType ?? 'None',
                 activeColor: const Color(0xFF10B981),
                 onChanged: (value) {
-                  model.setDefaultPageType(value!);
+                  if (value == 'None') {
+                    model.setDefaultPageType('');
+                  } else {
+                    model.setDefaultPageType(value!);
+                  }
                   Navigator.pop(context);
                 },
               );
@@ -755,8 +778,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   String _getDefaultPageTypeLabel(String? defaultPageType) {
-    if (defaultPageType == null || defaultPageType.isEmpty) {
-      return 'Not Set';
+    if (defaultPageType == null ||
+        defaultPageType.isEmpty ||
+        defaultPageType == 'None') {
+      return 'None';
     }
 
     // Check if it's a custom page

@@ -79,30 +79,42 @@ class _HomeScreenState extends State<HomeScreen> {
     final model = Provider.of<AccountingModel>(context, listen: false);
     final defaultPage = model.defaultPageType;
 
-    if (defaultPage != null && defaultPage.isNotEmpty) {
-      UserType? selectedType;
-      switch (defaultPage) {
-        case 'Personal':
-          selectedType = UserType.personal;
-          break;
-        case 'Business':
-          selectedType = UserType.business;
-          break;
-        case 'Institute':
-          selectedType = UserType.institute;
-          break;
-        case 'Other':
-          selectedType = UserType.other;
-          break;
-      }
+    // If None or empty, don't auto-select anything
+    if (defaultPage == null || defaultPage.isEmpty || defaultPage == 'None') {
+      return;
+    }
 
-      if (selectedType != null) {
-        setState(() {
-          selectedUseCase = selectedType;
-          description =
-              descriptions[selectedType] ?? 'Description will appear here';
-        });
-      }
+    // Check if it's a custom page
+    if (defaultPage.startsWith('custom_')) {
+      setState(() {
+        selectedPageId = defaultPage;
+      });
+      return;
+    }
+
+    // Handle standard page types
+    UserType? selectedType;
+    switch (defaultPage) {
+      case 'Personal':
+        selectedType = UserType.personal;
+        break;
+      case 'Business':
+        selectedType = UserType.business;
+        break;
+      case 'Institute':
+        selectedType = UserType.institute;
+        break;
+      case 'Other':
+        selectedType = UserType.other;
+        break;
+    }
+
+    if (selectedType != null) {
+      setState(() {
+        selectedUseCase = selectedType;
+        description =
+            descriptions[selectedType] ?? 'Description will appear here';
+      });
     }
   }
 
