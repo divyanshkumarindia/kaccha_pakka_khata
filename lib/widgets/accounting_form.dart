@@ -773,7 +773,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                       const SizedBox(height: 4),
                                       _buildReportItemRow(
                                         '  Balance B/F:',
-                                        '$currencySymbol${_formatAmount(model.openingCash + model.openingBank + model.openingOther)}',
+                                        '$currencySymbol${_formatAmount(model.openingCash + model.openingBank + model.openingOther + model.customOpeningBalances.values.fold(0.0, (sum, val) => sum + val))}',
                                         isDark,
                                       ),
                                       const Divider(height: 16),
@@ -1382,6 +1382,22 @@ class _AccountingFormState extends State<AccountingForm> {
                               ],
                               isDark,
                             ),
+                          // Custom Balance Boxes (show only if > 0)
+                          ...model.customOpeningBalances.entries
+                              .where((e) => e.value > 0)
+                              .map((entry) {
+                            final title = balanceCardTitles[entry.key] ??
+                                'Custom Balance';
+                            return _buildTableRow(
+                              [
+                                '   $title',
+                                '0.00',
+                                _formatAmount(entry.value),
+                                _formatAmount(entry.value)
+                              ],
+                              isDark,
+                            );
+                          }),
                           // Income Categories
                           ...model.receiptAccounts.entries.expand((entry) {
                             double cash = 0, bank = 0;
@@ -2318,22 +2334,50 @@ class _AccountingFormState extends State<AccountingForm> {
           ),
           if (isOpeningBalancesExpanded) ...[
             const SizedBox(height: 12),
+            // Default balance cards (non-deletable)
             _buildBalanceCard(isDark, 'cash', balanceCardTitles['cash']!,
-                balanceCardDescriptions['cash']!),
+                balanceCardDescriptions['cash']!, false),
             const SizedBox(height: 12),
             _buildBalanceCard(isDark, 'bank', balanceCardTitles['bank']!,
-                balanceCardDescriptions['bank']!),
+                balanceCardDescriptions['bank']!, false),
             const SizedBox(height: 12),
             _buildBalanceCard(isDark, 'other', balanceCardTitles['other']!,
-                balanceCardDescriptions['other']!),
+                balanceCardDescriptions['other']!, false),
+
+            // Custom balance cards (deletable)
+            ...model.customOpeningBalances.keys.map((key) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 12.0),
+                child: _buildCustomBalanceCard(isDark, key),
+              );
+            }).toList(),
+
+            // Add Balance Box button
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _addNewBalanceBox(),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Add Balance Box'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF059669),
+                  side: const BorderSide(color: Color(0xFF059669)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildBalanceCard(
-      bool isDark, String cardType, String title, String description) {
+  Widget _buildBalanceCard(bool isDark, String cardType, String title,
+      String description, bool isDeletable) {
     return BalanceCard(
       isDark: isDark,
       title: title,
@@ -2376,6 +2420,124 @@ class _AccountingFormState extends State<AccountingForm> {
     );
   }
 
+  Widget _buildCustomBalanceCard(bool isDark, String key) {
+    // Get or initialize title and description for custom balance
+    if (!balanceCardTitles.containsKey(key)) {
+      balanceCardTitles[key] = 'Custom Balance';
+    }
+    if (!balanceCardDescriptions.containsKey(key)) {
+      balanceCardDescriptions[key] = '';
+    }
+
+    return Stack(
+      children: [
+        BalanceCard(
+          isDark: isDark,
+          title: balanceCardTitles[key]!,
+          initialDescription: balanceCardDescriptions[key]!,
+          onTitleChanged: (newTitle) {
+            model.setBalanceCardTitle(key, newTitle);
+            setState(() {
+              balanceCardTitles[key] = newTitle;
+            });
+          },
+          onDescriptionChanged: (newDescription) {
+            model.setBalanceCardDescription(key, newDescription);
+            setState(() {
+              balanceCardDescriptions[key] = newDescription;
+            });
+          },
+          onAmountChanged: (newAmount) {
+            final value = double.tryParse(newAmount) ?? 0.0;
+            model.setCustomOpeningBalance(key, value);
+          },
+        ),
+        // Delete button
+        Positioned(
+          top: 8,
+          right: 8,
+          child: IconButton(
+            icon: Icon(
+              Icons.delete_outline,
+              color: Colors.red.shade400,
+              size: 20,
+            ),
+            onPressed: () => _showDeleteBalanceBoxDialog(key),
+            padding: EdgeInsets.all(4),
+            constraints: BoxConstraints(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _addNewBalanceBox() {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final key = 'custom_balance_$timestamp';
+
+    setState(() {
+      model.addCustomOpeningBalance(key);
+      balanceCardTitles[key] = 'Custom Balance';
+      balanceCardDescriptions[key] = '';
+    });
+  }
+
+  void _showDeleteBalanceBoxDialog(String key) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange.shade400),
+            SizedBox(width: 12),
+            Text('Delete Balance Box?'),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to delete this balance box?',
+          style: TextStyle(
+            color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color:
+                    isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade500,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() {
+        model.removeCustomOpeningBalance(key);
+        balanceCardTitles.remove(key);
+        balanceCardDescriptions.remove(key);
+      });
+    }
+  }
+
   // Helper methods for live calculations
   String _formatCategoryTotal(String accountKey, bool isExpense) {
     final total =
@@ -2387,6 +2549,10 @@ class _AccountingFormState extends State<AccountingForm> {
     double total = 0.0;
     // Add opening balances
     total += model.openingCash + model.openingBank + model.openingOther;
+    // Add custom opening balances
+    for (var value in model.customOpeningBalances.values) {
+      total += value;
+    }
     // Add all receipt accounts
     for (var key in model.receiptAccounts.keys) {
       total += model.calculateAccountTotalByKey(key, receipt: true);

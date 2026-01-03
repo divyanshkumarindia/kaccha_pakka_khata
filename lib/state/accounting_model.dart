@@ -23,6 +23,9 @@ class AccountingModel extends ChangeNotifier {
   double openingBank = 0.0;
   double openingOther = 0.0;
 
+  // Custom opening balance boxes
+  Map<String, double> customOpeningBalances = {};
+
   AccountingModel({required this.userType})
       : firmName = userTypeConfigs[userType]!.firmNamePlaceholder,
         currency = 'INR',
@@ -518,6 +521,22 @@ class AccountingModel extends ChangeNotifier {
     if (other != null) openingOther = other;
     notifyListeners();
     // Don't persist - opening balances should reset on each page load
+  }
+
+  // Custom opening balance management
+  void addCustomOpeningBalance(String key) {
+    customOpeningBalances[key] = 0.0;
+    notifyListeners();
+  }
+
+  void setCustomOpeningBalance(String key, double value) {
+    customOpeningBalances[key] = value;
+    notifyListeners();
+  }
+
+  void removeCustomOpeningBalance(String key) {
+    customOpeningBalances.remove(key);
+    notifyListeners();
   }
 
   // Replace entries for an account

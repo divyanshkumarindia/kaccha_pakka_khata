@@ -532,7 +532,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
-                                vertical: 12,
+                                vertical: 16,
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
