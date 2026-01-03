@@ -283,14 +283,21 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     await _saveCustomPages();
 
-    // Navigate to the new custom page
+    // Create a new model with UserType.other for custom pages
+    final customModel = AccountingModel(userType: UserType.other);
+    await customModel.loadFromPrefs();
+
+    // Navigate to the new custom page with its own model
     final wasDeleted = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AccountingTemplateScreen(
-          templateKey: 'other',
-          customTitle: pageName,
-          customPageId: pageId,
+        builder: (context) => ChangeNotifierProvider<AccountingModel>.value(
+          value: customModel,
+          child: AccountingTemplateScreen(
+            templateKey: 'other',
+            customTitle: pageName,
+            customPageId: pageId,
+          ),
         ),
       ),
     );
@@ -556,16 +563,25 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? null
                               : () async {
                                   if (selectedCustomPageId != null) {
-                                    // Navigate to custom page
+                                    // Create a new model with UserType.other for custom pages
+                                    final customModel = AccountingModel(
+                                        userType: UserType.other);
+                                    await customModel.loadFromPrefs();
+
+                                    // Navigate to custom page with its own model
                                     final wasDeleted = await Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            AccountingTemplateScreen(
-                                          templateKey: 'other',
-                                          customTitle:
-                                              customPages[selectedCustomPageId],
-                                          customPageId: selectedCustomPageId,
+                                            ChangeNotifierProvider<
+                                                AccountingModel>.value(
+                                          value: customModel,
+                                          child: AccountingTemplateScreen(
+                                            templateKey: 'other',
+                                            customTitle: customPages[
+                                                selectedCustomPageId],
+                                            customPageId: selectedCustomPageId,
+                                          ),
                                         ),
                                       ),
                                     );
