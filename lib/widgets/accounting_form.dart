@@ -2462,7 +2462,7 @@ class _AccountingFormState extends State<AccountingForm> {
               color: Colors.red.shade400,
               size: 20,
             ),
-            onPressed: () => _showDeleteBalanceBoxDialog(key),
+            onPressed: () => _deleteBalanceBox(key),
             padding: EdgeInsets.all(4),
             constraints: BoxConstraints(),
           ),
@@ -2482,60 +2482,12 @@ class _AccountingFormState extends State<AccountingForm> {
     });
   }
 
-  void _showDeleteBalanceBoxDialog(String key) async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange.shade400),
-            SizedBox(width: 12),
-            Text('Delete Balance Box?'),
-          ],
-        ),
-        content: Text(
-          'Are you sure you want to delete this balance box?',
-          style: TextStyle(
-            color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color:
-                    isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade500,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      setState(() {
-        model.removeCustomOpeningBalance(key);
-        balanceCardTitles.remove(key);
-        balanceCardDescriptions.remove(key);
-      });
-    }
+  void _deleteBalanceBox(String key) {
+    setState(() {
+      model.removeCustomOpeningBalance(key);
+      balanceCardTitles.remove(key);
+      balanceCardDescriptions.remove(key);
+    });
   }
 
   // Helper methods for live calculations
