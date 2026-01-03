@@ -31,6 +31,8 @@ class AccountingModel extends ChangeNotifier {
         periodStartDate = '',
         periodEndDate = '' {
     _initializeAccounts();
+    loadSettings();
+    loadSavedReports();
   }
 
   // Persistence: simple JSON save/load using SharedPreferences
@@ -584,4 +586,166 @@ class AccountingModel extends ChangeNotifier {
   }
 
   double get netBalance => receiptsTotal - paymentsTotal;
+
+  // ====== SAVED REPORTS FUNCTIONALITY ======
+  List<Map<String, dynamic>> _savedReports = [];
+  List<Map<String, dynamic>> get savedReports => _savedReports;
+
+  Future<void> loadSavedReports() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final reportsJson = prefs.getString('saved_reports');
+      if (reportsJson != null && reportsJson.isNotEmpty) {
+        final List<dynamic> decoded = jsonDecode(reportsJson);
+        _savedReports = decoded.cast<Map<String, dynamic>>();
+        notifyListeners();
+      }
+    } catch (e) {
+      // ignore errors
+    }
+  }
+
+  Future<void> saveReport(String title, String date, String reportData) async {
+    final report = {
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'title': title,
+      'date': date,
+      'savedAt': DateTime.now().toIso8601String(),
+      'currency': selectedCurrency,
+      'data': reportData,
+    };
+    _savedReports.insert(0, report);
+    await _persistSavedReports();
+    notifyListeners();
+  }
+
+  Future<void> deleteSavedReport(String reportId) async {
+    _savedReports.removeWhere((report) => report['id'] == reportId);
+    await _persistSavedReports();
+    notifyListeners();
+  }
+
+  Future<void> _persistSavedReports() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('saved_reports', jsonEncode(_savedReports));
+    } catch (e) {
+      // ignore errors
+    }
+  }
+
+  // ====== SETTINGS FUNCTIONALITY ======
+  String _selectedCurrency = 'INR';
+  String get selectedCurrency => _selectedCurrency;
+
+  bool _isDarkMode = false;
+  bool get isDarkMode => _isDarkMode;
+
+  bool _autoSaveReports = false;
+  bool get autoSaveReports => _autoSaveReports;
+
+  String? _businessName;
+  String? get businessName => _businessName;
+
+  String? _defaultPageType;
+  String? get defaultPageType => _defaultPageType;
+
+  String? _defaultReportFormat;
+  String? get defaultReportFormat => _defaultReportFormat;
+
+  Future<void> loadSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _selectedCurrency = prefs.getString('selected_currency') ?? 'INR';
+      _isDarkMode = prefs.getBool('dark_mode') ?? false;
+      _autoSaveReports = prefs.getBool('auto_save_reports') ?? false;
+      _businessName = prefs.getString('business_name');
+      _defaultPageType = prefs.getString('default_page_type') ?? 'Personal';
+      _defaultReportFormat =
+          prefs.getString('default_report_format') ?? 'Basic';
+      notifyListeners();
+    } catch (e) {
+      // ignore errors
+    }
+  }
+
+  void setSelectedCurrency(String currency) {
+    _selectedCurrency = currency;
+    notifyListeners();
+    SharedPreferences.getInstance()
+        .then((p) => p.setString('selected_currency', currency));
+  }
+
+  void toggleDarkMode() {
+    _isDarkMode = !_isDarkMode;
+    notifyListeners();
+    SharedPreferences.getInstance()
+        .then((p) => p.setBool('dark_mode', _isDarkMode));
+  }
+
+  void toggleAutoSaveReports() {
+    _autoSaveReports = !_autoSaveReports;
+    notifyListeners();
+    SharedPreferences.getInstance()
+        .then((p) => p.setBool('auto_save_reports', _autoSaveReports));
+  }
+
+  void setBusinessName(String name) {
+    _businessName = name;
+    notifyListeners();
+    SharedPreferences.getInstance()
+        .then((p) => p.setString('business_name', name));
+  }
+
+  void setDefaultPageType(String type) {
+    _defaultPageType = type;
+    notifyListeners();
+    SharedPreferences.getInstance()
+        .then((p) => p.setString('default_page_type', type));
+  }
+
+  void setDefaultReportFormat(String format) {
+    _defaultReportFormat = format;
+    notifyListeners();
+    SharedPreferences.getInstance()
+        .then((p) => p.setString('default_report_format', format));
+  }
+
+  Future<void> backupData() async {
+    // Placeholder for backup functionality
+    // In a real app, this would export data to a file
+    await Future.delayed(const Duration(seconds: 1));
+  }
+
+  Future<void> restoreData() async {
+    // Placeholder for restore functionality
+    // In a real app, this would import data from a file
+    await Future.delayed(const Duration(seconds: 1));
+  }
+
+  Future<void> clearAllData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      // Reset all data
+      _savedReports = [];
+      _selectedCurrency = 'INR';
+      _isDarkMode = false;
+      _autoSaveReports = false;
+      _businessName = null;
+      _defaultPageType = 'Personal';
+      _defaultReportFormat = 'Basic';
+
+      // Reset accounting data
+      openingCash = 0.0;
+      openingBank = 0.0;
+      openingOther = 0.0;
+      _initializeAccounts();
+
+      notifyListeners();
+    } catch (e) {
+      // ignore errors
+    }
+  }
 }

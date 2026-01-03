@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'theme.dart';
 import 'screens/index_screen.dart';
+import 'screens/main_navigation.dart';
 import 'screens/accounting_screen.dart';
 import 'screens/accounting_template_screen.dart';
 // legacy per-template screens left in the repo; routes now use the shared template screen
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => const IndexScreen(),
+          '/main': (context) => const MainNavigation(),
           '/accounting': (context) => const AccountingScreen(),
           // Separate routes per use case
           '/accounting/family': (context) =>

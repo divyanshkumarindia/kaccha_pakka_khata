@@ -263,19 +263,22 @@ class _IndexScreenState extends State<IndexScreen> {
                                   final model = AccountingModel(
                                       userType: selectedUseCase!);
                                   await model.loadFromPrefs();
-                                  String route = '/accounting';
+                                  String route =
+                                      '/main'; // Navigate to main navigation with bottom nav
+
+                                  // Store the selected route for reference
                                   switch (selectedUseCase!) {
                                     case UserType.personal:
-                                      route = '/accounting/family';
+                                      // route = '/accounting/family';
                                       break;
                                     case UserType.business:
-                                      route = '/accounting/business';
+                                      // route = '/accounting/business';
                                       break;
                                     case UserType.institute:
-                                      route = '/accounting/institute';
+                                      // route = '/accounting/institute';
                                       break;
                                     case UserType.other:
-                                      route = '/accounting/other';
+                                      // route = '/accounting/other';
                                       break;
                                   }
                                   // await navigation so we can refresh titles when returning
