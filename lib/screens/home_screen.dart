@@ -501,14 +501,32 @@ class _HomeScreenState extends State<HomeScreen> {
                             });
                           }
 
+                          // Palette for custom pages to ensure variety
+                          final palette = [
+                            const Color(0xFFEF4444), // Red
+                            const Color(0xFFF97316), // Orange
+                            const Color(0xFFF59E0B), // Amber
+                            const Color(0xFF84CC16), // Lime
+                            const Color(0xFF10B981), // Emerald
+                            const Color(0xFF06B6D4), // Cyan
+                            const Color(0xFF3B82F6), // Blue
+                            const Color(0xFF6366F1), // Indigo
+                            const Color(0xFF8B5CF6), // Violet
+                            const Color(0xFFD946EF), // Fuchsia
+                            const Color(0xFFEC4899), // Pink
+                          ];
+
                           // Add custom pages
                           customPages.forEach((key, value) {
+                            // Deterministic random color based on key
+                            final colorIndex =
+                                key.hashCode.abs() % palette.length;
                             items.add({
                               'id': key,
                               'title': value,
                               'icon': Icons.star_rounded,
                               'type': 'custom',
-                              'color': const Color(0xFF06B6D4), // Cyan
+                              'color': palette[colorIndex],
                             });
                           });
 
