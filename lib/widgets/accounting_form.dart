@@ -4317,43 +4317,44 @@ class _AccountingFormState extends State<AccountingForm> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          if (entry.rows.length > 1)
-                            IconButton(
-                              icon: const Icon(Icons.remove_circle_outline,
-                                  size: 18),
-                              color: Colors.redAccent,
-                              tooltip: 'Remove row',
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              onPressed: () {
-                                m.removeRowFromEntry(
-                                    accountKey, entry.id, row.id,
-                                    receipt: !isExpense);
-                              },
-                            )
-                          else
-                            const SizedBox(
-                                width: 24), // Spacer when only one row
-
-                          // --- DUPLICATE ROW BUTTON (New) ---
-                          const SizedBox(width: 4),
-                          IconButton(
-                            icon: const Icon(Icons.copy_rounded, size: 16),
-                            color: Colors.blueAccent,
-                            tooltip: 'Duplicate Row',
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            onPressed: () {
-                              m.addRowToEntry(
-                                accountKey,
-                                entry.id,
-                                receipt: !isExpense,
-                                cash: row.cash, // Pass current values
-                                bank: row.bank,
-                                insertAfterRowId:
-                                    row.id, // Insert directly after
-                              );
-                            },
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (entry.rows.length > 1)
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline,
+                                      size: 18),
+                                  color: Colors.redAccent,
+                                  tooltip: 'Remove row',
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () {
+                                    m.removeRowFromEntry(
+                                        accountKey, entry.id, row.id,
+                                        receipt: !isExpense);
+                                  },
+                                ),
+                              if (entry.rows.length > 1)
+                                const SizedBox(height: 8),
+                              IconButton(
+                                icon: const Icon(Icons.copy_rounded, size: 16),
+                                color: Colors.blueAccent,
+                                tooltip: 'Duplicate Row',
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                onPressed: () {
+                                  m.addRowToEntry(
+                                    accountKey,
+                                    entry.id,
+                                    receipt: !isExpense,
+                                    cash: row.cash, // Pass current values
+                                    bank: row.bank,
+                                    insertAfterRowId:
+                                        row.id, // Insert directly after
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ],
                       ),
