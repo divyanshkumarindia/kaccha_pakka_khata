@@ -295,6 +295,80 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _handleNavigation(Map<String, dynamic> item) async {
+    final String pageId = item['id'];
+    final String type = item['type'];
+
+    // Provide visual feedback
+    setState(() {
+      selectedPageId = pageId;
+    });
+
+    // Small delay to show selection
+    await Future.delayed(const Duration(milliseconds: 150));
+
+    if (!mounted) return;
+
+    if (type == 'custom') {
+      final customTitle = item['title'];
+
+      // Create a new model with UserType.other for custom pages
+      final customModel = AccountingModel(userType: UserType.other);
+      await customModel.loadFromPrefs();
+
+      // Navigate to custom page
+      final wasDeleted = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChangeNotifierProvider<AccountingModel>.value(
+            value: customModel,
+            child: AccountingTemplateScreen(
+              templateKey: 'other',
+              customTitle: customTitle,
+              customPageId: pageId,
+            ),
+          ),
+        ),
+      );
+      await _loadCustomPages();
+
+      if (wasDeleted == true && mounted) {
+        setState(() {
+          selectedPageId = null;
+        });
+      }
+    } else {
+      // Standard page
+      final ut = item['userType'] as UserType;
+
+      // Navigate to standard page
+      final model = AccountingModel(userType: ut);
+      await model.loadFromPrefs();
+
+      String route = '/accounting';
+      switch (ut) {
+        case UserType.personal:
+          route = '/accounting/family';
+          break;
+        case UserType.business:
+          route = '/accounting/business';
+          break;
+        case UserType.institute:
+          route = '/accounting/institute';
+          break;
+        case UserType.other:
+          route = '/accounting/other';
+          break;
+      }
+
+      if (!mounted) return;
+      await Navigator.pushNamed(context, route, arguments: model);
+      await _loadPageTitles();
+    }
+
+    await _loadRecents();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -371,282 +445,167 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Select Your Use Case',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color:
-                              isDark ? Colors.white : const Color(0xFF0F172A),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Dropdown with Add New button
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            decoration: BoxDecoration(
+                          Text(
+                            'Select Your Use Case',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
                               color: isDark
-                                  ? const Color(0xFF1E293B)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isDark
-                                    ? const Color(0xFF334155)
-                                    : const Color(0xFFE2E8F0),
-                              ),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: selectedPageId,
-                                hint: Text(
-                                  'Choose Account Type...',
-                                  style: TextStyle(
-                                    color: isDark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF64748B),
-                                  ),
-                                ),
-                                isExpanded: true,
-                                icon: Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  color: isDark
-                                      ? const Color(0xFF94A3B8)
-                                      : const Color(0xFF64748B),
-                                ),
-                                dropdownColor: isDark
-                                    ? const Color(0xFF1E293B)
-                                    : Colors.white,
-                                items: [
-                                  // Standard page types
-                                  ...UserType.values.map((ut) {
-                                    final pageId =
-                                        'standard_${ut.toString().split('.').last}';
-                                    return DropdownMenuItem<String>(
-                                      value: pageId,
-                                      child: Text(
-                                        displayTitles[ut] ??
-                                            userTypeConfigs[ut]!.name,
-                                        style: TextStyle(
-                                          color: isDark
-                                              ? Colors.white
-                                              : const Color(0xFF0F172A),
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                  // Custom pages
-                                  ...customPages.entries.map((entry) {
-                                    return DropdownMenuItem<String>(
-                                      value: entry.key,
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.star_rounded,
-                                            size: 18,
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                          ),
-                                          SizedBox(width: 12),
-                                          Expanded(
-                                            child: Text(
-                                              entry.value,
-                                              style: TextStyle(
-                                                color: isDark
-                                                    ? Colors.white
-                                                    : const Color(0xFF0F172A),
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }).toList(),
-                                ],
-                                onChanged: (val) {
-                                  if (val == null) return;
-                                  setState(() {
-                                    selectedPageId = val;
-                                    if (val.startsWith('standard_')) {
-                                      // Standard page
-                                      final typeName =
-                                          val.replaceFirst('standard_', '');
-                                      selectedUseCase =
-                                          UserType.values.firstWhere(
-                                        (ut) =>
-                                            ut.toString().split('.').last ==
-                                            typeName,
-                                      );
-                                      selectedCustomPageId = null;
-                                      description =
-                                          descriptions[selectedUseCase] ??
-                                              'Description will appear here';
-                                    } else {
-                                      // Custom page
-                                      selectedCustomPageId = val;
-                                      selectedUseCase = null;
-                                      description =
-                                          'Your custom accounting page: ${customPages[val]}';
-                                    }
-                                  });
-                                },
-                              ),
+                                  ? Colors.white
+                                  : const Color(0xFF0F172A),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          // Add New Page Button
-                          OutlinedButton.icon(
+                          // New "Add Page" button in header
+                          IconButton(
                             onPressed: () => _showAddNewPageDialog(context),
-                            icon: const Icon(Icons.add_rounded, size: 20),
-                            label: const Text('New Accounting Page'),
+                            icon: const Icon(Icons.add_circle_outline_rounded),
+                            color: Theme.of(context).primaryColor,
+                            tooltip: 'New Accounting Page',
                           ),
                         ],
                       ),
+                      const SizedBox(height: 20),
 
-                      const SizedBox(height: 24),
+                      // Grid Layout for Use Cases
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Prepare list of items
+                          final List<Map<String, dynamic>> items = [];
 
-                      // Description
-                      // Static Intro Card
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: isDark
-                                ? [
-                                    const Color(0xFF1E293B),
-                                    const Color(0xFF0F172A)
-                                  ]
-                                : [
-                                    const Color(0xFFF8FAFC),
-                                    const Color(0xFFF1F5F9)
-                                  ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isDark
-                                ? const Color(0xFF334155)
-                                : const Color(0xFFE2E8F0),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                          // Add standard types
+                          for (var ut in UserType.values) {
+                            IconData icon;
+                            switch (ut) {
+                              case UserType.personal:
+                                icon = Icons.family_restroom_rounded;
+                                break;
+                              case UserType.business:
+                                icon = Icons.store_rounded;
+                                break;
+                              case UserType.institute:
+                                icon = Icons.school_rounded;
+                                break;
+                              case UserType.other:
+                                icon = Icons.category_rounded;
+                                break;
+                            }
+                            items.add({
+                              'id': 'standard_${ut.toString().split('.').last}',
+                              'title': displayTitles[ut] ??
+                                  userTypeConfigs[ut]!.name,
+                              'icon': icon,
+                              'type': 'standard',
+                              'userType': ut,
+                            });
+                          }
+
+                          // Add custom pages
+                          customPages.forEach((key, value) {
+                            items.add({
+                              'id': key,
+                              'title': value,
+                              'icon': Icons.star_rounded,
+                              'type': 'custom',
+                            });
+                          });
+
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 1.1, // Adjust for card height
                             ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.auto_awesome,
-                                    size: 20,
-                                    color: Theme.of(context).primaryColor),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'Why choose this app?',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark
-                                          ? Colors.white
-                                          : const Color(0xFF0F172A),
+                            itemCount: items.length,
+                            itemBuilder: (context, index) {
+                              final item = items[index];
+                              final isSelected = selectedPageId == item['id'];
+                              final Color primaryColor =
+                                  Theme.of(context).primaryColor;
+
+                              return InkWell(
+                                onTap: () => _handleNavigation(item),
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? primaryColor.withValues(alpha: 0.1)
+                                        : (isDark
+                                            ? const Color(0xFF1E293B)
+                                            : Colors.white),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? primaryColor
+                                          : (isDark
+                                              ? const Color(0xFF334155)
+                                              : const Color(0xFFE2E8F0)),
+                                      width: isSelected ? 2 : 1,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Complete financial tracking for Personal, Business, and Institutes. Generate meaningful reports, track every penny, and manage your budget with our premium, intuitive tools.',
-                              style: TextStyle(
-                                fontSize: 14,
-                                height: 1.6,
-                                color: isDark
-                                    ? const Color(0xFFCBD5E1)
-                                    : const Color(0xFF475569),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Continue Button
-                      GradientButton(
-                        text: 'Continue to Accounting',
-                        icon: Icons.arrow_forward_rounded,
-                        fullWidth: true,
-                        onPressed: selectedPageId == null
-                            ? null
-                            : () async {
-                                if (selectedCustomPageId != null) {
-                                  // Create a new model with UserType.other for custom pages
-                                  final customModel =
-                                      AccountingModel(userType: UserType.other);
-                                  await customModel.loadFromPrefs();
-
-                                  // Navigate to custom page with its own model
-                                  final wasDeleted = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          ChangeNotifierProvider<
-                                              AccountingModel>.value(
-                                        value: customModel,
-                                        child: AccountingTemplateScreen(
-                                          templateKey: 'other',
-                                          customTitle:
-                                              customPages[selectedCustomPageId],
-                                          customPageId: selectedCustomPageId,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? primaryColor.withValues(
+                                                  alpha: 0.2)
+                                              : (isDark
+                                                  ? const Color(0xFF334155)
+                                                  : const Color(0xFFF1F5F9)),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          item['icon'] as IconData,
+                                          color: isSelected
+                                              ? primaryColor
+                                              : (isDark
+                                                  ? const Color(0xFF94A3B8)
+                                                  : const Color(0xFF64748B)),
+                                          size: 24,
                                         ),
                                       ),
-                                    ),
-                                  );
-                                  await _loadCustomPages();
-
-                                  // If page was deleted, reset selection
-                                  if (wasDeleted == true) {
-                                    setState(() {
-                                      selectedPageId = null;
-                                    });
-                                  }
-                                } else if (selectedUseCase != null) {
-                                  // Navigate to standard page
-                                  final model = AccountingModel(
-                                      userType: selectedUseCase!);
-                                  await model.loadFromPrefs();
-                                  String route = '/accounting';
-                                  switch (selectedUseCase!) {
-                                    case UserType.personal:
-                                      route = '/accounting/family';
-                                      break;
-                                    case UserType.business:
-                                      route = '/accounting/business';
-                                      break;
-                                    case UserType.institute:
-                                      route = '/accounting/institute';
-                                      break;
-                                    case UserType.other:
-                                      route = '/accounting/other';
-                                      break;
-                                  }
-                                  await Navigator.pushNamed(context, route,
-                                      arguments: model);
-                                  await _loadPageTitles();
-                                }
-                                await _loadRecents();
-                              },
+                                      const SizedBox(height: 12),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        child: Text(
+                                          item['title'] as String,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize:
+                                                13, // Slightly smaller to fit 2 cols
+                                            fontWeight: isSelected
+                                                ? FontWeight.bold
+                                                : FontWeight.w500,
+                                            color: isSelected
+                                                ? primaryColor
+                                                : (isDark
+                                                    ? Colors.white
+                                                    : const Color(0xFF0F172A)),
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
                       ),
+
+                      const SizedBox(height: 12),
                     ],
                   ),
                 ),
