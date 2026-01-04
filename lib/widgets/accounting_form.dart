@@ -8,6 +8,7 @@ import '../models/accounting.dart';
 import '../theme.dart';
 import 'components/balance_card.dart';
 import 'components/duration_period_picker.dart';
+import 'components/premium_card.dart';
 
 /// Shared accounting form widget extracted from the Family screen.
 /// Accepts a `templateKey` so templates can pass different labels/configs later.
@@ -2556,510 +2557,579 @@ class _AccountingFormState extends State<AccountingForm> {
     }
   }
 
+  // OTHER INCOME CATEGORIES
+  Widget _buildOtherIncome(bool isDark, AccountingModel model) {
+    return PremiumCard(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.receiptColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.category_rounded,
+                      color: AppTheme.receiptColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Receipts',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.receiptColor,
+                    ),
+                  ),
+                ],
+              ),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _addNewCategoryBox(true); // true = receipt/income
+                },
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Entry'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.receiptColor,
+                  side: BorderSide(
+                    color:
+                        isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  visualDensity: VisualDensity.compact,
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w500),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          // Dynamically render any custom receipt accounts (new boxes added by user) - AT TOP
+          ...model.receiptAccounts.keys
+              .where((key) => key.startsWith('custom_receipt_'))
+              .map((key) {
+            return Column(
+              children: [
+                _buildCategoryCard(
+                  isDark,
+                  key,
+                  model.receiptLabels[key] ?? 'New Income Category',
+                  _formatCategoryTotal(key, false),
+                  AppTheme.receiptColor,
+                  categoryExpansionState[key] ?? true,
+                  () {
+                    setState(() {
+                      categoryExpansionState[key] =
+                          !(categoryExpansionState[key] ?? true);
+                    });
+                  },
+                  showEntry: categoryExpansionState[key] ?? true,
+                  receipt: true,
+                ),
+                const SizedBox(height: 12),
+              ],
+            );
+          }).toList(),
+          _buildCategoryCard(
+            isDark,
+            'other_income',
+            'Other Income',
+            _formatCategoryTotal('other_income', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['other_income'] ?? true,
+            () {
+              setState(() {
+                categoryExpansionState['other_income'] =
+                    !(categoryExpansionState['other_income'] ?? true);
+              });
+            },
+            showEntry: categoryExpansionState['other_income'] ?? true,
+            receipt: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // PERSONAL INCOME CATEGORIES
   // PERSONAL INCOME CATEGORIES
   Widget _buildPersonalIncome(bool isDark, AccountingModel model) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Income',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.receiptColor,
-              ),
-            ),
-            OutlinedButton.icon(
-              onPressed: () {
-                _addNewCategoryBox(true); // true = receipt/income
-              },
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add New Entry Box'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTheme.receiptColor,
-                side: BorderSide(
-                  color: isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                textStyle: const TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        // Dynamically render any custom receipt accounts (new boxes added by user) - AT TOP
-        ...model.receiptAccounts.keys
-            .where((key) => key.startsWith('custom_receipt_'))
-            .map((key) {
-          return Column(
+    return PremiumCard(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildCategoryCard(
-                isDark,
-                key,
-                model.receiptLabels[key] ?? 'New Income Category',
-                _formatCategoryTotal(key, false),
-                AppTheme.receiptColor,
-                categoryExpansionState[key] ?? true,
-                () {
-                  setState(() {
-                    categoryExpansionState[key] =
-                        !(categoryExpansionState[key] ?? true);
-                  });
-                },
-                showEntry: categoryExpansionState[key] ?? true,
-                receipt: true,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.receiptColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_downward_rounded,
+                      color: AppTheme.receiptColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Income',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.receiptColor,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _addNewCategoryBox(true); // true = receipt/income
+                },
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Entry'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.receiptColor,
+                  side: BorderSide(
+                    color:
+                        isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  visualDensity: VisualDensity.compact,
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w500),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
             ],
-          );
-        }).toList(),
-        _buildCategoryCard(
-          isDark,
-          'salary',
-          'Salary / Wages',
-          _formatCategoryTotal('salary', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['salary'] ?? true,
-          () {
-            setState(() {
-              categoryExpansionState['salary'] =
-                  !(categoryExpansionState['salary'] ?? true);
-            });
-          },
-          showEntry: categoryExpansionState['salary'] ?? true,
-          receipt: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'business_income',
-          'Business Income',
-          _formatCategoryTotal('business_income', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['business_income'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['business_income'] =
-                  !(categoryExpansionState['business_income'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['business_income'] ?? false,
-          receipt: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'rental_income',
-          'Rental Income',
-          _formatCategoryTotal('rental_income', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['rental_income'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['rental_income'] =
-                  !(categoryExpansionState['rental_income'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['rental_income'] ?? false,
-          receipt: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'investment_returns',
-          'Investment Returns / Interest',
-          _formatCategoryTotal('investment_returns', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['investment_returns'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['investment_returns'] =
-                  !(categoryExpansionState['investment_returns'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['investment_returns'] ?? false,
-          receipt: true,
-        ),
-      ],
+          ),
+          const SizedBox(height: 20),
+          // Dynamically render any custom receipt accounts (new boxes added by user) - AT TOP
+          ...model.receiptAccounts.keys
+              .where((key) => key.startsWith('custom_receipt_'))
+              .map((key) {
+            return Column(
+              children: [
+                _buildCategoryCard(
+                  isDark,
+                  key,
+                  model.receiptLabels[key] ?? 'New Income Category',
+                  _formatCategoryTotal(key, false),
+                  AppTheme.receiptColor,
+                  categoryExpansionState[key] ?? true,
+                  () {
+                    setState(() {
+                      categoryExpansionState[key] =
+                          !(categoryExpansionState[key] ?? true);
+                    });
+                  },
+                  showEntry: categoryExpansionState[key] ?? true,
+                  receipt: true,
+                ),
+                const SizedBox(height: 12),
+              ],
+            );
+          }).toList(),
+          _buildCategoryCard(
+            isDark,
+            'salary',
+            'Salary / Wages',
+            _formatCategoryTotal('salary', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['salary'] ?? true,
+            () {
+              setState(() {
+                categoryExpansionState['salary'] =
+                    !(categoryExpansionState['salary'] ?? true);
+              });
+            },
+            showEntry: categoryExpansionState['salary'] ?? true,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'business_income',
+            'Business Income',
+            _formatCategoryTotal('business_income', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['business_income'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['business_income'] =
+                    !(categoryExpansionState['business_income'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['business_income'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'rental_income',
+            'Rental Income',
+            _formatCategoryTotal('rental_income', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['rental_income'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['rental_income'] =
+                    !(categoryExpansionState['rental_income'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['rental_income'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'investment_returns',
+            'Investment Returns / Interest',
+            _formatCategoryTotal('investment_returns', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['investment_returns'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['investment_returns'] =
+                    !(categoryExpansionState['investment_returns'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['investment_returns'] ?? false,
+            receipt: true,
+          ),
+        ],
+      ),
     );
   }
 
   // BUSINESS INCOME CATEGORIES
+  // BUSINESS INCOME CATEGORIES
   Widget _buildBusinessIncome(bool isDark, AccountingModel model) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Sales (Receipts)',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.receiptColor,
-              ),
-            ),
-            OutlinedButton.icon(
-              onPressed: () {
-                _addNewCategoryBox(true); // true = receipt/income
-              },
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add New Entry Box'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTheme.receiptColor,
-                side: BorderSide(
-                  color: isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                textStyle: const TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        // Dynamically render any custom receipt accounts (new boxes added by user) - AT TOP
-        ...model.receiptAccounts.keys
-            .where((key) => key.startsWith('custom_receipt_'))
-            .map((key) {
-          return Column(
+    return PremiumCard(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildCategoryCard(
-                isDark,
-                key,
-                model.receiptLabels[key] ?? 'New Income Category',
-                _formatCategoryTotal(key, false),
-                AppTheme.receiptColor,
-                categoryExpansionState[key] ?? true,
-                () {
-                  setState(() {
-                    categoryExpansionState[key] =
-                        !(categoryExpansionState[key] ?? true);
-                  });
-                },
-                showEntry: categoryExpansionState[key] ?? true,
-                receipt: true,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.receiptColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.store_rounded,
+                      color: AppTheme.receiptColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Sales (Receipts)',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.receiptColor,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _addNewCategoryBox(true); // true = receipt/income
+                },
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Entry'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.receiptColor,
+                  side: BorderSide(
+                    color:
+                        isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  visualDensity: VisualDensity.compact,
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w500),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
             ],
-          );
-        }).toList(),
-        _buildCategoryCard(
-          isDark,
-          'sales',
-          'Sales Revenue',
-          _formatCategoryTotal('sales', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['sales'] ?? true,
-          () {
-            setState(() {
-              categoryExpansionState['sales'] =
-                  !(categoryExpansionState['sales'] ?? true);
-            });
-          },
-          showEntry: categoryExpansionState['sales'] ?? true,
-          receipt: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'service_income',
-          'Service Income',
-          _formatCategoryTotal('service_income', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['service_income'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['service_income'] =
-                  !(categoryExpansionState['service_income'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['service_income'] ?? false,
-          receipt: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'interest_received',
-          'Interest Received',
-          _formatCategoryTotal('interest_received', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['interest_received'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['interest_received'] =
-                  !(categoryExpansionState['interest_received'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['interest_received'] ?? false,
-          receipt: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'commission_received',
-          'Commission Received',
-          _formatCategoryTotal('commission_received', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['commission_received'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['commission_received'] =
-                  !(categoryExpansionState['commission_received'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['commission_received'] ?? false,
-          receipt: true,
-        ),
-      ],
+          ),
+          const SizedBox(height: 20),
+          // Dynamically render any custom receipt accounts (new boxes added by user) - AT TOP
+          ...model.receiptAccounts.keys
+              .where((key) => key.startsWith('custom_receipt_'))
+              .map((key) {
+            return Column(
+              children: [
+                _buildCategoryCard(
+                  isDark,
+                  key,
+                  model.receiptLabels[key] ?? 'New Income Category',
+                  _formatCategoryTotal(key, false),
+                  AppTheme.receiptColor,
+                  categoryExpansionState[key] ?? true,
+                  () {
+                    setState(() {
+                      categoryExpansionState[key] =
+                          !(categoryExpansionState[key] ?? true);
+                    });
+                  },
+                  showEntry: categoryExpansionState[key] ?? true,
+                  receipt: true,
+                ),
+                const SizedBox(height: 12),
+              ],
+            );
+          }).toList(),
+          _buildCategoryCard(
+            isDark,
+            'sales',
+            'Sales Revenue',
+            _formatCategoryTotal('sales', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['sales'] ?? true,
+            () {
+              setState(() {
+                categoryExpansionState['sales'] =
+                    !(categoryExpansionState['sales'] ?? true);
+              });
+            },
+            showEntry: categoryExpansionState['sales'] ?? true,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'service_income',
+            'Service Income',
+            _formatCategoryTotal('service_income', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['service_income'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['service_income'] =
+                    !(categoryExpansionState['service_income'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['service_income'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'interest_received',
+            'Interest Received',
+            _formatCategoryTotal('interest_received', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['interest_received'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['interest_received'] =
+                    !(categoryExpansionState['interest_received'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['interest_received'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'commission_received',
+            'Commission Received',
+            _formatCategoryTotal('commission_received', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['commission_received'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['commission_received'] =
+                    !(categoryExpansionState['commission_received'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['commission_received'] ?? false,
+            receipt: true,
+          ),
+        ],
+      ),
     );
   }
 
   // INSTITUTE/ORGANIZATION INCOME CATEGORIES
+  // INSTITUTE/ORGANIZATION INCOME CATEGORIES
   Widget _buildInstituteIncome(bool isDark, AccountingModel model) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Receipts',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.receiptColor,
-              ),
-            ),
-            OutlinedButton.icon(
-              onPressed: () {
-                _addNewCategoryBox(true); // true = receipt/income
-              },
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add New Entry Box'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTheme.receiptColor,
-                side: BorderSide(
-                  color: isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                textStyle: const TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        // Dynamically render any custom receipt accounts (new boxes added by user) - AT TOP
-        ...model.receiptAccounts.keys
-            .where((key) => key.startsWith('custom_receipt_'))
-            .map((key) {
-          return Column(
+    return PremiumCard(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildCategoryCard(
-                isDark,
-                key,
-                model.receiptLabels[key] ?? 'New Income Category',
-                _formatCategoryTotal(key, false),
-                AppTheme.receiptColor,
-                categoryExpansionState[key] ?? true,
-                () {
-                  setState(() {
-                    categoryExpansionState[key] =
-                        !(categoryExpansionState[key] ?? true);
-                  });
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.receiptColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.school_rounded,
+                      color: AppTheme.receiptColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Receipts',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.receiptColor,
+                    ),
+                  ),
+                ],
+              ),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _addNewCategoryBox(true); // true = receipt/income
                 },
-                showEntry: categoryExpansionState[key] ?? true,
-                receipt: true,
-              ),
-              const SizedBox(height: 12),
-            ],
-          );
-        }).toList(),
-        _buildCategoryCard(
-          isDark,
-          'fees_collected',
-          'Fees Collected (Tuition / Admission)',
-          _formatCategoryTotal('fees_collected', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['fees_collected'] ?? true,
-          () {
-            setState(() {
-              categoryExpansionState['fees_collected'] =
-                  !(categoryExpansionState['fees_collected'] ?? true);
-            });
-          },
-          showEntry: categoryExpansionState['fees_collected'] ?? true,
-          receipt: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'exam_fees',
-          'Exam Fees',
-          _formatCategoryTotal('exam_fees', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['exam_fees'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['exam_fees'] =
-                  !(categoryExpansionState['exam_fees'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['exam_fees'] ?? false,
-          receipt: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'donations',
-          'Donations Received',
-          _formatCategoryTotal('donations', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['donations'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['donations'] =
-                  !(categoryExpansionState['donations'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['donations'] ?? false,
-          receipt: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'grants',
-          'Grants / Subsidies',
-          _formatCategoryTotal('grants', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['grants'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['grants'] =
-                  !(categoryExpansionState['grants'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['grants'] ?? false,
-          receipt: true,
-        ),
-      ],
-    );
-  }
-
-  // OTHER INCOME CATEGORIES
-  Widget _buildOtherIncome(bool isDark, AccountingModel model) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Receipts',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.receiptColor,
-              ),
-            ),
-            OutlinedButton.icon(
-              onPressed: () {
-                _addNewCategoryBox(true); // true = receipt/income
-              },
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add New Entry Box'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTheme.receiptColor,
-                side: BorderSide(
-                  color: isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Entry'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.receiptColor,
+                  side: BorderSide(
+                    color:
+                        isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  visualDensity: VisualDensity.compact,
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w500),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                textStyle: const TextStyle(fontSize: 14),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        // Dynamically render any custom receipt accounts (new boxes added by user) - AT TOP
-        ...model.receiptAccounts.keys
-            .where((key) => key.startsWith('custom_receipt_'))
-            .map((key) {
-          return Column(
-            children: [
-              _buildCategoryCard(
-                isDark,
-                key,
-                model.receiptLabels[key] ?? 'New Income Category',
-                _formatCategoryTotal(key, false),
-                AppTheme.receiptColor,
-                categoryExpansionState[key] ?? true,
-                () {
-                  setState(() {
-                    categoryExpansionState[key] =
-                        !(categoryExpansionState[key] ?? true);
-                  });
-                },
-                showEntry: categoryExpansionState[key] ?? true,
-                receipt: true,
-              ),
-              const SizedBox(height: 12),
             ],
-          );
-        }).toList(),
-        _buildCategoryCard(
-          isDark,
-          'income_1',
-          'Income Source 1',
-          _formatCategoryTotal('income_1', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['income_1'] ?? true,
-          () {
-            setState(() {
-              categoryExpansionState['income_1'] =
-                  !(categoryExpansionState['income_1'] ?? true);
-            });
-          },
-          showEntry: categoryExpansionState['income_1'] ?? true,
-          receipt: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'income_2',
-          'Income Source 2',
-          _formatCategoryTotal('income_2', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['income_2'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['income_2'] =
-                  !(categoryExpansionState['income_2'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['income_2'] ?? false,
-          receipt: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'income_3',
-          'Income Source 3',
-          _formatCategoryTotal('income_3', false),
-          AppTheme.receiptColor,
-          categoryExpansionState['income_3'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['income_3'] =
-                  !(categoryExpansionState['income_3'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['income_3'] ?? false,
-          receipt: true,
-        ),
-      ],
+          ),
+          const SizedBox(height: 20),
+          // Dynamically render any custom receipt accounts (new boxes added by user) - AT TOP
+          ...model.receiptAccounts.keys
+              .where((key) => key.startsWith('custom_receipt_'))
+              .map((key) {
+            return Column(
+              children: [
+                _buildCategoryCard(
+                  isDark,
+                  key,
+                  model.receiptLabels[key] ?? 'New Income Category',
+                  _formatCategoryTotal(key, false),
+                  AppTheme.receiptColor,
+                  categoryExpansionState[key] ?? true,
+                  () {
+                    setState(() {
+                      categoryExpansionState[key] =
+                          !(categoryExpansionState[key] ?? true);
+                    });
+                  },
+                  showEntry: categoryExpansionState[key] ?? true,
+                  receipt: true,
+                ),
+                const SizedBox(height: 12),
+              ],
+            );
+          }).toList(),
+          _buildCategoryCard(
+            isDark,
+            'fees_collected',
+            'Fees Collected (Tuition / Admission)',
+            _formatCategoryTotal('fees_collected', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['fees_collected'] ?? true,
+            () {
+              setState(() {
+                categoryExpansionState['fees_collected'] =
+                    !(categoryExpansionState['fees_collected'] ?? true);
+              });
+            },
+            showEntry: categoryExpansionState['fees_collected'] ?? true,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'exam_fees',
+            'Exam Fees',
+            _formatCategoryTotal('exam_fees', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['exam_fees'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['exam_fees'] =
+                    !(categoryExpansionState['exam_fees'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['exam_fees'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'donations',
+            'Donations Received',
+            _formatCategoryTotal('donations', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['donations'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['donations'] =
+                    !(categoryExpansionState['donations'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['donations'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'grants',
+            'Grants / Subsidies',
+            _formatCategoryTotal('grants', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['grants'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['grants'] =
+                    !(categoryExpansionState['grants'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['grants'] ?? false,
+            receipt: true,
+          ),
+        ],
+      ),
     );
   }
 
@@ -3078,509 +3148,613 @@ class _AccountingFormState extends State<AccountingForm> {
   }
 
   // PERSONAL EXPENSES CATEGORIES
+  // PERSONAL EXPENSES CATEGORIES
   Widget _buildPersonalExpenses(bool isDark, AccountingModel model) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Expenses',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.paymentColor,
-              ),
-            ),
-            OutlinedButton.icon(
-              onPressed: () {
-                _addNewCategoryBox(false); // false = payment/expense
-              },
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add New Entry Box'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTheme.paymentColor,
-                side: BorderSide(
-                  color: isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                textStyle: const TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        // Dynamically render any custom payment accounts at the top
-        ...model.paymentAccounts.keys
-            .where((key) => key.startsWith('custom_payment_'))
-            .map((key) {
-          return Column(
+    return PremiumCard(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildCategoryCard(
-                isDark,
-                key,
-                model.paymentLabels[key] ?? 'New Expense Category',
-                _formatCategoryTotal(key, true),
-                AppTheme.paymentColor,
-                categoryExpansionState[key] ?? true,
-                () {
-                  setState(() {
-                    categoryExpansionState[key] =
-                        !(categoryExpansionState[key] ?? true);
-                  });
-                },
-                showEntry: categoryExpansionState[key] ?? true,
-                isExpense: true,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.paymentColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_upward_rounded,
+                      color: AppTheme.paymentColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Expenses',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.paymentColor,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _addNewCategoryBox(false); // false = payment/expense
+                },
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Entry'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.paymentColor,
+                  side: BorderSide(
+                    color:
+                        isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  visualDensity: VisualDensity.compact,
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w500),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
             ],
-          );
-        }).toList(),
-        _buildCategoryCard(
-          isDark,
-          'groceries',
-          'Groceries / Food',
-          _formatCategoryTotal('groceries', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['groceries'] ?? true,
-          () {
-            setState(() {
-              categoryExpansionState['groceries'] =
-                  !(categoryExpansionState['groceries'] ?? true);
-            });
-          },
-          showEntry: categoryExpansionState['groceries'] ?? true,
-          isExpense: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'rent_payment',
-          'Rent / EMI Payment',
-          _formatCategoryTotal('rent_payment', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['rent_payment'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['rent_payment'] =
-                  !(categoryExpansionState['rent_payment'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['rent_payment'] ?? false,
-          isExpense: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'education',
-          'Education Expenses',
-          _formatCategoryTotal('education', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['education'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['education'] =
-                  !(categoryExpansionState['education'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['education'] ?? false,
-          isExpense: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'transport',
-          'Transport / Fuel',
-          _formatCategoryTotal('transport', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['transport'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['transport'] =
-                  !(categoryExpansionState['transport'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['transport'] ?? false,
-          isExpense: true,
-        ),
-      ],
+          ),
+          const SizedBox(height: 20),
+          // Dynamically render any custom payment accounts at the top
+          ...model.paymentAccounts.keys
+              .where((key) => key.startsWith('custom_payment_'))
+              .map((key) {
+            return Column(
+              children: [
+                _buildCategoryCard(
+                  isDark,
+                  key,
+                  model.paymentLabels[key] ?? 'New Expense Category',
+                  _formatCategoryTotal(key, true),
+                  AppTheme.paymentColor,
+                  categoryExpansionState[key] ?? true,
+                  () {
+                    setState(() {
+                      categoryExpansionState[key] =
+                          !(categoryExpansionState[key] ?? true);
+                    });
+                  },
+                  showEntry: categoryExpansionState[key] ?? true,
+                  isExpense: true,
+                ),
+                const SizedBox(height: 12),
+              ],
+            );
+          }).toList(),
+          _buildCategoryCard(
+            isDark,
+            'groceries',
+            'Groceries / Food',
+            _formatCategoryTotal('groceries', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['groceries'] ?? true,
+            () {
+              setState(() {
+                categoryExpansionState['groceries'] =
+                    !(categoryExpansionState['groceries'] ?? true);
+              });
+            },
+            showEntry: categoryExpansionState['groceries'] ?? true,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'rent_payment',
+            'Rent / EMI Payment',
+            _formatCategoryTotal('rent_payment', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['rent_payment'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['rent_payment'] =
+                    !(categoryExpansionState['rent_payment'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['rent_payment'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'education',
+            'Education Expenses',
+            _formatCategoryTotal('education', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['education'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['education'] =
+                    !(categoryExpansionState['education'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['education'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'transport',
+            'Transport / Fuel',
+            _formatCategoryTotal('transport', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['transport'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['transport'] =
+                    !(categoryExpansionState['transport'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['transport'] ?? false,
+            isExpense: true,
+          ),
+        ],
+      ),
     );
   }
 
   // BUSINESS EXPENSES CATEGORIES
+  // BUSINESS EXPENSES CATEGORIES
   Widget _buildBusinessExpenses(bool isDark, AccountingModel model) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Purchases (Payments)',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.paymentColor,
-              ),
-            ),
-            OutlinedButton.icon(
-              onPressed: () {
-                _addNewCategoryBox(false); // false = payment/expense
-              },
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add New Entry Box'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTheme.paymentColor,
-                side: BorderSide(
-                  color: isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                textStyle: const TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        // Dynamically render any custom payment accounts at the top
-        ...model.paymentAccounts.keys
-            .where((key) => key.startsWith('custom_payment_'))
-            .map((key) {
-          return Column(
+    return PremiumCard(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildCategoryCard(
-                isDark,
-                key,
-                model.paymentLabels[key] ?? 'New Expense Category',
-                _formatCategoryTotal(key, true),
-                AppTheme.paymentColor,
-                categoryExpansionState[key] ?? true,
-                () {
-                  setState(() {
-                    categoryExpansionState[key] =
-                        !(categoryExpansionState[key] ?? true);
-                  });
-                },
-                showEntry: categoryExpansionState[key] ?? true,
-                isExpense: true,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.paymentColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.shopping_bag_rounded,
+                      color: AppTheme.paymentColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Purchases (Payments)',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.paymentColor,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _addNewCategoryBox(false); // false = payment/expense
+                },
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Entry'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.paymentColor,
+                  side: BorderSide(
+                    color:
+                        isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  visualDensity: VisualDensity.compact,
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w500),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
             ],
-          );
-        }).toList(),
-        _buildCategoryCard(
-          isDark,
-          'purchases',
-          'Raw Material / Goods Purchase',
-          _formatCategoryTotal('purchases', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['purchases'] ?? true,
-          () {
-            setState(() {
-              categoryExpansionState['purchases'] =
-                  !(categoryExpansionState['purchases'] ?? true);
-            });
-          },
-          showEntry: categoryExpansionState['purchases'] ?? true,
-          isExpense: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'salaries',
-          'Salaries / Wages',
-          _formatCategoryTotal('salaries', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['salaries'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['salaries'] =
-                  !(categoryExpansionState['salaries'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['salaries'] ?? false,
-          isExpense: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'rent_commercial',
-          'Rent / Lease',
-          _formatCategoryTotal('rent_commercial', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['rent_commercial'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['rent_commercial'] =
-                  !(categoryExpansionState['rent_commercial'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['rent_commercial'] ?? false,
-          isExpense: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'utilities_business',
-          'Utilities (Power / Water / Internet)',
-          _formatCategoryTotal('utilities_business', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['utilities_business'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['utilities_business'] =
-                  !(categoryExpansionState['utilities_business'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['utilities_business'] ?? false,
-          isExpense: true,
-        ),
-      ],
+          ),
+          const SizedBox(height: 20),
+          // Dynamically render any custom payment accounts at the top
+          ...model.paymentAccounts.keys
+              .where((key) => key.startsWith('custom_payment_'))
+              .map((key) {
+            return Column(
+              children: [
+                _buildCategoryCard(
+                  isDark,
+                  key,
+                  model.paymentLabels[key] ?? 'New Expense Category',
+                  _formatCategoryTotal(key, true),
+                  AppTheme.paymentColor,
+                  categoryExpansionState[key] ?? true,
+                  () {
+                    setState(() {
+                      categoryExpansionState[key] =
+                          !(categoryExpansionState[key] ?? true);
+                    });
+                  },
+                  showEntry: categoryExpansionState[key] ?? true,
+                  isExpense: true,
+                ),
+                const SizedBox(height: 12),
+              ],
+            );
+          }).toList(),
+          _buildCategoryCard(
+            isDark,
+            'purchases',
+            'Raw Material / Goods Purchase',
+            _formatCategoryTotal('purchases', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['purchases'] ?? true,
+            () {
+              setState(() {
+                categoryExpansionState['purchases'] =
+                    !(categoryExpansionState['purchases'] ?? true);
+              });
+            },
+            showEntry: categoryExpansionState['purchases'] ?? true,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'salaries',
+            'Salaries / Wages',
+            _formatCategoryTotal('salaries', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['salaries'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['salaries'] =
+                    !(categoryExpansionState['salaries'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['salaries'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'rent_commercial',
+            'Rent / Lease',
+            _formatCategoryTotal('rent_commercial', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['rent_commercial'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['rent_commercial'] =
+                    !(categoryExpansionState['rent_commercial'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['rent_commercial'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'utilities_business',
+            'Utilities (Power / Water / Internet)',
+            _formatCategoryTotal('utilities_business', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['utilities_business'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['utilities_business'] =
+                    !(categoryExpansionState['utilities_business'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['utilities_business'] ?? false,
+            isExpense: true,
+          ),
+        ],
+      ),
     );
   }
 
   // INSTITUTE/ORGANIZATION EXPENSES CATEGORIES
+  // INSTITUTE/ORGANIZATION EXPENSES CATEGORIES
   Widget _buildInstituteExpenses(bool isDark, AccountingModel model) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Payments',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.paymentColor,
-              ),
-            ),
-            OutlinedButton.icon(
-              onPressed: () {
-                _addNewCategoryBox(false); // false = payment/expense
-              },
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add New Entry Box'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTheme.paymentColor,
-                side: BorderSide(
-                  color: isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                textStyle: const TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        // Dynamically render any custom payment accounts at the top
-        ...model.paymentAccounts.keys
-            .where((key) => key.startsWith('custom_payment_'))
-            .map((key) {
-          return Column(
+    return PremiumCard(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildCategoryCard(
-                isDark,
-                key,
-                model.paymentLabels[key] ?? 'New Expense Category',
-                _formatCategoryTotal(key, true),
-                AppTheme.paymentColor,
-                categoryExpansionState[key] ?? true,
-                () {
-                  setState(() {
-                    categoryExpansionState[key] =
-                        !(categoryExpansionState[key] ?? true);
-                  });
-                },
-                showEntry: categoryExpansionState[key] ?? true,
-                isExpense: true,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.paymentColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.account_balance_rounded,
+                      color: AppTheme.paymentColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Payments',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.paymentColor,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _addNewCategoryBox(false); // false = payment/expense
+                },
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Entry'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.paymentColor,
+                  side: BorderSide(
+                    color:
+                        isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  visualDensity: VisualDensity.compact,
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w500),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
             ],
-          );
-        }).toList(),
-        _buildCategoryCard(
-          isDark,
-          'staff_salaries',
-          'Staff Salaries (Teaching)',
-          _formatCategoryTotal('staff_salaries', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['staff_salaries'] ?? true,
-          () {
-            setState(() {
-              categoryExpansionState['staff_salaries'] =
-                  !(categoryExpansionState['staff_salaries'] ?? true);
-            });
-          },
-          showEntry: categoryExpansionState['staff_salaries'] ?? true,
-          isExpense: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'non_teaching_salaries',
-          'Non-Teaching Staff Salaries',
-          _formatCategoryTotal('non_teaching_salaries', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['non_teaching_salaries'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['non_teaching_salaries'] =
-                  !(categoryExpansionState['non_teaching_salaries'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['non_teaching_salaries'] ?? false,
-          isExpense: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'utilities_inst',
-          'Utilities (Electricity / Water / Internet)',
-          _formatCategoryTotal('utilities_inst', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['utilities_inst'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['utilities_inst'] =
-                  !(categoryExpansionState['utilities_inst'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['utilities_inst'] ?? false,
-          isExpense: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'library_supplies',
-          'Library / Books / Supplies',
-          _formatCategoryTotal('library_supplies', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['library_supplies'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['library_supplies'] =
-                  !(categoryExpansionState['library_supplies'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['library_supplies'] ?? false,
-          isExpense: true,
-        ),
-      ],
+          ),
+          const SizedBox(height: 20),
+          // Dynamically render any custom payment accounts at the top
+          ...model.paymentAccounts.keys
+              .where((key) => key.startsWith('custom_payment_'))
+              .map((key) {
+            return Column(
+              children: [
+                _buildCategoryCard(
+                  isDark,
+                  key,
+                  model.paymentLabels[key] ?? 'New Expense Category',
+                  _formatCategoryTotal(key, true),
+                  AppTheme.paymentColor,
+                  categoryExpansionState[key] ?? true,
+                  () {
+                    setState(() {
+                      categoryExpansionState[key] =
+                          !(categoryExpansionState[key] ?? true);
+                    });
+                  },
+                  showEntry: categoryExpansionState[key] ?? true,
+                  isExpense: true,
+                ),
+                const SizedBox(height: 12),
+              ],
+            );
+          }).toList(),
+          _buildCategoryCard(
+            isDark,
+            'staff_salaries',
+            'Staff Salaries (Teaching)',
+            _formatCategoryTotal('staff_salaries', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['staff_salaries'] ?? true,
+            () {
+              setState(() {
+                categoryExpansionState['staff_salaries'] =
+                    !(categoryExpansionState['staff_salaries'] ?? true);
+              });
+            },
+            showEntry: categoryExpansionState['staff_salaries'] ?? true,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'non_teaching_salaries',
+            'Non-Teaching Staff Salaries',
+            _formatCategoryTotal('non_teaching_salaries', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['non_teaching_salaries'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['non_teaching_salaries'] =
+                    !(categoryExpansionState['non_teaching_salaries'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['non_teaching_salaries'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'utilities_inst',
+            'Utilities (Electricity / Water / Internet)',
+            _formatCategoryTotal('utilities_inst', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['utilities_inst'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['utilities_inst'] =
+                    !(categoryExpansionState['utilities_inst'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['utilities_inst'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'library_supplies',
+            'Library / Books / Supplies',
+            _formatCategoryTotal('library_supplies', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['library_supplies'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['library_supplies'] =
+                    !(categoryExpansionState['library_supplies'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['library_supplies'] ?? false,
+            isExpense: true,
+          ),
+        ],
+      ),
     );
   }
 
   // OTHER EXPENSES CATEGORIES
+  // OTHER EXPENSES CATEGORIES
   Widget _buildOtherExpenses(bool isDark, AccountingModel model) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Payments',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.paymentColor,
-              ),
-            ),
-            OutlinedButton.icon(
-              onPressed: () {
-                _addNewCategoryBox(false); // false = payment/expense
-              },
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add New Entry Box'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTheme.paymentColor,
-                side: BorderSide(
-                  color: isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                textStyle: const TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        // Dynamically render any custom payment accounts at the top
-        ...model.paymentAccounts.keys
-            .where((key) => key.startsWith('custom_payment_'))
-            .map((key) {
-          return Column(
+    return PremiumCard(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildCategoryCard(
-                isDark,
-                key,
-                model.paymentLabels[key] ?? 'New Expense Category',
-                _formatCategoryTotal(key, true),
-                AppTheme.paymentColor,
-                categoryExpansionState[key] ?? true,
-                () {
-                  setState(() {
-                    categoryExpansionState[key] =
-                        !(categoryExpansionState[key] ?? true);
-                  });
-                },
-                showEntry: categoryExpansionState[key] ?? true,
-                isExpense: true,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.paymentColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.category_rounded,
+                      color: AppTheme.paymentColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Payments',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.paymentColor,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _addNewCategoryBox(false); // false = payment/expense
+                },
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Entry'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.paymentColor,
+                  side: BorderSide(
+                    color:
+                        isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  visualDensity: VisualDensity.compact,
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w500),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
             ],
-          );
-        }).toList(),
-        _buildCategoryCard(
-          isDark,
-          'expense_1',
-          'Expense Category 1',
-          _formatCategoryTotal('expense_1', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['expense_1'] ?? true,
-          () {
-            setState(() {
-              categoryExpansionState['expense_1'] =
-                  !(categoryExpansionState['expense_1'] ?? true);
-            });
-          },
-          showEntry: categoryExpansionState['expense_1'] ?? true,
-          isExpense: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'expense_2',
-          'Expense Category 2',
-          _formatCategoryTotal('expense_2', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['expense_2'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['expense_2'] =
-                  !(categoryExpansionState['expense_2'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['expense_2'] ?? false,
-          isExpense: true,
-        ),
-        const SizedBox(height: 12),
-        _buildCategoryCard(
-          isDark,
-          'expense_3',
-          'Expense Category 3',
-          _formatCategoryTotal('expense_3', true),
-          AppTheme.paymentColor,
-          categoryExpansionState['expense_3'] ?? false,
-          () {
-            setState(() {
-              categoryExpansionState['expense_3'] =
-                  !(categoryExpansionState['expense_3'] ?? false);
-            });
-          },
-          showEntry: categoryExpansionState['expense_3'] ?? false,
-          isExpense: true,
-        ),
-      ],
+          ),
+          const SizedBox(height: 20),
+          // Dynamically render any custom payment accounts at the top
+          ...model.paymentAccounts.keys
+              .where((key) => key.startsWith('custom_payment_'))
+              .map((key) {
+            return Column(
+              children: [
+                _buildCategoryCard(
+                  isDark,
+                  key,
+                  model.paymentLabels[key] ?? 'New Expense Category',
+                  _formatCategoryTotal(key, true),
+                  AppTheme.paymentColor,
+                  categoryExpansionState[key] ?? true,
+                  () {
+                    setState(() {
+                      categoryExpansionState[key] =
+                          !(categoryExpansionState[key] ?? true);
+                    });
+                  },
+                  showEntry: categoryExpansionState[key] ?? true,
+                  isExpense: true,
+                ),
+                const SizedBox(height: 12),
+              ],
+            );
+          }).toList(),
+          _buildCategoryCard(
+            isDark,
+            'expense_1',
+            'Expense 1',
+            _formatCategoryTotal('expense_1', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['expense_1'] ?? true,
+            () {
+              setState(() {
+                categoryExpansionState['expense_1'] =
+                    !(categoryExpansionState['expense_1'] ?? true);
+              });
+            },
+            showEntry: categoryExpansionState['expense_1'] ?? true,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'expense_2',
+            'Expense 2',
+            _formatCategoryTotal('expense_2', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['expense_2'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['expense_2'] =
+                    !(categoryExpansionState['expense_2'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['expense_2'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'expense_3',
+            'Expense 3',
+            _formatCategoryTotal('expense_3', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['expense_3'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['expense_3'] =
+                    !(categoryExpansionState['expense_3'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['expense_3'] ?? false,
+            isExpense: true,
+          ),
+        ],
+      ),
     );
   }
 
@@ -4245,52 +4419,68 @@ class _AccountingFormState extends State<AccountingForm> {
   }
 
   Widget _buildFinancialSummary(bool isDark, AccountingModel model) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2A2135) : const Color(0xFFF3E8FF),
-        borderRadius: BorderRadius.circular(16),
-      ),
+    return PremiumCard(
       child: Column(
         children: [
-          const Text(
-            'Financial Summary',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF4F46E5),
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.analytics_rounded,
+                  color: Color(0xFF4F46E5),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Financial Summary',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF4F46E5),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? const Color(0xFF1C2A22)
-                        : const Color(0xFFF0FFF4),
+                        ? AppTheme.receiptColor.withValues(alpha: 0.1)
+                        : AppTheme.receiptColor.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppTheme.receiptColor.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Column(
                     children: [
                       Text(
                         'Total Income',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
                           color: isDark
                               ? const Color(0xFFD1D5DB)
                               : const Color(0xFF4B5563),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         AppTheme.formatCurrency(model.receiptsTotal,
                             currency: model.currency),
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                           color: AppTheme.receiptColor,
                         ),
                       ),
@@ -4301,31 +4491,35 @@ class _AccountingFormState extends State<AccountingForm> {
               const SizedBox(width: 16),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? const Color(0xFF2A1C1C)
-                        : const Color(0xFFFFF5F5),
+                        ? AppTheme.paymentColor.withValues(alpha: 0.1)
+                        : AppTheme.paymentColor.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppTheme.paymentColor.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Column(
                     children: [
                       Text(
                         'Total Expenses',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
                           color: isDark
                               ? const Color(0xFFD1D5DB)
                               : const Color(0xFF4B5563),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         AppTheme.formatCurrency(model.paymentsTotal,
                             currency: model.currency),
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                           color: AppTheme.paymentColor,
                         ),
                       ),
@@ -4335,46 +4529,56 @@ class _AccountingFormState extends State<AccountingForm> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Consumer<AccountingModel>(
             builder: (context, model, child) {
               final netSurplus = _calculateNetSurplus();
               final isNegative = netSurplus < 0;
+              final color =
+                  isNegative ? AppTheme.paymentColor : AppTheme.receiptColor;
 
               return Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: isNegative
-                      ? (isDark
-                          ? const Color(0xFF2A1C1C)
-                          : const Color(0xFFFFF5F5))
-                      : (isDark
-                          ? const Color(0xFF1C2A22)
-                          : const Color(0xFFF0FFF4)),
-                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: [
+                      color,
+                      color.withValues(alpha: 0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
                     Text(
                       isNegative ? 'Net Deficit' : 'Net Surplus',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: isDark
-                            ? const Color(0xFFD1D5DB)
-                            : const Color(0xFF4B5563),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Text(
                       AppTheme.formatCurrency(netSurplus,
                           currency: model.currency),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: isNegative
-                            ? AppTheme.paymentColor
-                            : AppTheme.receiptColor,
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
                       ),
                     ),
                   ],
