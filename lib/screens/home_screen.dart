@@ -478,18 +478,23 @@ class _HomeScreenState extends State<HomeScreen> {
                           // Add standard types
                           for (var ut in UserType.values) {
                             IconData icon;
+                            Color color;
                             switch (ut) {
                               case UserType.personal:
                                 icon = Icons.family_restroom_rounded;
+                                color = const Color(0xFF6366F1); // Indigo
                                 break;
                               case UserType.business:
                                 icon = Icons.store_rounded;
+                                color = const Color(0xFF10B981); // Emerald
                                 break;
                               case UserType.institute:
                                 icon = Icons.school_rounded;
+                                color = const Color(0xFF8B5CF6); // Violet
                                 break;
                               case UserType.other:
                                 icon = Icons.category_rounded;
+                                color = const Color(0xFFF59E0B); // Amber
                                 break;
                             }
                             items.add({
@@ -499,6 +504,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               'icon': icon,
                               'type': 'standard',
                               'userType': ut,
+                              'color': color,
                             });
                           }
 
@@ -509,6 +515,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               'title': value,
                               'icon': Icons.star_rounded,
                               'type': 'custom',
+                              'color': const Color(0xFF06B6D4), // Cyan
                             });
                           });
 
@@ -526,8 +533,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             itemBuilder: (context, index) {
                               final item = items[index];
                               final isSelected = selectedPageId == item['id'];
-                              final Color primaryColor =
-                                  Theme.of(context).primaryColor;
+                              final Color itemColor =
+                                  item['color'] as Color; // Use item color
 
                               return InkWell(
                                 onTap: () => _handleNavigation(item),
@@ -535,17 +542,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? primaryColor.withValues(alpha: 0.1)
+                                        ? itemColor.withValues(alpha: 0.15)
                                         : (isDark
-                                            ? const Color(0xFF1E293B)
-                                            : Colors.white),
+                                            ? itemColor.withValues(alpha: 0.05)
+                                            : itemColor.withValues(
+                                                alpha: 0.03)),
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
                                       color: isSelected
-                                          ? primaryColor
-                                          : (isDark
-                                              ? const Color(0xFF334155)
-                                              : const Color(0xFFE2E8F0)),
+                                          ? itemColor
+                                          : itemColor.withValues(alpha: 0.2),
                                       width: isSelected ? 2 : 1,
                                     ),
                                   ),
@@ -555,21 +561,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Container(
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? primaryColor.withValues(
-                                                  alpha: 0.2)
-                                              : (isDark
-                                                  ? const Color(0xFF334155)
-                                                  : const Color(0xFFF1F5F9)),
+                                          color: itemColor.withValues(
+                                              alpha: 0.1), // Fixed tint
                                           shape: BoxShape.circle,
                                         ),
                                         child: Icon(
                                           item['icon'] as IconData,
-                                          color: isSelected
-                                              ? primaryColor
-                                              : (isDark
-                                                  ? const Color(0xFF94A3B8)
-                                                  : const Color(0xFF64748B)),
+                                          color: itemColor, // Vibrant icon
                                           size: 24,
                                         ),
                                       ),
@@ -581,16 +579,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                           item['title'] as String,
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                            fontSize:
-                                                13, // Slightly smaller to fit 2 cols
+                                            fontSize: 13,
                                             fontWeight: isSelected
                                                 ? FontWeight.bold
-                                                : FontWeight.w500,
-                                            color: isSelected
-                                                ? primaryColor
-                                                : (isDark
-                                                    ? Colors.white
-                                                    : const Color(0xFF0F172A)),
+                                                : FontWeight.w600,
+                                            color: isDark
+                                                ? Colors.white
+                                                : const Color(0xFF1E293B),
                                           ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
