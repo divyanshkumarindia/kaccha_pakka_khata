@@ -707,6 +707,18 @@ class AccountingModel extends ChangeNotifier {
   bool _hasSkippedNameSetup = false;
   bool get hasSkippedNameSetup => _hasSkippedNameSetup;
 
+  Map<String, String> _pageHeaderTitles = {};
+  Map<String, String> get pageHeaderTitles => _pageHeaderTitles;
+
+  String? getPageHeaderTitle(String key) => _pageHeaderTitles[key];
+
+  void setPageHeaderTitle(String key, String title) {
+    _pageHeaderTitles[key] = title;
+    notifyListeners();
+    SharedPreferences.getInstance().then((p) =>
+        p.setString('page_header_titles', jsonEncode(_pageHeaderTitles)));
+  }
+
   Future<void> loadSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -722,6 +734,13 @@ class AccountingModel extends ChangeNotifier {
           prefs.getString('default_report_format') ?? 'Basic';
       _userName = prefs.getString('user_name');
       _hasSkippedNameSetup = prefs.getBool('skipped_name_setup') ?? false;
+
+      final savedTitles = prefs.getString('page_header_titles');
+      if (savedTitles != null) {
+        final decoded = jsonDecode(savedTitles) as Map<String, dynamic>;
+        _pageHeaderTitles = decoded.map((k, v) => MapEntry(k, v.toString()));
+      }
+
       notifyListeners();
     } catch (e) {
       // ignore errors
@@ -785,9 +804,16 @@ class AccountingModel extends ChangeNotifier {
   }
 
   void setUserName(String name) {
-    _userName = name;
-    notifyListeners();
-    SharedPreferences.getInstance().then((p) => p.setString('user_name', name));
+    if (name.trim().isEmpty) {
+      _userName = null;
+      notifyListeners();
+      SharedPreferences.getInstance().then((p) => p.remove('user_name'));
+    } else {
+      _userName = name;
+      notifyListeners();
+      SharedPreferences.getInstance()
+          .then((p) => p.setString('user_name', name));
+    }
   }
 
   void setSkippedNameSetup(bool skipped) {
