@@ -14,13 +14,16 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   Map<UserType, String> displayTitles = {};
+
   Map<String, String> customPages = {}; // Store custom pages
+  String? _userName;
 
   @override
   void initState() {
     super.initState();
     _loadPageTitles();
     _loadCustomPages();
+    _loadUserName();
   }
 
   @override
@@ -30,6 +33,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // This ensures we show updated custom names
     _loadPageTitles();
     _loadCustomPages();
+    _loadUserName();
   }
 
   Future<void> _loadPageTitles() async {
@@ -60,6 +64,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('user_name');
+    if (mounted) {
+      setState(() {
+        _userName = name;
+      });
+    }
+  }
+
+  Future<void> _saveUserName(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_name', name);
+    if (mounted) {
+      setState(() {
+        _userName = name;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -87,6 +111,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSettingsCard(
             isDark,
             [
+              _buildSettingTile(
+                context,
+                'Profile Name',
+                _userName ?? 'Set your name',
+                Icons.badge,
+                () => _showNameEditDialog(context),
+                isDark,
+              ),
+              _buildDivider(isDark),
               _buildSettingTile(
                 context,
                 'Default Page Type',
@@ -411,6 +444,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
       height: 1,
       thickness: 1,
       color: isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB),
+    );
+  }
+
+  void _showNameEditDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final controller = TextEditingController(text: _userName);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Edit Profile Name'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: TextStyle(color: isDark ? Colors.white : Colors.black),
+          decoration: InputDecoration(
+            hintText: 'Enter your name',
+            hintStyle:
+                TextStyle(color: isDark ? Colors.white38 : Colors.black38),
+            filled: true,
+            fillColor: isDark ? const Color(0xFF374151) : Colors.grey[100],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color:
+                    isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _saveUserName(controller.text.trim());
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
     );
   }
 

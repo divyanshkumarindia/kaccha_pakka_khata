@@ -525,29 +525,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 32),
 
                 // Features Section (Moved to Top)
-                Container(
-                  width: double.infinity,
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Feature Carousel (Hero Cards)
+                SizedBox(
+                  height: 140, // Height for premium cards
+                  child: PageView(
+                    controller: PageController(viewportFraction: 0.92),
+                    padEnds: false,
                     children: [
-                      _buildFeatureItem(
-                        icon: Icons.receipt_long_rounded,
-                        label: 'Track\nReceipts',
-                        isDark: isDark,
-                        context: context,
+                      _buildFeatureCard(
+                        context,
+                        'Track Receipts',
+                        'Log every earning instantly.',
+                        Icons.receipt_long_rounded,
+                        const Color(0xFF10B981), // Emerald
+                        isDark,
                       ),
-                      _buildFeatureItem(
-                        icon: Icons.payments_rounded,
-                        label: 'Track\nPayments',
-                        isDark: isDark,
-                        context: context,
+                      _buildFeatureCard(
+                        context,
+                        'Manage Expenses',
+                        'Keep spending in check.',
+                        Icons.payments_rounded,
+                        const Color(0xFFEF4444), // Red
+                        isDark,
                       ),
-                      _buildFeatureItem(
-                        icon: Icons.analytics_rounded,
-                        label: 'Smart\nReports',
-                        isDark: isDark,
-                        context: context,
+                      _buildFeatureCard(
+                        context,
+                        'Smart Reports',
+                        'Visualize financial health.',
+                        Icons.analytics_rounded,
+                        const Color(0xFF8B5CF6), // Violet
+                        isDark,
                       ),
                     ],
                   ),
@@ -861,50 +868,74 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFeatureItem({
-    required IconData icon,
-    required String label,
-    required bool isDark,
-    required BuildContext context,
-  }) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E293B) : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: isDark
-                ? []
-                : [
-                    BoxShadow(
-                      color: const Color(0xFF64748B).withValues(alpha: 0.08),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-            border: Border.all(
-              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+  Widget _buildFeatureCard(
+    BuildContext context,
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+    bool isDark,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: color.withValues(alpha: 0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: isDark ? 0.05 : 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : const Color(0xFF1E293B),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
+                  ),
+                ),
+              ],
             ),
           ),
-          child: Icon(
-            icon,
-            color: Theme.of(context).primaryColor,
-            size: 28,
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 28,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-            height: 1.2,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
