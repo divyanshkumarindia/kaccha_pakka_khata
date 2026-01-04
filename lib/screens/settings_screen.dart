@@ -16,14 +16,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Map<UserType, String> displayTitles = {};
 
   Map<String, String> customPages = {}; // Store custom pages
-  String? _userName;
 
   @override
   void initState() {
     super.initState();
     _loadPageTitles();
+    _loadPageTitles();
     _loadCustomPages();
-    _loadUserName();
   }
 
   @override
@@ -32,8 +31,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // Reload page titles when the screen becomes visible
     // This ensures we show updated custom names
     _loadPageTitles();
+    _loadPageTitles();
     _loadCustomPages();
-    _loadUserName();
   }
 
   Future<void> _loadPageTitles() async {
@@ -61,26 +60,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           customPages = decoded.map((k, v) => MapEntry(k, v.toString()));
         });
       }
-    }
-  }
-
-  Future<void> _loadUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name');
-    if (mounted) {
-      setState(() {
-        _userName = name;
-      });
-    }
-  }
-
-  Future<void> _saveUserName(String name) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_name', name);
-    if (mounted) {
-      setState(() {
-        _userName = name;
-      });
     }
   }
 
@@ -114,9 +93,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingTile(
                 context,
                 'Profile Name',
-                _userName ?? 'Set your name',
+                model.userName ?? 'Set your name',
                 Icons.badge,
-                () => _showNameEditDialog(context),
+                () => _showNameEditDialog(context, model),
                 isDark,
               ),
               _buildDivider(isDark),
@@ -447,9 +426,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showNameEditDialog(BuildContext context) {
+  void _showNameEditDialog(BuildContext context, AccountingModel model) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final controller = TextEditingController(text: _userName);
+    final controller = TextEditingController(text: model.userName);
 
     showDialog(
       context: context,
@@ -486,7 +465,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              _saveUserName(controller.text.trim());
+              model.setUserName(controller.text.trim());
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(

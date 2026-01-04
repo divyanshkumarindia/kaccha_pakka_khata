@@ -701,6 +701,12 @@ class AccountingModel extends ChangeNotifier {
   String? _defaultReportFormat;
   String? get defaultReportFormat => _defaultReportFormat;
 
+  String? _userName;
+  String? get userName => _userName;
+
+  bool _hasSkippedNameSetup = false;
+  bool get hasSkippedNameSetup => _hasSkippedNameSetup;
+
   Future<void> loadSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -714,6 +720,8 @@ class AccountingModel extends ChangeNotifier {
           prefs.getString('default_page_type'); // Default to null (None)
       _defaultReportFormat =
           prefs.getString('default_report_format') ?? 'Basic';
+      _userName = prefs.getString('user_name');
+      _hasSkippedNameSetup = prefs.getBool('skipped_name_setup') ?? false;
       notifyListeners();
     } catch (e) {
       // ignore errors
@@ -774,6 +782,19 @@ class AccountingModel extends ChangeNotifier {
     notifyListeners();
     SharedPreferences.getInstance()
         .then((p) => p.setString('default_report_format', format));
+  }
+
+  void setUserName(String name) {
+    _userName = name;
+    notifyListeners();
+    SharedPreferences.getInstance().then((p) => p.setString('user_name', name));
+  }
+
+  void setSkippedNameSetup(bool skipped) {
+    _hasSkippedNameSetup = skipped;
+    notifyListeners();
+    SharedPreferences.getInstance()
+        .then((p) => p.setBool('skipped_name_setup', skipped));
   }
 
   Future<void> backupData() async {

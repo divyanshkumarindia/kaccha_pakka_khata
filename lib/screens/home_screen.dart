@@ -23,8 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
       selectedPageId; // Combined selector: 'standard_personal', 'standard_business', or custom page ID
   String description = 'Description will appear here';
 
-  String? _userName;
-
   // display titles for dropdown; can be overridden by user-saved values
   final Map<UserType, String> displayTitles = {};
 
@@ -47,11 +45,20 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadCustomPages();
 
     _loadRecents();
-    _loadUserName();
-    // Load default page type after the first frame
+
+    // Prompt for name if needed
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowNameDialog();
       _loadDefaultPageType();
     });
+  }
+
+  void _checkAndShowNameDialog() {
+    final model = Provider.of<AccountingModel>(context, listen: false);
+    // If name is null and user hasn't skipped, show dialog
+    if (model.userName == null && !model.hasSkippedNameSetup) {
+      _showNameInputDialog(context);
+    }
   }
 
   @override
@@ -81,47 +88,22 @@ class _HomeScreenState extends State<HomeScreen> {
     await prefs.setString('custom_pages', jsonEncode(customPages));
   }
 
-  Future<void> _loadUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name');
-    if (name == null) {
-      // First time user, show dialog
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showNameInputDialog(context);
-      });
-    } else {
-      if (mounted) {
-        setState(() {
-          _userName = name;
-        });
-      }
-    }
-  }
-
-  Future<void> _saveUserName(String name) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_name', name);
-    if (mounted) {
-      setState(() {
-        _userName = name;
-      });
-    }
-  }
-
   void _showNameInputDialog(BuildContext context) {
     if (!mounted) return;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final controller = TextEditingController();
+    final model = Provider.of<AccountingModel>(context, listen: false);
 
     showDialog(
       context: context,
-      barrierDismissible: false, // Force user to enter name
+      barrierDismissible: false, // Force user to enter name or skip
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) {
           final hasText = controller.text.trim().isNotEmpty;
           return PopScope(
             canPop: false,
             child: AlertDialog(
+              backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
               title: const Text('Welcome!'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -142,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: isDark ? Colors.white38 : Colors.black38),
                       filled: true,
                       fillColor:
-                          isDark ? const Color(0xFF334155) : Colors.grey[100],
+                          isDark ? const Color(0xFF374151) : Colors.grey[100],
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -153,13 +135,47 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               actions: [
+                TextButton(
+                  onPressed: () {
+                    model.setSkippedNameSetup(true);
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'Skip',
+                    style: TextStyle(
+                      color: isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF6B7280),
+                    ),
+                  ),
+                ),
                 ElevatedButton(
                   onPressed: hasText
                       ? () {
-                          _saveUserName(controller.text.trim());
+                          final name = controller.text.trim();
+                          model.setUserName(name);
+                          model.setSkippedNameSetup(
+                              false); // Ensure skip is false if they save
                           Navigator.pop(context);
+
+                          // Show toast message after dialog closes
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text(
+                                  'You can change your username later in Settings.'),
+                              backgroundColor: const Color(0xFF10B981),
+                              duration: const Duration(seconds: 4),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
+                          );
                         }
                       : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF10B981),
+                    foregroundColor: Colors.white,
+                  ),
                   child: const Text('Continue'),
                 ),
               ],
@@ -504,12 +520,21 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Welcome Section
-                Text(
-                  _userName != null ? 'Welcome, $_userName!' : 'Welcome!',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                      ),
+                Consumer<AccountingModel>(
+                  builder: (context, model, child) {
+                    final name = model.userName;
+                    return Text(
+                      name != null ? 'Welcome, $name!' : 'Welcome User!',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color:
+                                isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 8),
                 Text(
