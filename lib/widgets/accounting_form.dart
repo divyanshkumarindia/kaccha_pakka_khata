@@ -2498,34 +2498,6 @@ class _AccountingFormState extends State<AccountingForm> {
     return '${_getCurrencySymbol(model.currency)}${total.toStringAsFixed(2)}';
   }
 
-  double _calculateTotalIncome() {
-    double total = 0.0;
-    // Add opening balances
-    total += model.openingCash + model.openingBank + model.openingOther;
-    // Add custom opening balances
-    for (var value in model.customOpeningBalances.values) {
-      total += value;
-    }
-    // Add all receipt accounts
-    for (var key in model.receiptAccounts.keys) {
-      total += model.calculateAccountTotalByKey(key, receipt: true);
-    }
-    return total;
-  }
-
-  double _calculateTotalExpenses() {
-    double total = 0.0;
-    // Add all payment accounts
-    for (var key in model.paymentAccounts.keys) {
-      total += model.calculateAccountTotalByKey(key, receipt: false);
-    }
-    return total;
-  }
-
-  double _calculateNetSurplus() {
-    return _calculateTotalIncome() - _calculateTotalExpenses();
-  }
-
   void _addNewCategoryBox(bool isReceipt) {
     // Generate unique key with timestamp
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -4378,6 +4350,8 @@ class _AccountingFormState extends State<AccountingForm> {
                                 receipt: !isExpense,
                                 cash: row.cash, // Pass current values
                                 bank: row.bank,
+                                insertAfterRowId:
+                                    row.id, // Insert directly after
                               );
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(

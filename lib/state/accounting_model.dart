@@ -457,17 +457,32 @@ class AccountingModel extends ChangeNotifier {
   }
 
   void addRowToEntry(String accountKey, String entryId,
-      {bool receipt = true, double? cash, double? bank}) {
+      {bool receipt = true,
+      double? cash,
+      double? bank,
+      String? insertAfterRowId}) {
     final accounts = receipt ? receiptAccounts : paymentAccounts;
     final entries = accounts[accountKey];
     if (entries == null) return;
     for (var e in entries) {
       if (e.id == entryId) {
-        e.rows.add(TransactionRow(
+        final newRow = TransactionRow(
           id: '${entryId}_row_${DateTime.now().millisecondsSinceEpoch}',
           cash: cash ?? 0,
           bank: bank ?? 0,
-        ));
+        );
+
+        if (insertAfterRowId != null) {
+          final index = e.rows.indexWhere((r) => r.id == insertAfterRowId);
+          if (index != -1) {
+            e.rows.insert(index + 1, newRow);
+          } else {
+            e.rows.add(newRow);
+          }
+        } else {
+          e.rows.add(newRow);
+        }
+
         notifyListeners();
         _persist();
         return;
@@ -497,10 +512,7 @@ class AccountingModel extends ChangeNotifier {
     if (entries == null) return;
     final id = '${accountKey}_entry_${DateTime.now().millisecondsSinceEpoch}';
 
-    // Generate default description based on entry count and type
-    final entryNumber = entries.length + 1;
-    final entryType = receipt ? 'Income' : 'Expense';
-    final defaultDescription = 'New $entryType $entryNumber';
+    final defaultDescription = '';
 
     entries.add(TransactionEntry(id: id, description: defaultDescription));
     notifyListeners();
