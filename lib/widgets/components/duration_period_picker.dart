@@ -207,114 +207,127 @@ class DurationPeriodPicker extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            InkWell(
-              onTap: () => pickDateRange(context),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  // lighter background in dark mode for better visual balance
-                  color: isDark ? const Color(0xFF475569) : Colors.white,
-                  border: Border.all(
-                    color: isDark
-                        ? const Color(0xFF6B7280)
-                        : const Color(0xFFD1D5DB),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      final endDate = parseDate(periodEndController.text);
+                      final DateTime? last = endDate != null
+                          ? endDate.subtract(const Duration(days: 1))
+                          : null;
+                      pickDateFor(
+                        context,
+                        periodStartController,
+                        (s) => model.setPeriodRange(s, model.periodEndDate),
+                        lastDate: last,
+                      );
+                    },
+                    child: Container(
+                      height: 42,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF374151) : Colors.white,
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF4B5563)
+                              : const Color(0xFFD1D5DB),
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              periodStartController.text.isEmpty
+                                  ? 'Start date'
+                                  : '${_weekdayAbbrev(periodStartController.text)}, ${periodStartController.text}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: periodStartController.text.isEmpty
+                                    ? (isDark
+                                        ? const Color(0xFF6B7280)
+                                        : const Color(0xFF9CA3AF))
+                                    : (isDark
+                                        ? const Color(0xFFF9FAFB)
+                                        : const Color(0xFF111827)),
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.calendar_today,
+                            size: 16,
+                            color: isDark
+                                ? const Color(0xFF6B7280)
+                                : const Color(0xFF9CA3AF),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(6),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      final startDate = parseDate(periodStartController.text);
+                      final DateTime? first = startDate != null
+                          ? startDate.add(const Duration(days: 1))
+                          : null;
+                      pickDateFor(
+                        context,
+                        periodEndController,
+                        (s) => model.setPeriodRange(model.periodStartDate, s),
+                        firstDate: first,
+                      );
+                    },
+                    child: Container(
+                      height: 42,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF374151) : Colors.white,
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF4B5563)
+                              : const Color(0xFFD1D5DB),
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
-                            periodStartController.text.isEmpty
-                                ? 'Start date'
-                                : '${_weekdayAbbrev(periodStartController.text)}, ${periodStartController.text}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: periodStartController.text.isEmpty
-                                  ? (isDark
-                                      ? const Color(0xFF6B7280)
-                                      : const Color(0xFF9CA3AF))
-                                  : (isDark
-                                      ? const Color(0xFFF9FAFB)
-                                      : const Color(0xFF111827)),
-                            ),
-                          ),
-                          if (periodStartController.text.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                'Start date',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: isDark
-                                      ? const Color(0xFF6B7280)
-                                      : const Color(0xFF9CA3AF),
-                                ),
+                          Expanded(
+                            child: Text(
+                              periodEndController.text.isEmpty
+                                  ? 'End date'
+                                  : '${_weekdayAbbrev(periodEndController.text)}, ${periodEndController.text}',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: periodEndController.text.isEmpty
+                                    ? (isDark
+                                        ? const Color(0xFF6B7280)
+                                        : const Color(0xFF9CA3AF))
+                                    : (isDark
+                                        ? const Color(0xFFF9FAFB)
+                                        : const Color(0xFF111827)),
                               ),
                             ),
+                          ),
+                          Icon(
+                            Icons.calendar_today,
+                            size: 16,
+                            color: isDark
+                                ? const Color(0xFF6B7280)
+                                : const Color(0xFF9CA3AF),
+                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Icon(
-                      Icons.arrow_forward,
-                      size: 16,
-                      color: isDark
-                          ? const Color(0xFF6B7280)
-                          : const Color(0xFF9CA3AF),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            periodEndController.text.isEmpty
-                                ? 'End date'
-                                : '${_weekdayAbbrev(periodEndController.text)}, ${periodEndController.text}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: periodEndController.text.isEmpty
-                                  ? (isDark
-                                      ? const Color(0xFF6B7280)
-                                      : const Color(0xFF9CA3AF))
-                                  : (isDark
-                                      ? const Color(0xFFF9FAFB)
-                                      : const Color(0xFF111827)),
-                            ),
-                          ),
-                          if (periodEndController.text.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                'End date',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: isDark
-                                      ? const Color(0xFF6B7280)
-                                      : const Color(0xFF9CA3AF),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Icon(
-                      Icons.calendar_today,
-                      size: 18,
-                      color: isDark
-                          ? const Color(0xFFCBD5E1)
-                          : const Color(0xFF6B7280),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         );

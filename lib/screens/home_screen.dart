@@ -306,19 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
           'My Kaccha-Pakka Khata',
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              // Use a named route if available, or push manually.
-              // Assuming '/settings' is not yet registered or main_navigation handles it.
-              // For now, if we don't have a route, we can disable or add it later.
-              // But usually settings is in the drawer or navigation bar.
-              // Given current context, let's just leave it or redirect to settings screen if imported.
-              // Since we don't have SettingsScreen imported here, I will comment it out or leave it empty.
-            },
-          ),
-        ],
+        actions: const [],
       ),
       body: SafeArea(
         child: Center(
@@ -363,12 +351,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Manage your finances with ease & style.',
+                      'Premium Financial Management',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: isDark
                                 ? const Color(0xFF94A3B8)
                                 : const Color(0xFF64748B),
+                            fontSize: 16,
+                            height: 1.5,
                           ),
                     ),
                   ],
@@ -521,30 +511,71 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 24),
 
                       // Description
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
+                      // Static Intro Card
+                      Container(
+                        padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF1E293B)
-                              : const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(12),
+                          gradient: LinearGradient(
+                            colors: isDark
+                                ? [
+                                    const Color(0xFF1E293B),
+                                    const Color(0xFF0F172A)
+                                  ]
+                                : [
+                                    const Color(0xFFF8FAFC),
+                                    const Color(0xFFF1F5F9)
+                                  ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: isDark
                                 ? const Color(0xFF334155)
                                 : const Color(0xFFE2E8F0),
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        child: Text(
-                          description,
-                          style: TextStyle(
-                            fontSize: 14,
-                            height: 1.5,
-                            color: isDark
-                                ? const Color(0xFFCBD5E1)
-                                : const Color(0xFF64748B),
-                          ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.auto_awesome,
+                                    size: 20,
+                                    color: Theme.of(context).primaryColor),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Why choose this app?',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark
+                                          ? Colors.white
+                                          : const Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Complete financial tracking for Personal, Business, and Institutes. Generate meaningful reports, track every penny, and manage your budget with our premium, intuitive tools.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                height: 1.6,
+                                color: isDark
+                                    ? const Color(0xFFCBD5E1)
+                                    : const Color(0xFF475569),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
