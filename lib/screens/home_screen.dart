@@ -475,7 +475,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             switch (ut) {
                               case UserType.personal:
                                 icon = Icons.family_restroom_rounded;
-                                color = const Color(0xFF6366F1); // Indigo
+                                color = const Color(0xFFEF4444); // Red
                                 break;
                               case UserType.business:
                                 icon = Icons.store_rounded;
@@ -483,7 +483,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 break;
                               case UserType.institute:
                                 icon = Icons.school_rounded;
-                                color = const Color(0xFF8B5CF6); // Violet
+                                color = const Color(0xFF2563EB); // Blue
                                 break;
                               case UserType.other:
                                 icon = Icons.category_rounded;
@@ -503,23 +503,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           // Palette for custom pages to ensure variety
                           final palette = [
-                            const Color(0xFFEF4444), // Red
-                            const Color(0xFFDB2777), // Pink
                             const Color(0xFFC026D3), // Fuchsia
-                            const Color(0xFF9333EA), // Purple
-                            const Color(0xFF7C3AED), // Violet
-                            const Color(0xFF4F46E5), // Indigo
-                            const Color(0xFF2563EB), // Blue
-                            const Color(0xFF0284C7), // Light Blue
-                            const Color(0xFF0891B2), // Cyan
-                            const Color(0xFF0D9488), // Teal
-                            const Color(0xFF059669), // Emerald
-                            const Color(0xFF16A34A), // Green
-                            const Color(0xFF65A30D), // Lime
+                            const Color(0xFFEF4444), // Red
+                            const Color(0xFF10B981), // Emerald
                             const Color(0xFFCA8A04), // Yellow/Gold
-                            const Color(0xFFD97706), // Amber
+                            const Color(0xFF2563EB), // Blue
+                            const Color(0xFF9333EA), // Purple
                             const Color(0xFFEA580C), // Orange
+                            const Color(0xFF0891B2), // Cyan
+                            const Color(0xFFDB2777), // Pink
+                            const Color(0xFF65A30D), // Lime
+                            const Color(0xFF4F46E5), // Indigo
                             const Color(0xFFDC2626), // Deep Orange
+                            const Color(0xFF0D9488), // Teal
+                            const Color(0xFF7C3AED), // Violet
+                            const Color(0xFFD97706), // Amber
+                            const Color(0xFF0284C7), // Light Blue
+                            const Color(0xFF16A34A), // Green
                             const Color(0xFF795548), // Brown
                             const Color(0xFF607D8B), // Blue Grey
                           ];
