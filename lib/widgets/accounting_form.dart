@@ -629,7 +629,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _buildActionButton(
+                    _buildPremiumActionButton(
                       'Save Report',
                       Icons.save,
                       AppTheme.primaryColor,
@@ -640,7 +640,7 @@ class _AccountingFormState extends State<AccountingForm> {
                         );
                       },
                     ),
-                    _buildActionButton(
+                    _buildPremiumActionButton(
                       'Download Excel',
                       Icons.file_download,
                       const Color(0xFF10B981),
@@ -651,7 +651,7 @@ class _AccountingFormState extends State<AccountingForm> {
                         );
                       },
                     ),
-                    _buildActionButton(
+                    _buildPremiumActionButton(
                       'Download PDF',
                       Icons.picture_as_pdf,
                       AppTheme.paymentColor,
@@ -1237,7 +1237,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _buildActionButton(
+                    _buildPremiumActionButton(
                       'Save Report',
                       Icons.save,
                       AppTheme.primaryColor,
@@ -1248,7 +1248,7 @@ class _AccountingFormState extends State<AccountingForm> {
                         );
                       },
                     ),
-                    _buildActionButton(
+                    _buildPremiumActionButton(
                       'Download Excel',
                       Icons.file_download,
                       AppTheme.receiptColor,
@@ -1259,7 +1259,7 @@ class _AccountingFormState extends State<AccountingForm> {
                         );
                       },
                     ),
-                    _buildActionButton(
+                    _buildPremiumActionButton(
                       'Download PDF',
                       Icons.picture_as_pdf,
                       AppTheme.paymentColor,
@@ -3822,10 +3822,13 @@ class _AccountingFormState extends State<AccountingForm> {
                               backgroundColor: isDark
                                   ? const Color(0xFF1F2937)
                                   : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16)),
                               title: Text(
                                 'Edit Title',
                                 style: TextStyle(
                                   color: isDark ? Colors.white : Colors.black87,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               content: TextField(
@@ -3848,28 +3851,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                       : const Color(0xFFF9FAFB),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: isDark
-                                          ? const Color(0xFF4B5563)
-                                          : const Color(0xFFD1D5DB),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: isDark
-                                          ? const Color(0xFF4B5563)
-                                          : const Color(0xFFD1D5DB),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: AppTheme.primaryColor,
-                                      width: 2,
-                                    ),
+                                    borderSide: BorderSide.none,
                                   ),
                                   contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 16, vertical: 12),
@@ -3891,6 +3873,10 @@ class _AccountingFormState extends State<AccountingForm> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppTheme.primaryColor,
                                     foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    elevation: 0,
                                   ),
                                   onPressed: () => Navigator.pop(
                                       context, controller.text.trim()),
@@ -3907,15 +3893,21 @@ class _AccountingFormState extends State<AccountingForm> {
                             }
                           }
                         },
-                        child: Icon(
-                          Icons.edit_outlined,
-                          size: 18,
-                          color: isDark
-                              ? const Color(0xFF9CA3AF)
-                              : const Color(0xFF6B7280),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color:
+                                const Color(0xFF6366F1).withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.edit_outlined,
+                            size: 14,
+                            color: Color(0xFF6366F1),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 8),
                       GestureDetector(
                         onTap: () {
                           model.addEntryToAccount(accountKey,
@@ -4163,24 +4155,25 @@ class _AccountingFormState extends State<AccountingForm> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: isDark
-                              ? const Color(0xFF4B5563)
-                              : const Color(0xFFD1D5DB),
-                        ),
+                        borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: isDark
-                              ? const Color(0xFF4B5563)
-                              : const Color(0xFFD1D5DB),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: AppTheme.primaryColor,
+                          width: 1.5,
                         ),
                       ),
                       filled: true,
-                      fillColor:
-                          isDark ? const Color(0xFF374151) : Colors.white,
-                      contentPadding: const EdgeInsets.all(8),
+                      fillColor: isDark
+                          ? const Color(0xFF374151)
+                          : const Color(
+                              0xFFF9FAFB), // Very light gray for light mode
+                      contentPadding: const EdgeInsets.all(12),
                     ),
                     style: TextStyle(
                       fontSize: 14,
@@ -4369,6 +4362,36 @@ class _AccountingFormState extends State<AccountingForm> {
                           else
                             const SizedBox(
                                 width: 24), // Spacer when only one row
+
+                          // --- DUPLICATE ROW BUTTON (New) ---
+                          const SizedBox(width: 4),
+                          IconButton(
+                            icon: const Icon(Icons.copy_rounded, size: 16),
+                            color: Colors.blueAccent,
+                            tooltip: 'Duplicate Row',
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () {
+                              m.addRowToEntry(
+                                accountKey,
+                                entry.id,
+                                receipt: !isExpense,
+                                cash: row.cash, // Pass current values
+                                bank: row.bank,
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Row duplicated!'),
+                                  duration: const Duration(seconds: 1),
+                                  backgroundColor: Colors.blueAccent,
+                                  behavior: SnackBarBehavior.floating,
+                                  margin: const EdgeInsets.all(16),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     );
@@ -4376,36 +4399,28 @@ class _AccountingFormState extends State<AccountingForm> {
                   const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: OutlinedButton.icon(
+                    child: TextButton.icon(
                       onPressed: () {
                         m.addRowToEntry(accountKey, entry.id,
                             receipt: !isExpense);
                       },
                       icon: const Icon(Icons.add, size: 14),
                       label: const Text('Add Row'),
-                      style: OutlinedButton.styleFrom(
+                      style: TextButton.styleFrom(
                         foregroundColor: isExpense
                             ? AppTheme.paymentColor
-                            : (isDark
-                                ? const Color(0xFFE5E7EB)
-                                : const Color(0xFF374151)),
-                        side: BorderSide(
-                          color: isExpense
-                              ? (isDark
-                                  ? AppTheme.paymentColor
-                                  : AppTheme.paymentColor)
-                              : (isDark
-                                  ? const Color(0xFF4B5563)
-                                  : const Color(0xFFD1D5DB)),
-                        ),
-                        backgroundColor: isExpense
-                            ? (isDark
-                                ? Color.fromRGBO(42, 28, 28, 0.5)
-                                : Color.fromRGBO(255, 245, 245, 0.5))
-                            : (isDark ? const Color(0xFF374151) : Colors.white),
+                            : AppTheme.receiptColor,
+                        backgroundColor: (isExpense
+                                ? AppTheme.paymentColor
+                                : AppTheme.receiptColor)
+                            .withValues(alpha: 0.1),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 8),
-                        textStyle: const TextStyle(fontSize: 12),
+                        textStyle: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
@@ -4532,7 +4547,7 @@ class _AccountingFormState extends State<AccountingForm> {
           const SizedBox(height: 24),
           Consumer<AccountingModel>(
             builder: (context, model, child) {
-              final netSurplus = _calculateNetSurplus();
+              final netSurplus = model.receiptsTotal - model.paymentsTotal;
               final isNegative = netSurplus < 0;
               final color =
                   isNegative ? AppTheme.paymentColor : AppTheme.receiptColor;
@@ -4587,6 +4602,46 @@ class _AccountingFormState extends State<AccountingForm> {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumActionButton(
+    String label,
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: color.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

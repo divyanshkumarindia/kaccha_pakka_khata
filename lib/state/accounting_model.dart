@@ -456,14 +456,18 @@ class AccountingModel extends ChangeNotifier {
     }
   }
 
-  void addRowToEntry(String accountKey, String entryId, {bool receipt = true}) {
+  void addRowToEntry(String accountKey, String entryId,
+      {bool receipt = true, double? cash, double? bank}) {
     final accounts = receipt ? receiptAccounts : paymentAccounts;
     final entries = accounts[accountKey];
     if (entries == null) return;
     for (var e in entries) {
       if (e.id == entryId) {
         e.rows.add(TransactionRow(
-            id: '${entryId}_row_${DateTime.now().millisecondsSinceEpoch}'));
+          id: '${entryId}_row_${DateTime.now().millisecondsSinceEpoch}',
+          cash: cash ?? 0,
+          bank: bank ?? 0,
+        ));
         notifyListeners();
         _persist();
         return;
