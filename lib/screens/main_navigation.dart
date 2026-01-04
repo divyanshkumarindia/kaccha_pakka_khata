@@ -39,7 +39,7 @@ class _MainNavigationState extends State<MainNavigation> {
         elevation: 8,
         height: 70,
         backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        indicatorColor: const Color(0xFF10B981).withOpacity(0.2),
+        indicatorColor: const Color(0xFF10B981).withValues(alpha: 0.2),
         animationDuration: const Duration(milliseconds: 400),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: const [

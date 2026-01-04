@@ -272,7 +272,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -295,7 +295,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: (textColor ?? const Color(0xFF10B981)).withOpacity(0.1),
+          color: (textColor ?? const Color(0xFF10B981)).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
@@ -340,7 +340,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: const Color(0xFF10B981).withOpacity(0.1),
+          color: const Color(0xFF10B981).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
@@ -367,7 +367,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: const Color(0xFF10B981),
+        activeThumbColor: const Color(0xFF10B981),
       ),
     );
   }
@@ -378,7 +378,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: const Color(0xFF10B981).withOpacity(0.1),
+          color: const Color(0xFF10B981).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
@@ -464,49 +464,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Default Page Type'),
         content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: allOptions.map((option) {
-              final isCustom = option['isCustom'] == true;
-              final isNone = option['isNone'] == true;
-              final displayText = option['display'] as String;
-              final valueText = option['value'] as String;
+          child: RadioGroup<String>(
+            groupValue: model.defaultPageType ?? 'None',
+            onChanged: (value) {
+              if (value == 'None') {
+                model.setDefaultPageType('');
+              } else {
+                model.setDefaultPageType(value!);
+              }
+              Navigator.pop(context);
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: allOptions.map((option) {
+                final isCustom = option['isCustom'] == true;
+                final isNone = option['isNone'] == true;
+                final displayText = option['display'] as String;
+                final valueText = option['value'] as String;
 
-              return RadioListTile<String>(
-                title: Row(
-                  children: [
-                    if (isCustom) ...[
-                      Icon(
-                        Icons.star,
-                        size: 16,
-                        color: Color(0xFF6366F1),
-                      ),
-                      SizedBox(width: 8),
+                return RadioListTile<String>(
+                  title: Row(
+                    children: [
+                      if (isCustom) ...[
+                        const Icon(
+                          Icons.star,
+                          size: 16,
+                          color: Color(0xFF6366F1),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      if (isNone) ...[
+                        Icon(
+                          Icons.block,
+                          size: 16,
+                          color: isDark
+                              ? const Color(0xFF9CA3AF)
+                              : const Color(0xFF6B7280),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Expanded(child: Text(displayText)),
                     ],
-                    if (isNone) ...[
-                      Icon(
-                        Icons.block,
-                        size: 16,
-                        color: isDark ? Color(0xFF9CA3AF) : Color(0xFF6B7280),
-                      ),
-                      SizedBox(width: 8),
-                    ],
-                    Expanded(child: Text(displayText)),
-                  ],
-                ),
-                value: valueText,
-                groupValue: model.defaultPageType ?? 'None',
-                activeColor: const Color(0xFF10B981),
-                onChanged: (value) {
-                  if (value == 'None') {
-                    model.setDefaultPageType('');
-                  } else {
-                    model.setDefaultPageType(value!);
-                  }
-                  Navigator.pop(context);
-                },
-              );
-            }).toList(),
+                  ),
+                  value: valueText,
+                  activeColor: const Color(0xFF10B981),
+                );
+              }).toList(),
+            ),
           ),
         ),
       ),
@@ -523,20 +527,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Default Report Format'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: formats.map((format) {
-            return RadioListTile<String>(
-              title: Text(format),
-              value: format,
-              groupValue: model.defaultReportFormat,
-              activeColor: const Color(0xFF10B981),
-              onChanged: (value) {
-                model.setDefaultReportFormat(value!);
-                Navigator.pop(context);
-              },
-            );
-          }).toList(),
+        content: RadioGroup<String>(
+          groupValue: model.defaultReportFormat ?? 'Basic',
+          onChanged: (value) {
+            model.setDefaultReportFormat(value!);
+            Navigator.pop(context);
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: formats.map((format) {
+              return RadioListTile<String>(
+                title: Text(format),
+                value: format,
+                activeColor: const Color(0xFF10B981),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -829,58 +835,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Text('Theme Mode'),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<String>(
-              title: const Row(
-                children: [
-                  Icon(Icons.light_mode, size: 20),
-                  SizedBox(width: 12),
-                  Text('Light'),
-                ],
+        content: RadioGroup<String>(
+          groupValue: model.themeMode,
+          onChanged: (value) {
+            model.setThemeMode(value!);
+            Navigator.pop(context);
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<String>(
+                title: const Row(
+                  children: [
+                    Icon(Icons.light_mode, size: 20),
+                    SizedBox(width: 12),
+                    Text('Light'),
+                  ],
+                ),
+                value: 'light',
+                activeColor: const Color(0xFF6366F1),
               ),
-              value: 'light',
-              groupValue: model.themeMode,
-              activeColor: const Color(0xFF6366F1),
-              onChanged: (value) {
-                model.setThemeMode(value!);
-                Navigator.pop(context);
-              },
-            ),
-            RadioListTile<String>(
-              title: const Row(
-                children: [
-                  Icon(Icons.dark_mode, size: 20),
-                  SizedBox(width: 12),
-                  Text('Dark'),
-                ],
+              RadioListTile<String>(
+                title: const Row(
+                  children: [
+                    Icon(Icons.dark_mode, size: 20),
+                    SizedBox(width: 12),
+                    Text('Dark'),
+                  ],
+                ),
+                value: 'dark',
+                activeColor: const Color(0xFF6366F1),
               ),
-              value: 'dark',
-              groupValue: model.themeMode,
-              activeColor: const Color(0xFF6366F1),
-              onChanged: (value) {
-                model.setThemeMode(value!);
-                Navigator.pop(context);
-              },
-            ),
-            RadioListTile<String>(
-              title: const Row(
-                children: [
-                  Icon(Icons.settings_brightness, size: 20),
-                  SizedBox(width: 12),
-                  Text('System Default'),
-                ],
+              RadioListTile<String>(
+                title: const Row(
+                  children: [
+                    Icon(Icons.settings_brightness, size: 20),
+                    SizedBox(width: 12),
+                    Text('System Default'),
+                  ],
+                ),
+                value: 'system',
+                activeColor: const Color(0xFF6366F1),
               ),
-              value: 'system',
-              groupValue: model.themeMode,
-              activeColor: const Color(0xFF6366F1),
-              onChanged: (value) {
-                model.setThemeMode(value!);
-                Navigator.pop(context);
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

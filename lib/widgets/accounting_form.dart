@@ -273,7 +273,7 @@ class _AccountingFormState extends State<AccountingForm> {
           data: Theme.of(context).copyWith(
             colorScheme: isDark
                 ? ColorScheme.dark(
-                    primary: const Color(0xFF6366F1),
+                    primary: AppTheme.primaryColor,
                     onPrimary: Colors.white,
                     primaryContainer: const Color(0xFF4F46E5),
                     onPrimaryContainer: Colors.white,
@@ -289,7 +289,7 @@ class _AccountingFormState extends State<AccountingForm> {
                     onPrimary: Colors.white,
                     primaryContainer: const Color(0xFFEEF2FF),
                     onPrimaryContainer: const Color(0xFF312E81),
-                    secondary: const Color(0xFF6366F1),
+                    secondary: AppTheme.primaryColor,
                     surface: Colors.white,
                     onSurface: const Color(0xFF111827),
                     surfaceContainerHighest: const Color(0xFFF3F4F6),
@@ -491,7 +491,7 @@ class _AccountingFormState extends State<AccountingForm> {
               backgroundColor: Colors.red.shade500,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
             child: const Text('Delete'),
@@ -545,7 +545,7 @@ class _AccountingFormState extends State<AccountingForm> {
       context: context,
       builder: (context) => Dialog(
         backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           constraints: const BoxConstraints(maxWidth: 850, maxHeight: 750),
           child: Column(
@@ -578,7 +578,7 @@ class _AccountingFormState extends State<AccountingForm> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF6366F1),
+                            color: AppTheme.primaryColor,
                           ),
                         ),
                         IconButton(
@@ -631,7 +631,7 @@ class _AccountingFormState extends State<AccountingForm> {
                     _buildActionButton(
                       'Save Report',
                       Icons.save,
-                      const Color(0xFF6366F1),
+                      AppTheme.primaryColor,
                       () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -653,7 +653,7 @@ class _AccountingFormState extends State<AccountingForm> {
                     _buildActionButton(
                       'Download PDF',
                       Icons.picture_as_pdf,
-                      const Color(0xFFDC2626),
+                      AppTheme.paymentColor,
                       () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -729,9 +729,9 @@ class _AccountingFormState extends State<AccountingForm> {
                               border: Border.all(
                                 color: isDark
                                     ? const Color(0xFF374151)
-                                    : const Color(0xFF86EFAC),
+                                    : AppTheme.receiptColor,
                               ),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             child: Column(
                               children: [
@@ -811,7 +811,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                         '$currencySymbol${_formatAmount(netReceipts)}',
                                         isDark,
                                         isBold: true,
-                                        color: const Color(0xFF059669),
+                                        color: AppTheme.receiptColor,
                                       ),
                                     ],
                                   ),
@@ -832,9 +832,9 @@ class _AccountingFormState extends State<AccountingForm> {
                               border: Border.all(
                                 color: isDark
                                     ? const Color(0xFF374151)
-                                    : const Color(0xFFFCA5A5),
+                                    : AppTheme.paymentColor,
                               ),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             child: Column(
                               children: [
@@ -843,7 +843,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                   width: double.infinity,
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFDC2626),
+                                    color: AppTheme.paymentColor,
                                     borderRadius: const BorderRadius.only(
                                       topLeft: Radius.circular(7),
                                       topRight: Radius.circular(7),
@@ -914,7 +914,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                         '$currencySymbol${_formatAmount(netPayments)}',
                                         isDark,
                                         isBold: true,
-                                        color: const Color(0xFFDC2626),
+                                        color: AppTheme.paymentColor,
                                       ),
                                     ],
                                   ),
@@ -935,9 +935,9 @@ class _AccountingFormState extends State<AccountingForm> {
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFECFDF5),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                    color: const Color(0xFF10B981), width: 1.5),
+                                    color: AppTheme.receiptColor, width: 1.5),
                               ),
                               child: Column(
                                 children: [
@@ -945,7 +945,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                     'Net Receipts',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: const Color(0xFF059669),
+                                      color: AppTheme.receiptColor,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -955,7 +955,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                     style: const TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF059669),
+                                      color: AppTheme.receiptColor,
                                     ),
                                   ),
                                 ],
@@ -968,9 +968,9 @@ class _AccountingFormState extends State<AccountingForm> {
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFFEF2F2),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                    color: const Color(0xFFDC2626), width: 1.5),
+                                    color: AppTheme.paymentColor, width: 1.5),
                               ),
                               child: Column(
                                 children: [
@@ -978,7 +978,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                     'Net Payments',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: const Color(0xFFDC2626),
+                                      color: AppTheme.paymentColor,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -988,7 +988,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                     style: const TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFFDC2626),
+                                      color: AppTheme.paymentColor,
                                     ),
                                   ),
                                 ],
@@ -1005,9 +1005,9 @@ class _AccountingFormState extends State<AccountingForm> {
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           color: const Color(0xFFEEF2FF),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                              color: const Color(0xFF6366F1), width: 2),
+                              color: AppTheme.primaryColor, width: 2),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1075,7 +1075,7 @@ class _AccountingFormState extends State<AccountingForm> {
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -1153,7 +1153,7 @@ class _AccountingFormState extends State<AccountingForm> {
       context: context,
       builder: (context) => Dialog(
         backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           constraints: const BoxConstraints(maxWidth: 900, maxHeight: 800),
           child: Column(
@@ -1186,7 +1186,7 @@ class _AccountingFormState extends State<AccountingForm> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF6366F1),
+                            color: AppTheme.primaryColor,
                           ),
                         ),
                         IconButton(
@@ -1239,7 +1239,7 @@ class _AccountingFormState extends State<AccountingForm> {
                     _buildActionButton(
                       'Save Report',
                       Icons.save,
-                      const Color(0xFF6366F1),
+                      AppTheme.primaryColor,
                       () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -1250,7 +1250,7 @@ class _AccountingFormState extends State<AccountingForm> {
                     _buildActionButton(
                       'Download Excel',
                       Icons.file_download,
-                      const Color(0xFF10B981),
+                      AppTheme.receiptColor,
                       () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -1261,7 +1261,7 @@ class _AccountingFormState extends State<AccountingForm> {
                     _buildActionButton(
                       'Download PDF',
                       Icons.picture_as_pdf,
-                      const Color(0xFFDC2626),
+                      AppTheme.paymentColor,
                       () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -1327,7 +1327,7 @@ class _AccountingFormState extends State<AccountingForm> {
                       // Receipts Table
                       _buildDetailedTable(
                         'Receipts ($currencySymbol)',
-                        const Color(0xFF10B981),
+                        AppTheme.receiptColor,
                         isDark
                             ? const Color(0xFF111827)
                             : const Color(0xFFF0FDF4),
@@ -1440,7 +1440,7 @@ class _AccountingFormState extends State<AccountingForm> {
                             ],
                             isDark,
                             isBold: true,
-                            color: const Color(0xFF059669),
+                            color: AppTheme.receiptColor,
                           ),
                         ],
                         isDark,
@@ -1451,7 +1451,7 @@ class _AccountingFormState extends State<AccountingForm> {
                       // Payments Table
                       _buildDetailedTable(
                         'Payments ($currencySymbol)',
-                        const Color(0xFFDC2626),
+                        AppTheme.paymentColor,
                         isDark
                             ? const Color(0xFF111827)
                             : const Color(0xFFFEF2F2),
@@ -1508,7 +1508,7 @@ class _AccountingFormState extends State<AccountingForm> {
                               thickness: 2,
                               color: isDark
                                   ? const Color(0xFF4B5563)
-                                  : const Color(0xFFDC2626)),
+                                  : AppTheme.paymentColor),
                           // Total Payments
                           _buildTableRow(
                             [
@@ -1521,7 +1521,7 @@ class _AccountingFormState extends State<AccountingForm> {
                             ],
                             isDark,
                             isBold: true,
-                            color: const Color(0xFFDC2626),
+                            color: AppTheme.paymentColor,
                           ),
                         ],
                         isDark,
@@ -1535,7 +1535,7 @@ class _AccountingFormState extends State<AccountingForm> {
                         decoration: BoxDecoration(
                           color:
                               isDark ? const Color(0xFF111827) : Colors.white,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isDark
                                 ? const Color(0xFF374151)
@@ -1574,8 +1574,8 @@ class _AccountingFormState extends State<AccountingForm> {
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                           color: closingCash >= 0
-                                              ? const Color(0xFF059669)
-                                              : const Color(0xFFDC2626),
+                                              ? AppTheme.receiptColor
+                                              : AppTheme.paymentColor,
                                         ),
                                       ),
                                     ],
@@ -1607,8 +1607,8 @@ class _AccountingFormState extends State<AccountingForm> {
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                           color: closingBank >= 0
-                                              ? const Color(0xFF059669)
-                                              : const Color(0xFFDC2626),
+                                              ? AppTheme.receiptColor
+                                              : AppTheme.paymentColor,
                                         ),
                                       ),
                                     ],
@@ -1672,8 +1672,8 @@ class _AccountingFormState extends State<AccountingForm> {
           decoration: BoxDecoration(
             color: headerColor,
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(8),
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
             ),
           ),
           child: Center(
@@ -1697,8 +1697,8 @@ class _AccountingFormState extends State<AccountingForm> {
                   : headerColor.withOpacity(0.3),
             ),
             borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(8),
-              bottomRight: Radius.circular(8),
+              bottomLeft: Radius.circular(12),
+              bottomRight: Radius.circular(12),
             ),
           ),
           child: Column(
@@ -1875,7 +1875,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                 color: isDark
                                     ? const Color(0xFF1E3A8A)
                                     : const Color(0xFFDCE7FF),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(16),
                               ),
                               child: const Icon(
                                 Icons.receipt_long_outlined,
@@ -1947,7 +1947,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                                 : const Color(0xFFF9FAFB),
                                             border: OutlineInputBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(8),
+                                                  BorderRadius.circular(12),
                                               borderSide: BorderSide(
                                                 color: isDark
                                                     ? const Color(0xFF4B5563)
@@ -1957,7 +1957,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                             ),
                                             enabledBorder: OutlineInputBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(8),
+                                                  BorderRadius.circular(12),
                                               borderSide: BorderSide(
                                                 color: isDark
                                                     ? const Color(0xFF4B5563)
@@ -1967,9 +1967,9 @@ class _AccountingFormState extends State<AccountingForm> {
                                             ),
                                             focusedBorder: OutlineInputBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(8),
+                                                  BorderRadius.circular(12),
                                               borderSide: const BorderSide(
-                                                color: Color(0xFF6366F1),
+                                                color: AppTheme.primaryColor,
                                                 width: 2,
                                               ),
                                             ),
@@ -1995,7 +1995,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                           ElevatedButton(
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor:
-                                                  const Color(0xFF6366F1),
+                                                  AppTheme.primaryColor,
                                               foregroundColor: Colors.white,
                                             ),
                                             onPressed: () => Navigator.pop(
@@ -2161,7 +2161,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                         ? const Color(0xFF4B5563)
                                         : const Color(0xFFD1D5DB),
                                   ),
-                                  borderRadius: BorderRadius.circular(6),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -2220,14 +2220,14 @@ class _AccountingFormState extends State<AccountingForm> {
                                     ),
                                   ),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF6366F1),
+                                    backgroundColor: AppTheme.primaryColor,
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 16,
                                       horizontal: 16,
                                     ),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     elevation: 2,
                                   ),
@@ -2249,14 +2249,14 @@ class _AccountingFormState extends State<AccountingForm> {
                                     ),
                                   ),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF10B981),
+                                    backgroundColor: AppTheme.receiptColor,
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 16,
                                       horizontal: 16,
                                     ),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     elevation: 2,
                                   ),
@@ -2300,7 +2300,7 @@ class _AccountingFormState extends State<AccountingForm> {
       decoration: BoxDecoration(
         color:
             isDark ? Color.fromRGBO(17, 24, 39, 0.5) : const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
@@ -2318,7 +2318,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF059669),
+                    color: AppTheme.receiptColor,
                   ),
                 ),
                 Icon(
@@ -2361,11 +2361,11 @@ class _AccountingFormState extends State<AccountingForm> {
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('Add Balance Box'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF059669),
-                  side: const BorderSide(color: Color(0xFF059669)),
+                  foregroundColor: AppTheme.receiptColor,
+                  side: const BorderSide(color: AppTheme.receiptColor),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
@@ -2568,7 +2568,7 @@ class _AccountingFormState extends State<AccountingForm> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF059669),
+                color: AppTheme.receiptColor,
               ),
             ),
             OutlinedButton.icon(
@@ -2578,11 +2578,9 @@ class _AccountingFormState extends State<AccountingForm> {
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Add New Entry Box'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF059669),
+                foregroundColor: AppTheme.receiptColor,
                 side: BorderSide(
-                  color: isDark
-                      ? const Color(0xFF15803D)
-                      : const Color(0xFF86EFAC),
+                  color: isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
                 ),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -2603,7 +2601,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 key,
                 model.receiptLabels[key] ?? 'New Income Category',
                 _formatCategoryTotal(key, false),
-                const Color(0xFF059669),
+                AppTheme.receiptColor,
                 categoryExpansionState[key] ?? true,
                 () {
                   setState(() {
@@ -2623,7 +2621,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'salary',
           'Salary / Wages',
           _formatCategoryTotal('salary', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['salary'] ?? true,
           () {
             setState(() {
@@ -2640,7 +2638,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'business_income',
           'Business Income',
           _formatCategoryTotal('business_income', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['business_income'] ?? false,
           () {
             setState(() {
@@ -2657,7 +2655,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'rental_income',
           'Rental Income',
           _formatCategoryTotal('rental_income', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['rental_income'] ?? false,
           () {
             setState(() {
@@ -2674,7 +2672,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'investment_returns',
           'Investment Returns / Interest',
           _formatCategoryTotal('investment_returns', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['investment_returns'] ?? false,
           () {
             setState(() {
@@ -2701,7 +2699,7 @@ class _AccountingFormState extends State<AccountingForm> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF059669),
+                color: AppTheme.receiptColor,
               ),
             ),
             OutlinedButton.icon(
@@ -2711,11 +2709,9 @@ class _AccountingFormState extends State<AccountingForm> {
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Add New Entry Box'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF059669),
+                foregroundColor: AppTheme.receiptColor,
                 side: BorderSide(
-                  color: isDark
-                      ? const Color(0xFF15803D)
-                      : const Color(0xFF86EFAC),
+                  color: isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
                 ),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -2736,7 +2732,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 key,
                 model.receiptLabels[key] ?? 'New Income Category',
                 _formatCategoryTotal(key, false),
-                const Color(0xFF059669),
+                AppTheme.receiptColor,
                 categoryExpansionState[key] ?? true,
                 () {
                   setState(() {
@@ -2756,7 +2752,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'sales',
           'Sales Revenue',
           _formatCategoryTotal('sales', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['sales'] ?? true,
           () {
             setState(() {
@@ -2773,7 +2769,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'service_income',
           'Service Income',
           _formatCategoryTotal('service_income', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['service_income'] ?? false,
           () {
             setState(() {
@@ -2790,7 +2786,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'interest_received',
           'Interest Received',
           _formatCategoryTotal('interest_received', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['interest_received'] ?? false,
           () {
             setState(() {
@@ -2807,7 +2803,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'commission_received',
           'Commission Received',
           _formatCategoryTotal('commission_received', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['commission_received'] ?? false,
           () {
             setState(() {
@@ -2834,7 +2830,7 @@ class _AccountingFormState extends State<AccountingForm> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF059669),
+                color: AppTheme.receiptColor,
               ),
             ),
             OutlinedButton.icon(
@@ -2844,11 +2840,9 @@ class _AccountingFormState extends State<AccountingForm> {
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Add New Entry Box'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF059669),
+                foregroundColor: AppTheme.receiptColor,
                 side: BorderSide(
-                  color: isDark
-                      ? const Color(0xFF15803D)
-                      : const Color(0xFF86EFAC),
+                  color: isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
                 ),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -2869,7 +2863,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 key,
                 model.receiptLabels[key] ?? 'New Income Category',
                 _formatCategoryTotal(key, false),
-                const Color(0xFF059669),
+                AppTheme.receiptColor,
                 categoryExpansionState[key] ?? true,
                 () {
                   setState(() {
@@ -2889,7 +2883,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'fees_collected',
           'Fees Collected (Tuition / Admission)',
           _formatCategoryTotal('fees_collected', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['fees_collected'] ?? true,
           () {
             setState(() {
@@ -2906,7 +2900,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'exam_fees',
           'Exam Fees',
           _formatCategoryTotal('exam_fees', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['exam_fees'] ?? false,
           () {
             setState(() {
@@ -2923,7 +2917,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'donations',
           'Donations Received',
           _formatCategoryTotal('donations', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['donations'] ?? false,
           () {
             setState(() {
@@ -2940,7 +2934,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'grants',
           'Grants / Subsidies',
           _formatCategoryTotal('grants', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['grants'] ?? false,
           () {
             setState(() {
@@ -2967,7 +2961,7 @@ class _AccountingFormState extends State<AccountingForm> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF059669),
+                color: AppTheme.receiptColor,
               ),
             ),
             OutlinedButton.icon(
@@ -2977,11 +2971,9 @@ class _AccountingFormState extends State<AccountingForm> {
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Add New Entry Box'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF059669),
+                foregroundColor: AppTheme.receiptColor,
                 side: BorderSide(
-                  color: isDark
-                      ? const Color(0xFF15803D)
-                      : const Color(0xFF86EFAC),
+                  color: isDark ? AppTheme.receiptColor : AppTheme.receiptColor,
                 ),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -3002,7 +2994,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 key,
                 model.receiptLabels[key] ?? 'New Income Category',
                 _formatCategoryTotal(key, false),
-                const Color(0xFF059669),
+                AppTheme.receiptColor,
                 categoryExpansionState[key] ?? true,
                 () {
                   setState(() {
@@ -3022,7 +3014,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'income_1',
           'Income Source 1',
           _formatCategoryTotal('income_1', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['income_1'] ?? true,
           () {
             setState(() {
@@ -3039,7 +3031,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'income_2',
           'Income Source 2',
           _formatCategoryTotal('income_2', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['income_2'] ?? false,
           () {
             setState(() {
@@ -3056,7 +3048,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'income_3',
           'Income Source 3',
           _formatCategoryTotal('income_3', false),
-          const Color(0xFF059669),
+          AppTheme.receiptColor,
           categoryExpansionState['income_3'] ?? false,
           () {
             setState(() {
@@ -3097,7 +3089,7 @@ class _AccountingFormState extends State<AccountingForm> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFFDC2626),
+                color: AppTheme.paymentColor,
               ),
             ),
             OutlinedButton.icon(
@@ -3107,11 +3099,9 @@ class _AccountingFormState extends State<AccountingForm> {
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Add New Entry Box'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFDC2626),
+                foregroundColor: AppTheme.paymentColor,
                 side: BorderSide(
-                  color: isDark
-                      ? const Color(0xFF991B1B)
-                      : const Color(0xFFFCA5A5),
+                  color: isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
                 ),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -3132,7 +3122,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 key,
                 model.paymentLabels[key] ?? 'New Expense Category',
                 _formatCategoryTotal(key, true),
-                const Color(0xFFDC2626),
+                AppTheme.paymentColor,
                 categoryExpansionState[key] ?? true,
                 () {
                   setState(() {
@@ -3152,7 +3142,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'groceries',
           'Groceries / Food',
           _formatCategoryTotal('groceries', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['groceries'] ?? true,
           () {
             setState(() {
@@ -3169,7 +3159,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'rent_payment',
           'Rent / EMI Payment',
           _formatCategoryTotal('rent_payment', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['rent_payment'] ?? false,
           () {
             setState(() {
@@ -3186,7 +3176,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'education',
           'Education Expenses',
           _formatCategoryTotal('education', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['education'] ?? false,
           () {
             setState(() {
@@ -3203,7 +3193,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'transport',
           'Transport / Fuel',
           _formatCategoryTotal('transport', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['transport'] ?? false,
           () {
             setState(() {
@@ -3230,7 +3220,7 @@ class _AccountingFormState extends State<AccountingForm> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFFDC2626),
+                color: AppTheme.paymentColor,
               ),
             ),
             OutlinedButton.icon(
@@ -3240,11 +3230,9 @@ class _AccountingFormState extends State<AccountingForm> {
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Add New Entry Box'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFDC2626),
+                foregroundColor: AppTheme.paymentColor,
                 side: BorderSide(
-                  color: isDark
-                      ? const Color(0xFF991B1B)
-                      : const Color(0xFFFCA5A5),
+                  color: isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
                 ),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -3265,7 +3253,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 key,
                 model.paymentLabels[key] ?? 'New Expense Category',
                 _formatCategoryTotal(key, true),
-                const Color(0xFFDC2626),
+                AppTheme.paymentColor,
                 categoryExpansionState[key] ?? true,
                 () {
                   setState(() {
@@ -3285,7 +3273,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'purchases',
           'Raw Material / Goods Purchase',
           _formatCategoryTotal('purchases', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['purchases'] ?? true,
           () {
             setState(() {
@@ -3302,7 +3290,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'salaries',
           'Salaries / Wages',
           _formatCategoryTotal('salaries', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['salaries'] ?? false,
           () {
             setState(() {
@@ -3319,7 +3307,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'rent_commercial',
           'Rent / Lease',
           _formatCategoryTotal('rent_commercial', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['rent_commercial'] ?? false,
           () {
             setState(() {
@@ -3336,7 +3324,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'utilities_business',
           'Utilities (Power / Water / Internet)',
           _formatCategoryTotal('utilities_business', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['utilities_business'] ?? false,
           () {
             setState(() {
@@ -3363,7 +3351,7 @@ class _AccountingFormState extends State<AccountingForm> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFFDC2626),
+                color: AppTheme.paymentColor,
               ),
             ),
             OutlinedButton.icon(
@@ -3373,11 +3361,9 @@ class _AccountingFormState extends State<AccountingForm> {
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Add New Entry Box'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFDC2626),
+                foregroundColor: AppTheme.paymentColor,
                 side: BorderSide(
-                  color: isDark
-                      ? const Color(0xFF991B1B)
-                      : const Color(0xFFFCA5A5),
+                  color: isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
                 ),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -3398,7 +3384,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 key,
                 model.paymentLabels[key] ?? 'New Expense Category',
                 _formatCategoryTotal(key, true),
-                const Color(0xFFDC2626),
+                AppTheme.paymentColor,
                 categoryExpansionState[key] ?? true,
                 () {
                   setState(() {
@@ -3418,7 +3404,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'staff_salaries',
           'Staff Salaries (Teaching)',
           _formatCategoryTotal('staff_salaries', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['staff_salaries'] ?? true,
           () {
             setState(() {
@@ -3435,7 +3421,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'non_teaching_salaries',
           'Non-Teaching Staff Salaries',
           _formatCategoryTotal('non_teaching_salaries', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['non_teaching_salaries'] ?? false,
           () {
             setState(() {
@@ -3452,7 +3438,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'utilities_inst',
           'Utilities (Electricity / Water / Internet)',
           _formatCategoryTotal('utilities_inst', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['utilities_inst'] ?? false,
           () {
             setState(() {
@@ -3469,7 +3455,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'library_supplies',
           'Library / Books / Supplies',
           _formatCategoryTotal('library_supplies', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['library_supplies'] ?? false,
           () {
             setState(() {
@@ -3496,7 +3482,7 @@ class _AccountingFormState extends State<AccountingForm> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFFDC2626),
+                color: AppTheme.paymentColor,
               ),
             ),
             OutlinedButton.icon(
@@ -3506,11 +3492,9 @@ class _AccountingFormState extends State<AccountingForm> {
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Add New Entry Box'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFDC2626),
+                foregroundColor: AppTheme.paymentColor,
                 side: BorderSide(
-                  color: isDark
-                      ? const Color(0xFF991B1B)
-                      : const Color(0xFFFCA5A5),
+                  color: isDark ? AppTheme.paymentColor : AppTheme.paymentColor,
                 ),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -3531,7 +3515,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 key,
                 model.paymentLabels[key] ?? 'New Expense Category',
                 _formatCategoryTotal(key, true),
-                const Color(0xFFDC2626),
+                AppTheme.paymentColor,
                 categoryExpansionState[key] ?? true,
                 () {
                   setState(() {
@@ -3551,7 +3535,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'expense_1',
           'Expense Category 1',
           _formatCategoryTotal('expense_1', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['expense_1'] ?? true,
           () {
             setState(() {
@@ -3568,7 +3552,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'expense_2',
           'Expense Category 2',
           _formatCategoryTotal('expense_2', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['expense_2'] ?? false,
           () {
             setState(() {
@@ -3585,7 +3569,7 @@ class _AccountingFormState extends State<AccountingForm> {
           'expense_3',
           'Expense Category 3',
           _formatCategoryTotal('expense_3', true),
-          const Color(0xFFDC2626),
+          AppTheme.paymentColor,
           categoryExpansionState['expense_3'] ?? false,
           () {
             setState(() {
@@ -3617,7 +3601,7 @@ class _AccountingFormState extends State<AccountingForm> {
       decoration: BoxDecoration(
         color:
             isDark ? Color.fromRGBO(17, 24, 39, 0.5) : const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
@@ -3689,7 +3673,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                       ? const Color(0xFF374151)
                                       : const Color(0xFFF9FAFB),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide(
                                       color: isDark
                                           ? const Color(0xFF4B5563)
@@ -3698,7 +3682,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                     ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide(
                                       color: isDark
                                           ? const Color(0xFF4B5563)
@@ -3707,9 +3691,9 @@ class _AccountingFormState extends State<AccountingForm> {
                                     ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(12),
                                     borderSide: const BorderSide(
-                                      color: Color(0xFF6366F1),
+                                      color: AppTheme.primaryColor,
                                       width: 2,
                                     ),
                                   ),
@@ -3731,7 +3715,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                 ),
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF6366F1),
+                                    backgroundColor: AppTheme.primaryColor,
                                     foregroundColor: Colors.white,
                                   ),
                                   onPressed: () => Navigator.pop(
@@ -3917,7 +3901,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 color:
                     isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB),
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
               child: Text(
@@ -3948,7 +3932,7 @@ class _AccountingFormState extends State<AccountingForm> {
                       ? const Color(0xFF374151)
                       : const Color(0xFFE5E7EB),
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -4004,7 +3988,7 @@ class _AccountingFormState extends State<AccountingForm> {
                             : const Color(0xFF9CA3AF),
                       ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
                           color: isDark
                               ? const Color(0xFF4B5563)
@@ -4012,7 +3996,7 @@ class _AccountingFormState extends State<AccountingForm> {
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
                           color: isDark
                               ? const Color(0xFF4B5563)
@@ -4081,7 +4065,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                           : const Color(0xFF9CA3AF),
                                     ),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(6),
+                                      borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
                                         color: isDark
                                             ? const Color(0xFF4B5563)
@@ -4089,7 +4073,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(6),
+                                      borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
                                         color: isDark
                                             ? const Color(0xFF4B5563)
@@ -4155,7 +4139,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                           : const Color(0xFF9CA3AF),
                                     ),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(6),
+                                      borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
                                         color: isDark
                                             ? const Color(0xFF4B5563)
@@ -4163,7 +4147,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(6),
+                                      borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
                                         color: isDark
                                             ? const Color(0xFF4B5563)
@@ -4227,15 +4211,15 @@ class _AccountingFormState extends State<AccountingForm> {
                       label: const Text('Add Row'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: isExpense
-                            ? const Color(0xFFDC2626)
+                            ? AppTheme.paymentColor
                             : (isDark
                                 ? const Color(0xFFE5E7EB)
                                 : const Color(0xFF374151)),
                         side: BorderSide(
                           color: isExpense
                               ? (isDark
-                                  ? const Color(0xFF991B1B)
-                                  : const Color(0xFFFCA5A5))
+                                  ? AppTheme.paymentColor
+                                  : AppTheme.paymentColor)
                               : (isDark
                                   ? const Color(0xFF4B5563)
                                   : const Color(0xFFD1D5DB)),
@@ -4265,7 +4249,7 @@ class _AccountingFormState extends State<AccountingForm> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF2A2135) : const Color(0xFFF3E8FF),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
@@ -4287,7 +4271,7 @@ class _AccountingFormState extends State<AccountingForm> {
                     color: isDark
                         ? const Color(0xFF1C2A22)
                         : const Color(0xFFF0FFF4),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
                     children: [
@@ -4307,7 +4291,7 @@ class _AccountingFormState extends State<AccountingForm> {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF059669),
+                          color: AppTheme.receiptColor,
                         ),
                       ),
                     ],
@@ -4322,7 +4306,7 @@ class _AccountingFormState extends State<AccountingForm> {
                     color: isDark
                         ? const Color(0xFF2A1C1C)
                         : const Color(0xFFFFF5F5),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
                     children: [
@@ -4342,7 +4326,7 @@ class _AccountingFormState extends State<AccountingForm> {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFFDC2626),
+                          color: AppTheme.paymentColor,
                         ),
                       ),
                     ],
@@ -4368,7 +4352,7 @@ class _AccountingFormState extends State<AccountingForm> {
                       : (isDark
                           ? const Color(0xFF1C2A22)
                           : const Color(0xFFF0FFF4)),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   children: [
@@ -4389,8 +4373,8 @@ class _AccountingFormState extends State<AccountingForm> {
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: isNegative
-                            ? const Color(0xFFDC2626)
-                            : const Color(0xFF059669),
+                            ? AppTheme.paymentColor
+                            : AppTheme.receiptColor,
                       ),
                     ),
                   ],

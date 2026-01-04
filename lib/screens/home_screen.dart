@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:google_fonts/google_fonts.dart';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
 import '../services/recent_service.dart';
 import 'accounting_template_screen.dart';
+import '../widgets/premium_components.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -177,12 +179,10 @@ class _HomeScreenState extends State<HomeScreen> {
           final hasText = controller.text.trim().isNotEmpty;
 
           return AlertDialog(
-            backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: Row(
               children: [
-                Icon(Icons.add_circle_outline, color: Color(0xFF6366F1)),
+                Icon(Icons.add_circle_outline,
+                    color: Theme.of(context).primaryColor),
                 SizedBox(width: 12),
                 Text('New Accounting Page'),
               ],
@@ -195,7 +195,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   'Enter a name for your new accounting page:',
                   style: TextStyle(
                     fontSize: 14,
-                    color: isDark ? Color(0xFF9CA3AF) : Color(0xFF6B7280),
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
                   ),
                 ),
                 SizedBox(height: 12),
@@ -208,26 +210,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                   decoration: InputDecoration(
                     hintText: 'e.g., Rental Property, Side Business',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: isDark
-                            ? const Color(0xFF374151)
-                            : const Color(0xFFE5E7EB),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide:
-                          const BorderSide(color: Color(0xFF6366F1), width: 2),
-                    ),
-                    filled: true,
-                    fillColor: isDark
-                        ? const Color(0xFF374151)
-                        : const Color(0xFFF9FAFB),
                   ),
                 ),
                 if (!hasText)
@@ -246,14 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(
-                    color: isDark
-                        ? const Color(0xFF9CA3AF)
-                        : const Color(0xFF6B7280),
-                  ),
-                ),
+                child: const Text('Cancel'),
               ),
               ElevatedButton(
                 onPressed: hasText
@@ -264,17 +239,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     : null, // Disable if no text
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6366F1),
-                  foregroundColor: Colors.white,
                   disabledBackgroundColor: isDark
-                      ? const Color(0xFF374151)
-                      : const Color(0xFFE5E7EB),
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFE2E8F0),
                   disabledForegroundColor: isDark
-                      ? const Color(0xFF6B7280)
-                      : const Color(0xFF9CA3AF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF94A3B8),
                 ),
                 child: const Text('Create'),
               ),
@@ -330,67 +300,84 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF18181B) : const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'My Kaccha-Pakka Khata',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: isDark ? const Color(0xFF27272A) : Colors.white,
-        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              // Use a named route if available, or push manually.
+              // Assuming '/settings' is not yet registered or main_navigation handles it.
+              // For now, if we don't have a route, we can disable or add it later.
+              // But usually settings is in the drawer or navigation bar.
+              // Given current context, let's just leave it or redirect to settings screen if imported.
+              // Since we don't have SettingsScreen imported here, I will comment it out or leave it empty.
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Header Icon
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Color.fromRGBO(99, 102, 241, 0.2)
-                        : const Color(0xFFE0E7FF),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.description_outlined,
-                    color: Color(0xFF6366F1),
-                    size: 32,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Receipts & Payments Tracker',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF6366F1),
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Main Card
-                Container(
-                  width: double.infinity,
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF27272A) : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.06),
-                        blurRadius: 24,
-                        offset: const Offset(0, 4),
+                // Header Group
+                Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFF6366F1).withValues(alpha: 0.1),
+                            const Color(0xFF818CF8).withValues(alpha: 0.1),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        shape: BoxShape.circle,
                       ),
-                    ],
-                  ),
+                      child: Icon(
+                        Icons.account_balance_wallet_rounded,
+                        color: Theme.of(context).primaryColor,
+                        size: 48,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Welcome Back!',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color:
+                                isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Manage your finances with ease & style.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
+                          ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 48),
+
+                // Main Selection Card
+                PremiumCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -403,45 +390,45 @@ class _HomeScreenState extends State<HomeScreen> {
                               isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Dropdown with Add New button
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? const Color(0xFF3F3F46)
-                                  : const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(8),
+                                  ? const Color(0xFF1E293B)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: isDark
-                                    ? const Color(0xFF52525B)
-                                    : const Color(0xFFCBD5E1),
+                                    ? const Color(0xFF334155)
+                                    : const Color(0xFFE2E8F0),
                               ),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 value: selectedPageId,
                                 hint: Text(
-                                  'Choose...',
+                                  'Choose Account Type...',
                                   style: TextStyle(
                                     color: isDark
-                                        ? const Color(0xFFA1A1AA)
+                                        ? const Color(0xFF94A3B8)
                                         : const Color(0xFF64748B),
                                   ),
                                 ),
                                 isExpanded: true,
                                 icon: Icon(
-                                  Icons.keyboard_arrow_down,
+                                  Icons.keyboard_arrow_down_rounded,
                                   color: isDark
-                                      ? const Color(0xFFA1A1AA)
+                                      ? const Color(0xFF94A3B8)
                                       : const Color(0xFF64748B),
                                 ),
                                 dropdownColor: isDark
-                                    ? const Color(0xFF3F3F46)
+                                    ? const Color(0xFF1E293B)
                                     : Colors.white,
                                 items: [
                                   // Standard page types
@@ -457,6 +444,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           color: isDark
                                               ? Colors.white
                                               : const Color(0xFF0F172A),
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     );
@@ -468,11 +456,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       child: Row(
                                         children: [
                                           Icon(
-                                            Icons.star,
-                                            size: 16,
-                                            color: Color(0xFF6366F1),
+                                            Icons.star_rounded,
+                                            size: 18,
+                                            color:
+                                                Theme.of(context).primaryColor,
                                           ),
-                                          SizedBox(width: 8),
+                                          SizedBox(width: 12),
                                           Expanded(
                                             child: Text(
                                               entry.value,
@@ -480,6 +469,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 color: isDark
                                                     ? Colors.white
                                                     : const Color(0xFF0F172A),
+                                                fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                           ),
@@ -518,46 +508,39 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 16),
                           // Add New Page Button
                           OutlinedButton.icon(
                             onPressed: () => _showAddNewPageDialog(context),
-                            icon: const Icon(Icons.add, size: 18),
-                            label: const Text('Add New Accounting Page'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF6366F1),
-                              side: const BorderSide(
-                                color: Color(0xFF6366F1),
-                                width: 1.5,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
+                            icon: const Icon(Icons.add_rounded, size: 20),
+                            label: const Text('New Accounting Page'),
                           ),
                         ],
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
 
                       // Description
-                      Container(
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
                         width: double.infinity,
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? const Color(0xFF3F3F46)
-                              : const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(8),
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark
+                                ? const Color(0xFF334155)
+                                : const Color(0xFFE2E8F0),
+                          ),
                         ),
                         child: Text(
                           description,
                           style: TextStyle(
                             fontSize: 14,
+                            height: 1.5,
                             color: isDark
                                 ? const Color(0xFFCBD5E1)
                                 : const Color(0xFF64748B),
@@ -565,89 +548,73 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
 
                       // Continue Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: selectedPageId == null
-                              ? null
-                              : () async {
-                                  if (selectedCustomPageId != null) {
-                                    // Create a new model with UserType.other for custom pages
-                                    final customModel = AccountingModel(
-                                        userType: UserType.other);
-                                    await customModel.loadFromPrefs();
+                      GradientButton(
+                        text: 'Continue to Accounting',
+                        icon: Icons.arrow_forward_rounded,
+                        fullWidth: true,
+                        onPressed: selectedPageId == null
+                            ? null
+                            : () async {
+                                if (selectedCustomPageId != null) {
+                                  // Create a new model with UserType.other for custom pages
+                                  final customModel =
+                                      AccountingModel(userType: UserType.other);
+                                  await customModel.loadFromPrefs();
 
-                                    // Navigate to custom page with its own model
-                                    final wasDeleted = await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            ChangeNotifierProvider<
-                                                AccountingModel>.value(
-                                          value: customModel,
-                                          child: AccountingTemplateScreen(
-                                            templateKey: 'other',
-                                            customTitle: customPages[
-                                                selectedCustomPageId],
-                                            customPageId: selectedCustomPageId,
-                                          ),
+                                  // Navigate to custom page with its own model
+                                  final wasDeleted = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ChangeNotifierProvider<
+                                              AccountingModel>.value(
+                                        value: customModel,
+                                        child: AccountingTemplateScreen(
+                                          templateKey: 'other',
+                                          customTitle:
+                                              customPages[selectedCustomPageId],
+                                          customPageId: selectedCustomPageId,
                                         ),
                                       ),
-                                    );
-                                    await _loadCustomPages();
+                                    ),
+                                  );
+                                  await _loadCustomPages();
 
-                                    // If page was deleted, reset selection
-                                    if (wasDeleted == true) {
-                                      setState(() {
-                                        selectedPageId = null;
-                                      });
-                                    }
-                                  } else if (selectedUseCase != null) {
-                                    // Navigate to standard page
-                                    final model = AccountingModel(
-                                        userType: selectedUseCase!);
-                                    await model.loadFromPrefs();
-                                    String route = '/accounting';
-                                    switch (selectedUseCase!) {
-                                      case UserType.personal:
-                                        route = '/accounting/family';
-                                        break;
-                                      case UserType.business:
-                                        route = '/accounting/business';
-                                        break;
-                                      case UserType.institute:
-                                        route = '/accounting/institute';
-                                        break;
-                                      case UserType.other:
-                                        route = '/accounting/other';
-                                        break;
-                                    }
-                                    await Navigator.pushNamed(context, route,
-                                        arguments: model);
-                                    await _loadPageTitles();
+                                  // If page was deleted, reset selection
+                                  if (wasDeleted == true) {
+                                    setState(() {
+                                      selectedPageId = null;
+                                    });
                                   }
-                                  await _loadRecents();
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF6366F1),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'Continue to Accounting',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+                                } else if (selectedUseCase != null) {
+                                  // Navigate to standard page
+                                  final model = AccountingModel(
+                                      userType: selectedUseCase!);
+                                  await model.loadFromPrefs();
+                                  String route = '/accounting';
+                                  switch (selectedUseCase!) {
+                                    case UserType.personal:
+                                      route = '/accounting/family';
+                                      break;
+                                    case UserType.business:
+                                      route = '/accounting/business';
+                                      break;
+                                    case UserType.institute:
+                                      route = '/accounting/institute';
+                                      break;
+                                    case UserType.other:
+                                      route = '/accounting/other';
+                                      break;
+                                  }
+                                  await Navigator.pushNamed(context, route,
+                                      arguments: model);
+                                  await _loadPageTitles();
+                                }
+                                await _loadRecents();
+                              },
                       ),
                     ],
                   ),
@@ -655,33 +622,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // Recent Pages Section
                 if (_recents.isNotEmpty) ...[
-                  const SizedBox(height: 24),
-                  Container(
-                    width: double.infinity,
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF27272A) : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.06),
-                          blurRadius: 24,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
+                  const SizedBox(height: 32),
+                  PremiumCard(
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Recent Pages',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color:
-                                isDark ? Colors.white : const Color(0xFF0F172A),
-                          ),
+                        Row(
+                          children: [
+                            Icon(Icons.history_rounded,
+                                size: 20,
+                                color: Theme.of(context).primaryColor),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Recent Pages',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF0F172A),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         ...List.generate(
@@ -692,55 +655,74 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _userTypeForTemplate(recent.templateKey);
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 8),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 4),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                tileColor: isDark
-                                    ? const Color(0xFF3F3F46)
-                                    : const Color(0xFFF1F5F9),
-                                leading: Icon(
-                                  Icons.history,
-                                  color: const Color(0xFF6366F1),
-                                ),
-                                title: Text(
-                                  recent.displayTitle,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: isDark
-                                        ? Colors.white
-                                        : const Color(0xFF0F172A),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () async {
+                                    final model =
+                                        AccountingModel(userType: userType);
+                                    await model.loadFromPrefs();
+                                    final route =
+                                        _routeForTemplate(recent.templateKey);
+                                    await Navigator.pushNamed(context, route,
+                                        arguments: model);
+                                    await _loadPageTitles();
+                                    await _loadRecents();
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? const Color(0xFF1E293B)
+                                          : const Color(0xFFF8FAFC),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: isDark
+                                            ? const Color(0xFF334155)
+                                            : const Color(0xFFE2E8F0),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                recent.displayTitle,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : const Color(0xFF0F172A),
+                                                ),
+                                              ),
+                                              Text(
+                                                userTypeConfigs[userType]!.name,
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: isDark
+                                                      ? const Color(0xFF94A3B8)
+                                                      : const Color(0xFF64748B),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 16,
+                                          color: isDark
+                                              ? const Color(0xFF94A3B8)
+                                              : const Color(0xFF94A3B8),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                subtitle: Text(
-                                  userTypeConfigs[userType]!.name,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isDark
-                                        ? const Color(0xFFA1A1AA)
-                                        : const Color(0xFF64748B),
-                                  ),
-                                ),
-                                trailing: Icon(
-                                  Icons.arrow_forward_ios,
-                                  size: 16,
-                                  color: isDark
-                                      ? const Color(0xFFA1A1AA)
-                                      : const Color(0xFF64748B),
-                                ),
-                                onTap: () async {
-                                  final model =
-                                      AccountingModel(userType: userType);
-                                  await model.loadFromPrefs();
-                                  final route =
-                                      _routeForTemplate(recent.templateKey);
-                                  await Navigator.pushNamed(context, route,
-                                      arguments: model);
-                                  await _loadPageTitles();
-                                  await _loadRecents();
-                                },
                               ),
                             );
                           },
@@ -751,39 +733,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
 
                 // Features Section
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 Container(
                   width: double.infinity,
                   constraints: const BoxConstraints(maxWidth: 600),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF27272A) : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.06),
-                        blurRadius: 24,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildFeatureItem(
-                        icon: Icons.account_balance_wallet_outlined,
+                        icon: Icons.receipt_long_rounded,
                         label: 'Track\nReceipts',
                         isDark: isDark,
+                        context: context,
                       ),
                       _buildFeatureItem(
-                        icon: Icons.payments_outlined,
+                        icon: Icons.payments_rounded,
                         label: 'Track\nPayments',
                         isDark: isDark,
+                        context: context,
                       ),
                       _buildFeatureItem(
-                        icon: Icons.assessment_outlined,
-                        label: 'Detailed\nReports',
+                        icon: Icons.analytics_rounded,
+                        label: 'Smart\nReports',
                         isDark: isDark,
+                        context: context,
                       ),
                     ],
                   ),
@@ -800,32 +773,46 @@ class _HomeScreenState extends State<HomeScreen> {
     required IconData icon,
     required String label,
     required bool isDark,
+    required BuildContext context,
   }) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: const Color(0xFF6366F1),
-              size: 28,
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: isDark
+                ? []
+                : [
+                    BoxShadow(
+                      color: const Color(0xFF64748B).withValues(alpha: 0.08),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+            border: Border.all(
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color:
-                    isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
-                height: 1.3,
-              ),
-            ),
-          ],
+          ),
+          child: Icon(
+            icon,
+            color: Theme.of(context).primaryColor,
+            size: 28,
+          ),
         ),
-      ),
+        const SizedBox(height: 12),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            height: 1.2,
+          ),
+        ),
+      ],
     );
   }
 }

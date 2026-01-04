@@ -40,7 +40,7 @@ class _MainScreenState extends State<MainScreen> {
         elevation: 8,
         height: 70,
         backgroundColor: isDark ? const Color(0xFF27272A) : Colors.white,
-        indicatorColor: const Color(0xFF6366F1).withOpacity(0.2),
+        indicatorColor: const Color(0xFF6366F1).withValues(alpha: 0.2),
         animationDuration: const Duration(milliseconds: 400),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: const [

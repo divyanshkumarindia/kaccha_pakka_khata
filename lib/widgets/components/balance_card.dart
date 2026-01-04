@@ -50,15 +50,33 @@ class _BalanceCardState extends State<BalanceCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            widget.isDark ? const Color(0xFF1C2A22) : const Color(0xFFF0FFF4),
+        gradient: widget.isDark
+            ? const LinearGradient(
+                colors: [Color(0xFF1F2937), Color(0xFF111827)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : const LinearGradient(
+                colors: [Colors.white, Color(0xFFF8FAFC)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
         border: Border.all(
           color:
-              widget.isDark ? const Color(0xFF2D4A3A) : const Color(0xFFD4F3E1),
+              widget.isDark ? const Color(0xFF374151) : const Color(0xFFE2E8F0),
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: widget.isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: const Color(0xFF64748B).withValues(alpha: 0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,10 +92,15 @@ class _BalanceCardState extends State<BalanceCard> {
                       backgroundColor: widget.isDark
                           ? const Color(0xFF1F2937)
                           : Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
                       title: Text(
                         'Edit Title',
                         style: TextStyle(
-                          color: widget.isDark ? Colors.white : Colors.black87,
+                          color: widget.isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       content: TextField(
@@ -85,43 +108,24 @@ class _BalanceCardState extends State<BalanceCard> {
                         autofocus: true,
                         style: TextStyle(
                           fontSize: 16,
-                          color: widget.isDark ? Colors.white : Colors.black87,
+                          color: widget.isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
                         ),
                         decoration: InputDecoration(
                           hintText: 'Enter title',
                           hintStyle: TextStyle(
                             color: widget.isDark
-                                ? const Color(0xFF6B7280)
-                                : const Color(0xFF9CA3AF),
+                                ? const Color(0xFF64748B)
+                                : const Color(0xFF94A3B8),
                           ),
                           filled: true,
                           fillColor: widget.isDark
                               ? const Color(0xFF374151)
-                              : const Color(0xFFF9FAFB),
+                              : const Color(0xFFF1F5F9),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                              color: widget.isDark
-                                  ? const Color(0xFF4B5563)
-                                  : const Color(0xFFD1D5DB),
-                              width: 1.5,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                              color: widget.isDark
-                                  ? const Color(0xFF4B5563)
-                                  : const Color(0xFFD1D5DB),
-                              width: 1.5,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Color(0xFF6366F1),
-                              width: 2,
-                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
                           ),
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
@@ -134,8 +138,8 @@ class _BalanceCardState extends State<BalanceCard> {
                             'Cancel',
                             style: TextStyle(
                               color: widget.isDark
-                                  ? const Color(0xFF9CA3AF)
-                                  : const Color(0xFF6B7280),
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B),
                             ),
                           ),
                         ),
@@ -143,6 +147,10 @@ class _BalanceCardState extends State<BalanceCard> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF6366F1),
                             foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                           onPressed: () =>
                               Navigator.pop(context, controller.text.trim()),
@@ -157,31 +165,38 @@ class _BalanceCardState extends State<BalanceCard> {
                     widget.onTitleChanged!(res);
                   }
                 },
-                child: const Icon(
-                  Icons.edit_outlined,
-                  size: 16,
-                  color: Color(0xFF059669),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.edit_outlined,
+                    size: 14,
+                    color: Color(0xFF6366F1),
+                  ),
                 ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   widget.title,
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: widget.isDark
-                        ? const Color(0xFFE5E7EB)
-                        : const Color(0xFF374151),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color:
+                        widget.isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
+                flex: 3,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -189,70 +204,81 @@ class _BalanceCardState extends State<BalanceCard> {
                       'Description/Source',
                       style: TextStyle(
                         fontSize: 12,
+                        fontWeight: FontWeight.w500,
                         color: widget.isDark
-                            ? const Color(0xFF9CA3AF)
-                            : const Color(0xFF6B7280),
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     TextField(
                       controller: descriptionController,
                       onChanged: widget.onDescriptionChanged,
                       decoration: InputDecoration(
-                        hintText: 'Previous End Date',
+                        hintText: 'e.g. Previous Balance',
                         hintStyle: TextStyle(
-                          fontSize: 12,
+                          fontSize: 13,
                           color: widget.isDark
-                              ? const Color(0xFF6B7280)
-                              : const Color(0xFF9CA3AF),
+                              ? const Color(0xFF64748B)
+                              : const Color(0xFF94A3B8),
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(
                             color: widget.isDark
-                                ? const Color(0xFF4B5563)
-                                : const Color(0xFFD1D5DB),
+                                ? const Color(0xFF374151)
+                                : const Color(0xFFCBD5E1),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(
                             color: widget.isDark
-                                ? const Color(0xFF4B5563)
-                                : const Color(0xFFD1D5DB),
+                                ? const Color(0xFF374151)
+                                : const Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF6366F1),
+                            width: 1.5,
                           ),
                         ),
                         filled: true,
                         fillColor: widget.isDark
-                            ? const Color(0xFF374151)
+                            ? const Color(0xFF111827)
                             : Colors.white,
-                        contentPadding: const EdgeInsets.all(8),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
                       ),
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
                         color: widget.isDark
-                            ? const Color(0xFFF9FAFB)
-                            : const Color(0xFF111827),
+                            ? Colors.white
+                            : const Color(0xFF0F172A),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Expanded(
+                flex: 2,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Amount B/F:',
+                      'Amount',
                       style: TextStyle(
                         fontSize: 12,
+                        fontWeight: FontWeight.w500,
                         color: widget.isDark
-                            ? const Color(0xFF9CA3AF)
-                            : const Color(0xFF6B7280),
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     TextField(
                       controller: amountController,
                       onChanged: widget.onAmountChanged,
@@ -266,38 +292,47 @@ class _BalanceCardState extends State<BalanceCard> {
                       decoration: InputDecoration(
                         hintText: '0',
                         hintStyle: TextStyle(
-                          fontSize: 12,
+                          fontSize: 13,
                           color: widget.isDark
-                              ? const Color(0xFF6B7280)
-                              : const Color(0xFF9CA3AF),
+                              ? const Color(0xFF64748B)
+                              : const Color(0xFF94A3B8),
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(
                             color: widget.isDark
-                                ? const Color(0xFF4B5563)
-                                : const Color(0xFFD1D5DB),
+                                ? const Color(0xFF374151)
+                                : const Color(0xFFCBD5E1),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(
                             color: widget.isDark
-                                ? const Color(0xFF4B5563)
-                                : const Color(0xFFD1D5DB),
+                                ? const Color(0xFF374151)
+                                : const Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF6366F1),
+                            width: 1.5,
                           ),
                         ),
                         filled: true,
                         fillColor: widget.isDark
-                            ? const Color(0xFF374151)
+                            ? const Color(0xFF111827)
                             : Colors.white,
-                        contentPadding: const EdgeInsets.all(8),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
                       ),
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
                         color: widget.isDark
-                            ? const Color(0xFFF9FAFB)
-                            : const Color(0xFF111827),
+                            ? Colors.white
+                            : const Color(0xFF0F172A),
                       ),
                     ),
                   ],
