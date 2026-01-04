@@ -78,30 +78,37 @@ class ReportModal extends StatelessWidget {
     final excel = Excel.createExcel();
     final sheet = excel['Report'];
 
-    sheet.appendRow(['Firm', model.firmName]);
+    sheet.appendRow([TextCellValue('Firm'), TextCellValue(model.firmName)]);
     sheet.appendRow([
-      'Period',
-      model.duration.toString().split('.').last,
-      model.periodDate
+      TextCellValue('Period'),
+      TextCellValue(model.duration.toString().split('.').last),
+      TextCellValue(model.periodDate)
     ]);
-    sheet.appendRow([]);
+    sheet.appendRow(<CellValue?>[]);
 
-    sheet.appendRow(['Opening Balances', '', '']);
-    sheet.appendRow(['Cash', model.openingCash]);
-    sheet.appendRow(['Bank', model.openingBank]);
-    sheet.appendRow(['Other', model.openingOther]);
-    sheet.appendRow([]);
+    sheet.appendRow([
+      TextCellValue('Opening Balances'),
+      TextCellValue(''),
+      TextCellValue('')
+    ]);
+    sheet
+        .appendRow([TextCellValue('Cash'), DoubleCellValue(model.openingCash)]);
+    sheet
+        .appendRow([TextCellValue('Bank'), DoubleCellValue(model.openingBank)]);
+    sheet.appendRow(
+        [TextCellValue('Other'), DoubleCellValue(model.openingOther)]);
+    sheet.appendRow(<CellValue?>[]);
 
-    sheet.appendRow(['Receipts', 'Amount']);
+    sheet.appendRow([TextCellValue('Receipts'), TextCellValue('Amount')]);
     for (var e in model.receiptAccounts.entries) {
       final amount = model.calculateEntriesTotal(e.value);
-      sheet.appendRow([e.key, amount]);
+      sheet.appendRow([TextCellValue(e.key), DoubleCellValue(amount)]);
     }
-    sheet.appendRow([]);
-    sheet.appendRow(['Payments', 'Amount']);
+    sheet.appendRow(<CellValue?>[]);
+    sheet.appendRow([TextCellValue('Payments'), TextCellValue('Amount')]);
     for (var e in model.paymentAccounts.entries) {
       final amount = model.calculateEntriesTotal(e.value);
-      sheet.appendRow([e.key, amount]);
+      sheet.appendRow([TextCellValue(e.key), DoubleCellValue(amount)]);
     }
 
     final _ = excel.encode();

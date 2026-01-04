@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider<AccountingModel>(
       create: (_) => AccountingModel(userType: UserType.personal),
       child: Consumer<AccountingModel>(
-        builder: (context, model, child) {
+        builder: (context, model, child) { 
           // Determine theme mode
           ThemeMode themeMode;
           switch (model.themeMode) {
