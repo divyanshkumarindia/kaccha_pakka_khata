@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
+import '../services/auth_service.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -14,6 +15,8 @@ class _AuthScreenState extends State<AuthScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  final _authService = AuthService();
+  bool _isGoogleLoading = false;
 
   @override
   void initState() {
@@ -40,6 +43,22 @@ class _AuthScreenState extends State<AuthScreen>
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isGoogleLoading = true);
+    try {
+      await _authService.signInWithGoogle();
+      // Navigation handled by StreamBuilder in main.dart
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Google Sign-In failed: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
+    }
   }
 
   @override
@@ -161,6 +180,77 @@ class _AuthScreenState extends State<AuthScreen>
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Divider
+                  Container(
+                    constraints: const BoxConstraints(maxWidth: 320),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            color: isDark ? Colors.grey[700] : Colors.grey[300],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'or',
+                            style: TextStyle(
+                              color:
+                                  isDark ? Colors.grey[500] : Colors.grey[500],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            color: isDark ? Colors.grey[700] : Colors.grey[300],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Google Sign-In Button
+                  Container(
+                    width: double.infinity,
+                    constraints: const BoxConstraints(maxWidth: 320),
+                    child: OutlinedButton.icon(
+                      onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
+                      icon: _isGoogleLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Image.network(
+                              'https://www.google.com/favicon.ico',
+                              width: 20,
+                              height: 20,
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.g_mobiledata, size: 24),
+                            ),
+                      label: const Text(
+                        'Continue with Google',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: isDark ? Colors.white : Colors.black87,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(
+                          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                     ),
