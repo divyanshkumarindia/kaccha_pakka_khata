@@ -65,11 +65,6 @@ class AuthService {
     );
   }
 
-  // Sign In Anonymously (Guest)
-  Future<AuthResponse> signInAnonymously() async {
-    return await _supabase.auth.signInAnonymously();
-  }
-
   // Reset Password
   Future<void> resetPassword({required String email}) async {
     await _supabase.auth.resetPasswordForEmail(email);

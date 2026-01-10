@@ -255,38 +255,6 @@ class _AuthScreenState extends State<AuthScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-
-                  // Guest Button
-                  Container(
-                    width: double.infinity,
-                    constraints: const BoxConstraints(maxWidth: 320),
-                    child: TextButton(
-                      onPressed: () async {
-                        try {
-                          await _authService.signInAnonymously();
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Guest login failed: $e')),
-                            );
-                          }
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor:
-                            isDark ? Colors.grey[400] : Colors.grey[600],
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text(
-                        'Enter as Guest',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
