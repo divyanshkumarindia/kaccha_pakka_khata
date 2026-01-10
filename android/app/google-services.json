@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "312529416386",
+    "project_id": "my-daily-balance-d9bc9",
+    "storage_bucket": "my-daily-balance-d9bc9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312529416386:android:3f48220b1d8733c671cb5b",
+        "android_client_info": {
+          "package_name": "com.example.my_daily_balance_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "312529416386-ep38fvebmpg0d8karg0fd991kur05jla.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.my_daily_balance_flutter",
+            "certificate_hash": "cd781a9264ee8c98bc46d485513417d1d530ff77"
+          }
+        },
+        {
+          "client_id": "312529416386-p2uvi5hji28ueors84h15ul4s0l44t9g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrqeHlLN9lxfDJn2WGU6UKqN5KyA4lxJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "312529416386-p2uvi5hji28ueors84h15ul4s0l44t9g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
