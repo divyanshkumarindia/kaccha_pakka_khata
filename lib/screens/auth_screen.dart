@@ -230,9 +230,9 @@ class _AuthScreenState extends State<AuthScreen>
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Image.network(
-                              'https://www.google.com/favicon.ico',
-                              width: 20,
-                              height: 20,
+                              'https://lh3.googleusercontent.com/COxitqgJr1sJnIDe8-jiKhxDx1FrYbtRHKJ9z_hELisAlapwE9LUPh6fcXIfb5vwpbMl4xl9H9TRFPc5NOO8Sb3VSgIBrfRYvW6cUA',
+                              width: 24,
+                              height: 24,
                               errorBuilder: (_, __, ___) =>
                                   const Icon(Icons.g_mobiledata, size: 24),
                             ),
