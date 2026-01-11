@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -38,11 +39,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  // Store the subscription so we can cancel it
+  late final StreamSubscription<AuthState> _authSubscription;
+
   @override
   void initState() {
     super.initState();
     // Listen to auth state changes for logging/persistence debugging
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    _authSubscription =
+        Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       final AuthChangeEvent event = data.event;
       final Session? session = data.session;
 
@@ -52,6 +57,12 @@ class _MyAppState extends State<MyApp> {
         debugPrint("User Signed Out");
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription.cancel(); // Cleans up memory
+    super.dispose();
   }
 
   @override
