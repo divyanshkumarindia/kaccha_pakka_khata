@@ -24,6 +24,7 @@ local.properties
 # Misc
 *.log
 .env
+lib/main_auth_backup.dart
 
 # Miscellaneous
 *.class
