@@ -4612,7 +4612,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   backgroundColor: const Color(0xFF2563EB), // Vibrant Blue
                   foregroundColor: Colors.white,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -4622,8 +4622,8 @@ class _AccountingFormState extends State<AccountingForm> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.save_outlined, size: 28),
-                    const SizedBox(width: 8),
+                    const Icon(Icons.save_outlined, size: 22),
+                    const SizedBox(width: 6),
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -4857,15 +4857,39 @@ class _AccountingFormState extends State<AccountingForm> {
                           ),
                           child: Column(
                             children: [
-                              Text(
-                                'Closing Balance (C/F)',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: isDark
-                                      ? const Color(0xFFD1D5DB)
-                                      : const Color(0xFF4B5563),
-                                ),
+                              Column(
+                                children: [
+                                  Text(
+                                    'Closing Balance (C/F)',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark
+                                          ? const Color(0xFFD1D5DB)
+                                          : const Color(0xFF4B5563),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    model.duration == DurationType.Daily
+                                        ? "Tomorrow's Opening Balance"
+                                        : model.duration == DurationType.Weekly
+                                            ? "Next Week's Opening Balance"
+                                            : model.duration ==
+                                                    DurationType.Monthly
+                                                ? "Next Month's Opening Balance"
+                                                : "Next Year's Opening Balance",
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w400,
+                                      color: isDark
+                                          ? const Color(0xFF9CA3AF)
+                                          : const Color(0xFF6B7280),
+                                      letterSpacing: 0.3,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: 8),
                               Text(
