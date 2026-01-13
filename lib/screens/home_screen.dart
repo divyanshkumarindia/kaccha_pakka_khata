@@ -487,26 +487,76 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
+        toolbarHeight: 70, // Increase height for two-line text
         title: Row(
           children: [
+            // Logo Icon
             Container(
-              padding: const EdgeInsets.all(8),
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+                color: const Color(0xFF00C853), // Vivid Green
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00C853).withOpacity(0.3),
+                    spreadRadius: 1,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              child: Icon(
-                Icons.account_balance_wallet_rounded,
-                color: Theme.of(context).primaryColor,
-                size: 20,
+              child: const Icon(
+                Icons.menu_book_rounded,
+                color: Colors.white,
+                size: 24,
               ),
             ),
             const SizedBox(width: 12),
+            // Title and Subtitle
             Expanded(
-              child: Text(
-                'My Kaccha-Pakka Khata',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Main Title: KAACHA PAKKA KHATA
+                  RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900, // Extra Bold
+                        height: 1.1,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'KAACHA PAKKA ',
+                          style: TextStyle(
+                            color:
+                                isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                        ),
+                        const TextSpan(
+                          text: 'KHATA',
+                          style: TextStyle(
+                            color: Color(0xFF00C853), // Matching Green
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  // Subtitle: PREMIUM DIGITAL LEDGER
+                  Text(
+                    'PREMIUM DIGITAL LEDGER',
+                    style: GoogleFonts.outfit(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF94A3B8), // Slate 400
+                      letterSpacing: 1.5, // Spaced out letters
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -526,27 +576,101 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (context, model, child) {
                     final name = model.userName;
                     return Text(
-                      name != null ? 'Welcome, $name!' : 'Welcome User!',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color:
-                                isDark ? Colors.white : const Color(0xFF0F172A),
-                          ),
+                      name != null
+                          ? 'Hi, $name 👋'
+                          : 'Hello there! 👋', // Added wave emoji and casual tone
+                      style: GoogleFonts.outfit(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? Colors.white
+                            : const Color(0xFF334155), // Slate 700
+                        letterSpacing: -0.5,
+                      ),
                     );
                   },
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Premium Financial Management',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: isDark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF64748B),
-                        fontSize: 16,
+                const SizedBox(height: 24),
+
+                // Hero Section
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Main Hero Title
+                    RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.outfit(
+                          fontSize: 36, // Large Hero Title
+                          fontWeight: FontWeight.w800,
+                          height: 1.1,
+                          letterSpacing: -0.5,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'Simplify your\n',
+                            style: TextStyle(
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF0F172A),
+                            ),
+                          ),
+                          const TextSpan(
+                            text: 'Business Accounting.',
+                            style: TextStyle(
+                              color: Color(0xFF00C853), // Vivid Green
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Hero Description
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          right: 40.0), // Give it some breathing room
+                      child: Text(
+                        'The easiest way for small businesses to track daily cash flow and generate reports.',
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B), // Slate 500
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // Trust Badge (Placed below as requested)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9), // Light Green bg
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.verified_user_outlined,
+                            size: 16,
+                            color: Color(0xFF00C853), // Eco Green Icon
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '100% SAFE & SECURE',
+                            style: GoogleFonts.outfit(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1B5E20), // Dark Green Text
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 32),
@@ -567,9 +691,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Grid Layout for Use Cases
-                      LayoutBuilder(
-                        builder: (context, constraints) {
+                      // Use Case List with Builder to allow logic
+                      Builder(
+                        builder: (context) {
                           // Prepare list of items
                           final List<Map<String, dynamic>> items = [];
 
@@ -577,28 +701,37 @@ class _HomeScreenState extends State<HomeScreen> {
                           for (var ut in UserType.values) {
                             IconData icon;
                             Color color;
+                            String subtitle;
+
                             switch (ut) {
                               case UserType.personal:
-                                icon = Icons.family_restroom_rounded;
-                                color = const Color(0xFFEF4444); // Red
+                                icon =
+                                    Icons.groups_rounded; // Family group icon
+                                color = const Color(
+                                    0xFF00C853); // Green (Matches Image)
+                                subtitle = 'HOME EXPENSES & SAVINGS';
                                 break;
                               case UserType.business:
                                 icon = Icons.store_rounded;
-                                color = const Color(0xFF10B981); // Emerald
+                                color = const Color(0xFF2563EB); // Blue
+                                subtitle = 'DAILY CASH FLOW & PROFITS';
                                 break;
                               case UserType.institute:
                                 icon = Icons.school_rounded;
-                                color = const Color(0xFF2563EB); // Blue
+                                color = const Color(0xFF7C3AED); // Purple
+                                subtitle = 'FEES & STAFF SALARIES';
                                 break;
                               case UserType.other:
                                 icon = Icons.category_rounded;
                                 color = const Color(0xFFF59E0B); // Amber
+                                subtitle = 'CUSTOM LEDGER & TRACKING';
                                 break;
                             }
                             items.add({
                               'id': 'standard_${ut.toString().split('.').last}',
                               'title': displayTitles[ut] ??
                                   userTypeConfigs[ut]!.name,
+                              'subtitle': subtitle,
                               'icon': icon,
                               'type': 'standard',
                               'userType': ut,
@@ -609,34 +742,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           // Palette for custom pages to ensure variety
                           final palette = [
                             const Color(0xFFEF4444), // Red
-                            const Color(0xFF2563EB), // Blue
-                            const Color(0xFFCA8A04), // Yellow/Gold
-                            const Color(0xFF9333EA), // Purple
-                            const Color(0xFF10B981), // Emerald
-                            const Color(0xFFEA580C), // Orange
                             const Color(0xFF0891B2), // Cyan
                             const Color(0xFFDB2777), // Pink
-                            const Color(0xFF65A30D), // Lime
-                            const Color(0xFF4F46E5), // Indigo
-                            const Color(0xFFDC2626), // Deep Orange
-                            const Color(0xFF0D9488), // Teal
-                            const Color(0xFF7C3AED), // Violet
-                            const Color(0xFFD97706), // Amber
-                            const Color(0xFF0284C7), // Light Blue
-                            const Color(0xFFC026D3), // Fuchsia
-                            const Color(0xFF16A34A), // Green
-                            const Color(0xFF795548), // Brown
-                            const Color(0xFF607D8B), // Blue Grey
+                            const Color(0xFFEA580C), // Orange
                           ];
 
                           // Add custom pages
                           int customIndex = 0;
                           customPages.forEach((key, value) {
-                            // Sequential assignment to avoid repeats until palette is exhausted
                             final colorIndex = customIndex % palette.length;
                             items.add({
                               'id': key,
                               'title': value,
+                              'subtitle': 'CUSTOM TRACKING',
                               'icon': Icons.star_rounded,
                               'type': 'custom',
                               'color': palette[colorIndex],
@@ -648,87 +766,137 @@ class _HomeScreenState extends State<HomeScreen> {
                           items.add({
                             'id': 'add_new',
                             'title': 'Add New Page',
+                            'subtitle': 'CREATE NEW CATEGORY',
                             'icon': Icons.add_rounded,
                             'type': 'add_new',
                             'color': const Color(0xFF94A3B8), // Neutral Gray
                           });
 
-                          return GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 1.1, // Adjust for card height
-                            ),
-                            itemCount: items.length,
-                            itemBuilder: (context, index) {
-                              final item = items[index];
-                              final isSelected = selectedPageId == item['id'];
-                              final Color itemColor =
-                                  item['color'] as Color; // Use item color
+                          return Column(
+                            children: items.map((item) {
+                              final itemColor = item['color'] as Color;
+                              final isAddNew = item['type'] == 'add_new';
 
-                              return InkWell(
-                                onTap: () {
-                                  if (item['type'] == 'add_new') {
-                                    _showAddNewPageDialog(context);
-                                  } else {
-                                    _handleNavigation(item);
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(16),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: itemColor.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: itemColor.withValues(alpha: 0.6),
-                                      width: 1.5,
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: InkWell(
+                                  onTap: () {
+                                    if (isAddNew) {
+                                      _showAddNewPageDialog(context);
+                                    } else {
+                                      _handleNavigation(item);
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 20),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? const Color(0xFF1F2937)
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(24),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isDark
+                                              ? Colors.black26
+                                              : Colors.grey.withOpacity(0.05),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                      border: Border.all(
+                                        color: isDark
+                                            ? const Color(0xFF374151)
+                                            : Colors.grey.withOpacity(0.1),
+                                        width: 1,
+                                      ),
                                     ),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: itemColor.withValues(
-                                              alpha: 0.1), // Fixed tint
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          item['icon'] as IconData,
-                                          color: itemColor, // Vibrant icon
-                                          size: 24,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8),
-                                        child: Text(
-                                          item['title'] as String,
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: isSelected
-                                                ? FontWeight.bold
-                                                : FontWeight.w600,
-                                            color: isDark
-                                                ? Colors.white
-                                                : const Color(0xFF1E293B),
+                                    child: Row(
+                                      children: [
+                                        // Leading Icon
+                                        Container(
+                                          width: 48,
+                                          height: 48,
+                                          decoration: BoxDecoration(
+                                            color: itemColor.withOpacity(0.1),
+                                            shape: BoxShape.circle,
                                           ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
+                                          child: Icon(
+                                            item['icon'] as IconData,
+                                            color: itemColor,
+                                            size: 24,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(width: 16),
+                                        // Text Content
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                item['title'] as String,
+                                                style: GoogleFonts.outfit(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isAddNew
+                                                      ? itemColor
+                                                      : (itemColor ==
+                                                              const Color(
+                                                                  0xFF00C853)
+                                                          ? itemColor
+                                                          : (isDark
+                                                              ? Colors.white
+                                                              : const Color(
+                                                                  0xFF0F172A))),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                item['subtitle'] as String,
+                                                style: GoogleFonts.outfit(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: isDark
+                                                      ? const Color(0xFF94A3B8)
+                                                      : const Color(0xFF94A3B8),
+                                                  letterSpacing: 0.5,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        // Trailing Arrow
+                                        Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: isAddNew
+                                                ? Colors.transparent
+                                                : itemColor,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: isAddNew
+                                                ? Border.all(
+                                                    color: itemColor, width: 2)
+                                                : null,
+                                          ),
+                                          child: Icon(
+                                            Icons.arrow_forward_rounded,
+                                            color: isAddNew
+                                                ? itemColor
+                                                : Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
-                            },
+                            }).toList(),
                           );
                         },
                       ),
