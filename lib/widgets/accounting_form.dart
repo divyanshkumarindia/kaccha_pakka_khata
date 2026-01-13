@@ -4942,30 +4942,39 @@ class _AccountingFormState extends State<AccountingForm> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Save Report',
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.bold,
-          ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.save_outlined,
+                color: isDark ? Colors.white : const Color(0xFF111827)),
+            const SizedBox(width: 12),
+            Text(
+              'Save Report',
+              style: TextStyle(
+                color: isDark ? Colors.white : const Color(0xFF111827),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Save the current report state to access or edit it later.',
+              'Give this snapshot a name to easily edit it later.',
               style: TextStyle(
                 fontSize: 14,
                 color:
                     isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             TextField(
               controller: nameController,
               style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
+                color: isDark ? Colors.white : const Color(0xFF111827),
+                fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
                 labelText: 'Report Name',
@@ -4974,6 +4983,11 @@ class _AccountingFormState extends State<AccountingForm> {
                       ? const Color(0xFF9CA3AF)
                       : const Color(0xFF6B7280),
                 ),
+                prefixIcon: Icon(Icons.edit_outlined,
+                    size: 18,
+                    color: isDark
+                        ? const Color(0xFF9CA3AF)
+                        : const Color(0xFF6B7280)),
                 filled: true,
                 fillColor:
                     isDark ? const Color(0xFF374151) : const Color(0xFFF9FAFB),
@@ -4981,20 +4995,28 @@ class _AccountingFormState extends State<AccountingForm> {
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+                ),
               ),
             ),
           ],
         ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color:
-                    isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
-              ),
+            style: TextButton.styleFrom(
+              foregroundColor:
+                  isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
             ),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -5014,14 +5036,25 @@ class _AccountingFormState extends State<AccountingForm> {
                 );
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0F172A),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.resolveWith((states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return const Color(0xFF1E40AF); // Darker Blue when pressed
+                }
+                return const Color(0xFF2563EB); // Vibrant Blue default
+              }),
+              foregroundColor: MaterialStateProperty.all(Colors.white),
+              padding: MaterialStateProperty.all(
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+              shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              )),
+              elevation: MaterialStateProperty.all(0),
             ),
-            child: const Text('Save'),
+            child: const Text(
+              'Save',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
