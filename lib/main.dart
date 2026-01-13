@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'state/accounting_model.dart';
 import 'models/accounting.dart';
 import 'screens/accounting_template_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: const MainScreen(),
       routes: {
         '/accounting/family': (context) =>
             const AccountingTemplateScreen(templateKey: 'family'),

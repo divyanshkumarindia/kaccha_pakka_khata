@@ -505,7 +505,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     offset: const Offset(0, 2),
                   ),
                 ],
-              ),
+              ),  
               child: const Icon(
                 Icons.menu_book_rounded,
                 color: Colors.white,
@@ -1017,6 +1017,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ],
+                const SizedBox(height: 100), // Padding for floating nav bar
               ],
             ),
           ),

@@ -15,51 +15,90 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    const HomeScreen(),
-    const SavedReportsScreen(),
-    const SettingsScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _currentIndex,
-        children: _pages,
+        children: [
+          const HomeScreen(),
+          const SavedReportsScreen(),
+          const SettingsScreen(),
+          Container(
+            color: isDark ? const Color(0xFF111827) : Colors.white,
+            child: const Center(
+              child: Text('Profile Coming Soon'),
+            ),
+          ),
+        ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          height: 80,
+          margin: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B), // Dark Navy Blue
+            borderRadius: BorderRadius.circular(40),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildNavItem(0, 'HOME', Icons.home_outlined),
+              _buildNavItem(1, 'REPORTS', Icons.pie_chart_outline),
+              _buildNavItem(2, 'SETTINGS', Icons.settings_outlined),
+              _buildNavItem(3, 'PROFILE', Icons.person_outline),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, String label, IconData icon) {
+    final isSelected = _currentIndex == index;
+    final color = isSelected ? const Color(0xFF60A5FA) : Colors.white;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
           setState(() {
             _currentIndex = index;
           });
         },
-        elevation: 8,
-        height: 70,
-        backgroundColor: isDark ? const Color(0xFF27272A) : Colors.white,
-        indicatorColor: const Color(0xFF6366F1).withValues(alpha: 0.2),
-        animationDuration: const Duration(milliseconds: 400),
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bookmark_border),
-            selectedIcon: Icon(Icons.bookmark),
-            label: 'Saved',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 26,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(
+                height: 8), // Adjusted spacing to lift text above dot
+          ],
+        ),
       ),
     );
   }
