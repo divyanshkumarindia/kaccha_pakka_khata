@@ -35,8 +35,8 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: SafeArea(
         child: Container(
-          height: 80,
-          margin: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
+          height: 74,
+          margin: const EdgeInsets.only(left: 24, right: 24, bottom: 20),
           decoration: BoxDecoration(
             color: const Color(0xFF1E293B), // Dark Navy Blue
             borderRadius: BorderRadius.circular(40),
@@ -58,8 +58,6 @@ class _MainScreenState extends State<MainScreen> {
                       1, model.t('nav_reports'), Icons.pie_chart_outline),
                   _buildNavItem(
                       2, model.t('nav_settings'), Icons.settings_outlined),
-                  _buildNavItem(
-                      3, model.t('nav_profile'), Icons.person_outline),
                 ],
               );
             },
@@ -77,13 +75,9 @@ class _MainScreenState extends State<MainScreen> {
         return const SavedReportsScreen();
       case 2:
         return const SettingsScreen();
-      case 3:
       default:
         return Container(
           color: isDark ? const Color(0xFF111827) : Colors.white,
-          child: const Center(
-            child: Text('Profile Coming Soon'),
-          ),
         );
     }
   }
@@ -132,7 +126,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
             const SizedBox(
-                height: 8), // Adjusted spacing to lift text above dot
+                height: 2), // Reduced from 8 to 2 to move items downwards
           ],
         ),
       ),
