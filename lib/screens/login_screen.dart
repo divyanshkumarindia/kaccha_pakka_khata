@@ -304,49 +304,57 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 24),
 
-                      // Social Buttons (Google & Apple)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildSocialButton(
-                            icon: RichText(
-                              text: const TextSpan(
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                                children: [
-                                  TextSpan(
-                                      text: 'G',
-                                      style: TextStyle(color: Colors.blue)),
-                                  TextSpan(
-                                      text: 'o',
-                                      style: TextStyle(color: Colors.red)),
-                                  TextSpan(
-                                      text: 'o',
-                                      style: TextStyle(color: Colors.orange)),
-                                  TextSpan(
-                                      text: 'g',
-                                      style: TextStyle(color: Colors.blue)),
-                                  TextSpan(
-                                      text: 'l',
-                                      style: TextStyle(color: Colors.green)),
-                                  TextSpan(
-                                      text: 'e',
-                                      style: TextStyle(color: Colors.red)),
-                                ],
+                      // Continue with Google Button
+                      OutlinedButton(
+                        onPressed: _isLoading ? null : _googleSignIn,
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16), // Reduced vertical padding
+                          side: BorderSide(color: borderColor),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          backgroundColor:
+                              isDark ? const Color(0xFF111827) : Colors.white,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Acutal Google G Icon
+                            Image.network(
+                              'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/480px-Google_%22G%22_logo.svg.png',
+                              height: 24,
+                              width: 24,
+                              errorBuilder: (context, error, stackTrace) {
+                                // Fallback if offline
+                                return RichText(
+                                  text: const TextSpan(
+                                    style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'sans-serif'),
+                                    children: [
+                                      TextSpan(
+                                          text: 'G',
+                                          style: TextStyle(color: Colors.blue)),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Continue with Google',
+                              style: GoogleFonts.roboto(
+                                // Using Roboto to match standard look
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500, // Medium weight
+                                color: const Color(
+                                    0xFF1F1F1F), // Dark grey/black for text
                               ),
                             ),
-                            onTap: _googleSignIn,
-                            borderColor: borderColor,
-                          ),
-                          const SizedBox(width: 20),
-                          _buildSocialButton(
-                            icon: Icon(Icons.apple, size: 28, color: textColor),
-                            onTap: () {
-                              // Apple Sign in logic placeholder
-                            },
-                            borderColor: borderColor,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
 
                       const Spacer(),
@@ -453,27 +461,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: onVisibilityChanged,
               )
             : null,
-      ),
-    );
-  }
-
-  Widget _buildSocialButton({
-    required Widget icon,
-    required VoidCallback onTap,
-    required Color borderColor,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(50),
-      child: Container(
-        width: 60, // Circular button size
-        height: 60,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: borderColor),
-          // color: Colors.transparent, // Default
-        ),
-        child: Center(child: icon),
       ),
     );
   }
