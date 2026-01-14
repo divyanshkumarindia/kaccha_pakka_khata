@@ -43,34 +43,31 @@ class AuthService {
   // Sign In with Google
   Future<AuthResponse> signInWithGoogle() async {
     try {
-      // Configure GoogleSignIn based on the platform
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId: kWebClientId, // Use clientId for all platforms
-
-        // **REMOVE or comment out the serverClientId line**
-        // serverClientId: kAndroidClientId, // This causes the error on Web
+      // Initialize GoogleSignIn (v7.x uses singleton pattern)
+      await GoogleSignIn.instance.initialize(
+        serverClientId: kWebClientId,
       );
 
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      // Authenticate using the new v7.x API
+      final GoogleSignInAccount? googleUser =
+          await GoogleSignIn.instance.authenticate();
 
       if (googleUser == null) {
         throw Exception('Google Sign-In was cancelled');
       }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final accessToken = googleAuth.accessToken;
+      // Token access is now synchronous in v7.x
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
 
-      if (accessToken == null) {
-        throw Exception('No Access Token found.');
+      if (idToken == null) {
+        throw Exception('No ID Token found.');
       }
 
       // Exchange the tokens for a Supabase session
       return await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
-        idToken: idToken!,
-        accessToken: accessToken,
+        idToken: idToken,
       );
     } catch (e) {
       print("Supabase Google Sign-In Error: $e");
@@ -85,9 +82,8 @@ class AuthService {
 
   // Sign Out
   Future<void> signOut() async {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
     try {
-      await googleSignIn.signOut();
+      await GoogleSignIn.instance.signOut();
     } catch (_) {}
     await _supabase.auth.signOut();
   }

@@ -748,7 +748,8 @@ class AccountingModel extends ChangeNotifier {
       'title': title,
       'date': date,
       'savedAt': DateTime.now().toIso8601String(),
-      'currency': selectedCurrency,
+      'currency': currency,
+      'duration': duration.index,
       'data': reportData,
     };
     _savedReports.insert(0, report);

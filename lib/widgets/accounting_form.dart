@@ -10,6 +10,7 @@ import '../theme.dart';
 import 'components/balance_card.dart';
 import 'components/duration_period_picker.dart';
 import 'components/premium_card.dart';
+import '../utils/report_generator.dart';
 
 /// Shared accounting form widget extracted from the Family screen.
 /// Accepts a `templateKey` so templates can pass different labels/configs later.
@@ -748,10 +749,8 @@ class _AccountingFormState extends State<AccountingForm> {
                       Icons.save,
                       AppTheme.primaryColor,
                       () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Save feature coming soon!')),
-                        );
+                        Navigator.pop(context);
+                        _showSaveReportDialog(context, model);
                       },
                     ),
                     _buildPremiumActionButton(
@@ -759,10 +758,8 @@ class _AccountingFormState extends State<AccountingForm> {
                       Icons.file_download,
                       const Color(0xFF10B981),
                       () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Excel export coming soon!')),
-                        );
+                        Navigator.pop(context);
+                        ReportGenerator.generateAndShareExcel(context, model);
                       },
                     ),
                     _buildPremiumActionButton(
@@ -770,10 +767,8 @@ class _AccountingFormState extends State<AccountingForm> {
                       Icons.picture_as_pdf,
                       AppTheme.paymentColor,
                       () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('PDF export coming soon!')),
-                        );
+                        Navigator.pop(context);
+                        ReportGenerator.generateAndSharePdf(context, model);
                       },
                     ),
                     _buildActionButton(
@@ -783,10 +778,8 @@ class _AccountingFormState extends State<AccountingForm> {
                           ? const Color(0xFF6B7280)
                           : const Color(0xFF374151),
                       () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Print feature coming soon!')),
-                        );
+                        Navigator.pop(context);
+                        ReportGenerator.printReport(context, model);
                       },
                     ),
                   ],
@@ -1356,10 +1349,8 @@ class _AccountingFormState extends State<AccountingForm> {
                       Icons.save,
                       AppTheme.primaryColor,
                       () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Save feature coming soon!')),
-                        );
+                        Navigator.pop(context);
+                        _showSaveReportDialog(context, model);
                       },
                     ),
                     _buildPremiumActionButton(
@@ -1367,10 +1358,8 @@ class _AccountingFormState extends State<AccountingForm> {
                       Icons.file_download,
                       AppTheme.receiptColor,
                       () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Excel export coming soon!')),
-                        );
+                        Navigator.pop(context);
+                        ReportGenerator.generateAndShareExcel(context, model);
                       },
                     ),
                     _buildPremiumActionButton(
@@ -1378,10 +1367,8 @@ class _AccountingFormState extends State<AccountingForm> {
                       Icons.picture_as_pdf,
                       AppTheme.paymentColor,
                       () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('PDF export coming soon!')),
-                        );
+                        Navigator.pop(context);
+                        ReportGenerator.generateAndSharePdf(context, model);
                       },
                     ),
                     _buildActionButton(
@@ -1391,10 +1378,8 @@ class _AccountingFormState extends State<AccountingForm> {
                           ? const Color(0xFF6B7280)
                           : const Color(0xFF374151),
                       () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Print feature coming soon!')),
-                        );
+                        Navigator.pop(context);
+                        ReportGenerator.printReport(context, model);
                       },
                     ),
                   ],

@@ -18,7 +18,7 @@ const Map<String, Map<String, String>> appTranslations = {
         'Select a category below to start managing your daily receipts and payments.',
     'section_use_case': 'Select Your Use Case',
     'card_personal': 'My Personal Account',
-    'card_business': 'My Business/Shop/Firm account',
+    'card_business': 'My Business/Shop/Firm Account',
     'card_institute': 'My institute Account',
     'card_other': 'Other',
     'card_desc_personal': 'Manage family income & expenses',
