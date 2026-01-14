@@ -276,39 +276,35 @@ class _SignupScreenState extends State<SignupScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            RichText(
-                              text: TextSpan(
-                                style: const TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                                children: const [
-                                  TextSpan(
-                                      text: 'G',
-                                      style: TextStyle(color: Colors.blue)),
-                                  TextSpan(
-                                      text: 'o',
-                                      style: TextStyle(color: Colors.red)),
-                                  TextSpan(
-                                      text: 'o',
-                                      style: TextStyle(color: Colors.orange)),
-                                  TextSpan(
-                                      text: 'g',
-                                      style: TextStyle(color: Colors.blue)),
-                                  TextSpan(
-                                      text: 'l',
-                                      style: TextStyle(color: Colors.green)),
-                                  TextSpan(
-                                      text: 'e',
-                                      style: TextStyle(color: Colors.red)),
-                                ],
-                              ),
+                            // Acutal Google G Icon
+                            Image.network(
+                              'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/480px-Google_%22G%22_logo.svg.png',
+                              height: 24,
+                              width: 24,
+                              errorBuilder: (context, error, stackTrace) {
+                                // Fallback if offline
+                                return RichText(
+                                  text: const TextSpan(
+                                    style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'sans-serif'),
+                                    children: [
+                                      TextSpan(
+                                          text: 'G',
+                                          style: TextStyle(color: Colors.blue)),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 12),
                             Text(
                               'Continue with Google',
-                              style: TextStyle(
+                              style: GoogleFonts.roboto(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: textColor,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF1F1F1F),
                               ),
                             ),
                           ],
