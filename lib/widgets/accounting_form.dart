@@ -1950,16 +1950,19 @@ class _AccountingFormState extends State<AccountingForm> {
                                   size: 14,
                                   color: isDark
                                       ? const Color(0xFF9CA3AF)
-                                      : const Color(0xFF6B7280),
+                                      : Colors
+                                          .black, // Changed to black for better visibility
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   model.t('link_back_dashboard'),
                                   style: TextStyle(
                                     fontSize: 14,
+                                    fontWeight: FontWeight
+                                        .w500, // Added slightly bolder weight for readability
                                     color: isDark
                                         ? const Color(0xFF9CA3AF)
-                                        : const Color(0xFF6B7280),
+                                        : Colors.black, // Changed to black
                                   ),
                                 ),
                               ],
@@ -1980,12 +1983,14 @@ class _AccountingFormState extends State<AccountingForm> {
                                     style: TextStyle(
                                       fontSize: 28, // Bigger font size
                                       fontWeight: FontWeight.bold,
-                                      color:
-                                          _headerTitleController.text.isNotEmpty
-                                              ? const Color(0xFF4F46E5)
-                                              : (isDark
-                                                  ? Colors.white24
-                                                  : Colors.black12),
+                                      color: _headerTitleController
+                                              .text.isNotEmpty
+                                          ? const Color(0xFF4F46E5)
+                                          : (isDark
+                                              ? Colors.green.shade800
+                                                  .withOpacity(0.5)
+                                              : Colors.green
+                                                  .shade200), // Very light green ghost text
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -1996,7 +2001,10 @@ class _AccountingFormState extends State<AccountingForm> {
                                       _showHeadingEditDialog(context, isDark),
                                   icon: const Icon(Icons.edit_outlined,
                                       size: 24), // Bigger icon
-                                  color: const Color(0xFF4F46E5),
+                                  color: isDark
+                                      ? const Color(0xFF9CA3AF)
+                                      : const Color(
+                                          0xFF6B7280), // Gray like other pencil
                                   tooltip: model.t('tooltip_edit_heading'),
                                 ),
                               ],
