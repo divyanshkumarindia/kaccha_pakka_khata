@@ -1988,7 +1988,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                           ? const Color(0xFF4F46E5)
                                           : (isDark
                                               ? Colors.green.shade800
-                                                  .withOpacity(0.5)
+                                                  .withValues(alpha: 0.5)
                                               : Colors.green
                                                   .shade200), // Very light green ghost text
                                     ),
