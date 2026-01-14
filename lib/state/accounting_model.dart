@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
+import '../utils/translations.dart';
+
 class AccountingModel extends ChangeNotifier {
   UserType userType;
   String firmName;
@@ -12,14 +14,12 @@ class AccountingModel extends ChangeNotifier {
   String periodDate;
   String periodStartDate;
   String periodEndDate;
+  String language = 'en'; // Default to English ('en' or 'hi')
 
   Map<String, List<TransactionEntry>> receiptAccounts = {};
   Map<String, List<TransactionEntry>> paymentAccounts = {};
   Map<String, String> receiptLabels = {};
   Map<String, String> paymentLabels = {};
-
-  // Store customizable header titles (My Family, My Business etc.)
-  // Key: customPageId ?? templateKey
   Map<String, String> pageHeaderTitles = {};
 
   String? pageTitle;
@@ -28,7 +28,6 @@ class AccountingModel extends ChangeNotifier {
   double openingBank = 0.0;
   double openingOther = 0.0;
 
-  // Custom opening balance boxes
   Map<String, double> customOpeningBalances = {};
 
   AccountingModel({required this.userType})
@@ -44,6 +43,19 @@ class AccountingModel extends ChangeNotifier {
     loadFromCloud(); // Try to sync from cloud on startup
   }
 
+  /// Helper to get translated string
+  String t(String key) {
+    return appTranslations[language]?[key] ??
+        appTranslations['en']![key] ??
+        key;
+  }
+
+  void setLanguage(String lang) {
+    language = lang;
+    notifyListeners();
+    saveToPrefs();
+  }
+
   // Persistence: simple JSON save/load using SharedPreferences + Supabase Cloud Sync
   Future<void> saveToPrefs() async {
     final prefs = await SharedPreferences.getInstance();
@@ -53,6 +65,7 @@ class AccountingModel extends ChangeNotifier {
       'receiptLabels': receiptLabels,
       'paymentLabels': paymentLabels,
       'currency': currency,
+      'language': language,
       'pageHeaderTitles': pageHeaderTitles,
       // Don't save opening balances or entry data - they should reset each time
     };
@@ -130,6 +143,7 @@ class AccountingModel extends ChangeNotifier {
       pageTitle = data['pageTitle'] ?? pageTitle;
       firmName = data['firmName'] ?? firmName;
       currency = data['currency'] ?? currency;
+      language = data['language'] ?? 'en';
 
       // Load header titles from main blob if valid there (fallback)
       if (data['pageHeaderTitles'] != null) {

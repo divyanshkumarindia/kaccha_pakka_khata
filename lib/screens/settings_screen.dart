@@ -22,17 +22,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _loadPageTitles();
-    _loadPageTitles();
-    _loadCustomPages();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Reload page titles when the screen becomes visible
-    // This ensures we show updated custom names
-    _loadPageTitles();
-    _loadPageTitles();
     _loadCustomPages();
   }
 
@@ -87,14 +76,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           // Account Settings Section
-          _buildSectionHeader('Account Settings', Icons.person, isDark),
+          _buildSectionHeader(model.t('sec_account'), Icons.person, isDark),
           _buildSettingsCard(
             isDark,
             [
               _buildSettingTile(
                 context,
-                'Profile Name',
-                model.userName ?? 'Set your name',
+                model.t('label_profile'),
+                model.userName ?? model.t('hint_set_name'),
                 Icons.badge,
                 () => _showNameEditDialog(context, model),
                 isDark,
@@ -102,7 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildDivider(isDark),
               _buildSettingTile(
                 context,
-                'Default Page Type',
+                model.t('label_default_page'),
                 _getDefaultPageTypeLabel(model.defaultPageType),
                 Icons.category,
                 () => _showPageTypeDialog(context, model),
@@ -113,13 +102,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 20),
 
           // Appearance Section
-          _buildSectionHeader('Appearance', Icons.palette, isDark),
+          _buildSectionHeader(model.t('sec_appearance'), Icons.palette, isDark),
           _buildSettingsCard(
             isDark,
             [
               _buildSettingTile(
                 context,
-                'Theme Mode',
+                model.t('label_theme'),
                 _getThemeModeLabel(model.themeMode),
                 Icons.brightness_6,
                 () => _showThemeModeDialog(context, model),
@@ -128,8 +117,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildDivider(isDark),
               _buildSettingTile(
                 context,
-                'Font Size',
-                'Adjust text size',
+                model.t('label_font_size'),
+                model.t('desc_font_size'),
                 Icons.text_fields,
                 () => _showComingSoonSnackBar(context),
                 isDark,
@@ -137,14 +126,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          _buildSectionHeader('Data Management', Icons.storage, isDark),
+          _buildSectionHeader(model.t('sec_data'), Icons.storage, isDark),
           _buildSettingsCard(
             isDark,
             [
               _buildSettingTile(
                 context,
-                'Backup Data',
-                'Save your data to file',
+                model.t('label_backup'),
+                model.t('desc_backup'),
                 Icons.backup,
                 () => _showBackupDialog(context, model),
                 isDark,
@@ -152,8 +141,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildDivider(isDark),
               _buildSettingTile(
                 context,
-                'Restore Data',
-                'Load data from backup',
+                model.t('label_restore'),
+                model.t('desc_restore'),
                 Icons.restore,
                 () => _showRestoreDialog(context, model),
                 isDark,
@@ -161,8 +150,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildDivider(isDark),
               _buildSettingTile(
                 context,
-                'Export All Data',
-                'Export to Excel/PDF',
+                model.t('label_export'),
+                model.t('desc_export'),
                 Icons.file_download,
                 () => _showComingSoonSnackBar(context),
                 isDark,
@@ -170,8 +159,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildDivider(isDark),
               _buildSettingTile(
                 context,
-                'Clear All Data',
-                'Delete all saved data',
+                model.t('label_clear_data'),
+                model.t('desc_clear_data'),
                 Icons.delete_forever,
                 () => _showClearDataDialog(context, model),
                 isDark,
@@ -182,13 +171,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 20),
 
           // Report Settings Section
-          _buildSectionHeader('Report Settings', Icons.article, isDark),
+          _buildSectionHeader(model.t('sec_reports'), Icons.article, isDark),
           _buildSettingsCard(
             isDark,
             [
               _buildSwitchTile(
-                'Auto-Save Reports',
-                'Automatically save generated reports',
+                model.t('label_auto_save'),
+                model.t('desc_auto_save'),
                 Icons.save,
                 model.autoSaveReports,
                 (value) => model.toggleAutoSaveReports(),
@@ -197,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildDivider(isDark),
               _buildSettingTile(
                 context,
-                'Default Report Format',
+                model.t('label_report_format'),
                 model.defaultReportFormat ?? 'Basic',
                 Icons.format_list_bulleted,
                 () => _showReportFormatDialog(context, model),
@@ -208,12 +197,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 20),
 
           // About Section
-          _buildSectionHeader('About', Icons.info, isDark),
+          _buildSectionHeader(model.t('sec_about'), Icons.info, isDark),
           _buildSettingsCard(
             isDark,
             [
               _buildInfoTile(
-                'App Version',
+                model.t('label_app_version'),
                 '1.0.0',
                 Icons.app_settings_alt,
                 isDark,
@@ -221,7 +210,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildDivider(isDark),
               _buildSettingTile(
                 context,
-                'Developer',
+                model.t('label_developer'),
                 'Divyansh Kumar',
                 Icons.code,
                 () => _showDeveloperInfo(context),
@@ -230,8 +219,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildDivider(isDark),
               _buildSettingTile(
                 context,
-                'Privacy Policy',
-                'View our privacy policy',
+                model.t('label_privacy'),
+                model.t('desc_privacy'),
                 Icons.privacy_tip,
                 () => _showComingSoonSnackBar(context),
                 isDark,
@@ -239,8 +228,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildDivider(isDark),
               _buildSettingTile(
                 context,
-                'Terms of Service',
-                'View terms and conditions',
+                model.t('label_terms'),
+                model.t('desc_terms'),
                 Icons.description,
                 () => _showComingSoonSnackBar(context),
                 isDark,
@@ -248,14 +237,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          _buildSectionHeader('Account', Icons.logout, isDark),
+          _buildSectionHeader(model.t('sec_logout'), Icons.logout, isDark),
           _buildSettingsCard(
             isDark,
             [
               _buildSettingTile(
                 context,
-                'Log Out',
-                'Sign out of your account',
+                model.t('label_logout'),
+                model.t('desc_logout'),
                 Icons.exit_to_app,
                 () => _handleLogout(context),
                 isDark,
@@ -452,13 +441,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Edit Profile Name'),
+        title: Text(model.t('dialog_edit_name')),
         content: TextField(
           controller: controller,
           autofocus: true,
           style: TextStyle(color: isDark ? Colors.white : Colors.black),
           decoration: InputDecoration(
-            hintText: 'Enter your name',
+            hintText: model.t('hint_enter_name'),
             hintStyle:
                 TextStyle(color: isDark ? Colors.white38 : Colors.black38),
             filled: true,
@@ -473,7 +462,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              model.t('btn_cancel'),
               style: TextStyle(
                 color:
                     isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
@@ -491,7 +480,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
             ),
-            child: const Text('Save'),
+            child: Text(model.t('btn_save')),
           ),
         ],
       ),
@@ -640,15 +629,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Backup Data'),
-        content: const Text(
-          'This will save all your accounting data to a file. You can restore this backup later.',
-        ),
+        title: Text(model.t('dialog_backup_title')),
+        content: Text(model.t('dialog_backup_msg')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              model.t('btn_cancel'),
               style: TextStyle(
                 color:
                     isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
@@ -660,9 +647,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               model.backupData();
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Data backed up successfully!'),
-                  backgroundColor: Color(0xFF10B981),
+                SnackBar(
+                  content: Text(model.t('msg_backup_success')),
+                  backgroundColor: const Color(0xFF10B981),
                 ),
               );
             },
@@ -672,7 +659,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
             ),
-            child: const Text('Backup'),
+            child: Text(model.t('btn_backup')),
           ),
         ],
       ),
@@ -687,15 +674,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Restore Data'),
-        content: const Text(
-          'This will replace all current data with the backup. This action cannot be undone.',
-        ),
+        title: Text(model.t('dialog_restore_title')),
+        content: Text(model.t('dialog_restore_msg')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              model.t('btn_cancel'),
               style: TextStyle(
                 color:
                     isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
@@ -707,9 +692,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               model.restoreData();
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Data restored successfully!'),
-                  backgroundColor: Color(0xFF10B981),
+                SnackBar(
+                  content: Text(model.t('msg_restore_success')),
+                  backgroundColor: const Color(0xFF10B981),
                 ),
               );
             },
@@ -719,7 +704,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
             ),
-            child: const Text('Restore'),
+            child: Text(model.t('btn_restore')),
           ),
         ],
       ),
@@ -734,15 +719,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Clear All Data?'),
-        content: const Text(
-          'This will permanently delete all your accounting data including pages, categories, and saved reports. This action cannot be undone!',
-        ),
+        title: Text(model.t('dialog_clear_title')),
+        content: Text(model.t('dialog_clear_msg')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              model.t('btn_cancel'),
               style: TextStyle(
                 color:
                     isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
@@ -754,9 +737,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               model.clearAllData();
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('All data cleared successfully'),
-                  backgroundColor: Color(0xFFDC2626),
+                SnackBar(
+                  content: Text(model.t('msg_clear_success')),
+                  backgroundColor: const Color(0xFFDC2626),
                 ),
               );
             },
@@ -766,7 +749,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
             ),
-            child: const Text('Delete All'),
+            child: Text(model.t('btn_delete_all')),
           ),
         ],
       ),
@@ -845,10 +828,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showComingSoonSnackBar(BuildContext context) {
+    final model = Provider.of<AccountingModel>(context, listen: false);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Coming soon!'),
-        backgroundColor: Color(0xFF6366F1),
+      SnackBar(
+        content: Text(model.t('msg_coming_soon')),
+        backgroundColor: const Color(0xFF6366F1),
       ),
     );
   }
@@ -912,11 +896,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.brightness_6, color: Color(0xFF6366F1)),
-            SizedBox(width: 12),
-            Text('Theme Mode'),
+            const Icon(Icons.brightness_6, color: Color(0xFF6366F1)),
+            const SizedBox(width: 12),
+            Text(model.t('dialog_theme')),
           ],
         ),
         content: RadioGroup<String>(
@@ -929,33 +913,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               RadioListTile<String>(
-                title: const Row(
+                title: Row(
                   children: [
-                    Icon(Icons.light_mode, size: 20),
-                    SizedBox(width: 12),
-                    Text('Light'),
+                    const Icon(Icons.light_mode, size: 20),
+                    const SizedBox(width: 12),
+                    Text(model.t('theme_light')),
                   ],
                 ),
                 value: 'light',
                 activeColor: const Color(0xFF6366F1),
               ),
               RadioListTile<String>(
-                title: const Row(
+                title: Row(
                   children: [
-                    Icon(Icons.dark_mode, size: 20),
-                    SizedBox(width: 12),
-                    Text('Dark'),
+                    const Icon(Icons.dark_mode, size: 20),
+                    const SizedBox(width: 12),
+                    Text(model.t('theme_dark')),
                   ],
                 ),
                 value: 'dark',
                 activeColor: const Color(0xFF6366F1),
               ),
               RadioListTile<String>(
-                title: const Row(
+                title: Row(
                   children: [
-                    Icon(Icons.settings_brightness, size: 20),
-                    SizedBox(width: 12),
-                    Text('System Default'),
+                    const Icon(Icons.settings_brightness, size: 20),
+                    const SizedBox(width: 12),
+                    Text(model.t('theme_system')),
                   ],
                 ),
                 value: 'system',
@@ -969,15 +953,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _handleLogout(BuildContext context) async {
+    final model = Provider.of<AccountingModel>(context, listen: false);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Log Out'),
-        content: const Text('Are you sure you want to sign out?'),
+        title: Text(model.t('dialog_logout_title')),
+        content: Text(model.t('dialog_logout_msg')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(model.t('btn_cancel')),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -985,7 +970,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Log Out'),
+            child: Text(model.t('label_logout')),
           ),
         ],
       ),
@@ -996,7 +981,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await authService.signOut();
       if (mounted) {
         // Clear local state if needed via AccountingModel
-        final model = Provider.of<AccountingModel>(context, listen: false);
+        // Model already fetched above
         model.clearAllData(); // Optional: Clear local data on logout
 
         Navigator.of(context).popUntil((route) => route.isFirst);

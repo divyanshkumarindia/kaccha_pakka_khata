@@ -25,9 +25,9 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
       backgroundColor:
           isDark ? const Color(0xFF111827) : const Color(0xFFF3F4F6),
       appBar: AppBar(
-        title: const Text(
-          'Saved Reports',
-          style: TextStyle(
+        title: Text(
+          model.t('title_saved_reports'),
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 22,
           ),
@@ -44,7 +44,9 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                 _sortAscending = !_sortAscending;
               });
             },
-            tooltip: _sortAscending ? 'Oldest First' : 'Newest First',
+            tooltip: _sortAscending
+                ? model.t('tooltip_oldest')
+                : model.t('tooltip_newest'),
           ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.sort),
@@ -54,23 +56,23 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
               });
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'date',
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 18),
-                    SizedBox(width: 8),
-                    Text('Sort by Date'),
+                    const Icon(Icons.calendar_today, size: 18),
+                    const SizedBox(width: 8),
+                    Text(model.t('sort_date')),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'name',
                 child: Row(
                   children: [
-                    Icon(Icons.sort_by_alpha, size: 18),
-                    SizedBox(width: 8),
-                    Text('Sort by Name'),
+                    const Icon(Icons.sort_by_alpha, size: 18),
+                    const SizedBox(width: 8),
+                    Text(model.t('sort_name')),
                   ],
                 ),
               ),
@@ -91,7 +93,7 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                 });
               },
               decoration: InputDecoration(
-                hintText: 'Search saved reports...',
+                hintText: model.t('hint_search_reports'),
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -147,7 +149,7 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No Saved Reports',
+              model.t('empty_reports_title'),
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
@@ -157,7 +159,7 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Save reports from the Home tab\nto access them here',
+              model.t('empty_reports_msg'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -252,7 +254,7 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Report Date: ${report['date']}',
+                          '${model.t('label_report_date')}: ${report['date']}',
                           style: TextStyle(
                             fontSize: 13,
                             color: isDark
@@ -271,43 +273,45 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                           : const Color(0xFF6B7280),
                     ),
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'view',
                         child: Row(
                           children: [
-                            Icon(Icons.visibility, size: 18),
-                            SizedBox(width: 8),
-                            Text('View'),
+                            const Icon(Icons.visibility, size: 18),
+                            const SizedBox(width: 8),
+                            Text(model.t('menu_view')),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit, size: 18),
-                            SizedBox(width: 8),
-                            Text('Edit'),
+                            const Icon(Icons.edit, size: 18),
+                            const SizedBox(width: 8),
+                            Text(model.t('menu_edit')),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'share',
                         child: Row(
                           children: [
-                            Icon(Icons.share, size: 18),
-                            SizedBox(width: 8),
-                            Text('Share'),
+                            const Icon(Icons.share, size: 18),
+                            const SizedBox(width: 8),
+                            Text(model.t('menu_share')),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, size: 18, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
+                            const Icon(Icons.delete,
+                                size: 18, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Text(model.t('menu_delete'),
+                                style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
@@ -348,7 +352,7 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Saved: $formattedDate',
+                      '${model.t('label_saved_on')}: $formattedDate',
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark
@@ -376,14 +380,14 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(
-            'Edit Report?',
+            model.t('dialog_load_title'),
             style: TextStyle(
               color: isDark ? Colors.white : Colors.black87,
               fontWeight: FontWeight.bold,
             ),
           ),
           content: Text(
-            'This will overwrite your current active session data with the contents of "${report['title']}".\n\nAny unsaved changes in your current session will be lost.',
+            model.t('dialog_load_msg'),
             style: TextStyle(
               color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563),
             ),
@@ -392,7 +396,7 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Cancel',
+                model.t('btn_cancel'),
                 style: TextStyle(
                   color: isDark
                       ? const Color(0xFF9CA3AF)
@@ -410,34 +414,10 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                   if (context.mounted) {
                     Navigator.pop(context); // Close dialog
 
-                    // Navigate to accounting page (using template route typically used)
-                    // We need to import AccountingForm, but we can rely on route name if arguments are correct
-                    // Assuming main.dart has logic to handle this argument
-
-                    // Wait, we need to import AccountingForm to pass it as argument?
-                    // Usually safer to use pushNamed with arguments.
-                    // Let's check imports. accounting_form.dart is likely in ../widgets/accounting_form.dart
-
-                    // Since I can't easily check main.dart route logic right now, I'll assume standard route '/accounting_template'.
-                    // I'll assume I need to import AccountingForm. It is NOT imported in this file.
-                    // I will ADD the import in a separate edit or assume it might be available via export (unlikely).
-                    // Actually, let's just push to home and let user navigate? No that's bad UX.
-                    // I'll try to push to '/accounting_template' with the model.
-                    // But wait, the arguments for '/accounting_template' expects an instance of AccountingForm.
-                    // So I MUST import 'package:my_daily_balance/widgets/accounting_form.dart' first.
-
-                    // For now, I'll assume the route works with arguments.
-                    // I'll add the import in a later step if needed. FOR NOW: just pop and show snackbar "Loaded".
-                    // The user can then navigate to the page.
-                    // Better: Navigate to home (index 1?) or just show "Report Loaded".
-                    // The user is on SavedReportsScreen. If they go back, they are on Home.
-                    // If they click on a tile in Home, it opens the form with CURRENT model data.
-                    // Since we just updated the model data, clicking the tile for that userType should show the data.
-
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Report loaded! Return to Home to view.'),
-                        backgroundColor: Color(0xFF10B981),
+                      SnackBar(
+                        content: Text(model.t('msg_load_success')),
+                        backgroundColor: const Color(0xFF10B981),
                       ),
                     );
                   }
@@ -446,7 +426,7 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Error loading report: $e'),
+                        content: Text('${model.t('msg_load_error')}: $e'),
                         backgroundColor: const Color(0xFFDC2626),
                       ),
                     );
@@ -460,7 +440,7 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Load & Edit'),
+              child: Text(model.t('btn_load_edit')),
             ),
           ],
         );
@@ -469,6 +449,7 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
   }
 
   void _viewReport(Map<String, dynamic> report) {
+    final model = Provider.of<AccountingModel>(context, listen: false);
     showDialog(
       context: context,
       builder: (context) {
@@ -529,16 +510,18 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildInfoRow('Report Date', report['date'], isDark),
                       _buildInfoRow(
-                          'Saved On',
+                          model.t('label_report_date'), report['date'], isDark),
+                      _buildInfoRow(
+                          model.t('label_saved_on'),
                           DateFormat('MMM dd, yyyy • hh:mm a')
                               .format(DateTime.parse(report['savedAt'])),
                           isDark),
-                      _buildInfoRow('Currency', report['currency'], isDark),
+                      _buildInfoRow(model.t('label_currency'),
+                          report['currency'], isDark),
                       const SizedBox(height: 16),
                       Text(
-                        'Report Data:',
+                        '${model.t('label_report_data')}:',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -611,10 +594,11 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
   }
 
   void _shareReport(Map<String, dynamic> report) {
+    final model = Provider.of<AccountingModel>(context, listen: false);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Share functionality coming soon!'),
-        backgroundColor: Color(0xFF10B981),
+      SnackBar(
+        content: Text(model.t('msg_share_soon')),
+        backgroundColor: const Color(0xFF10B981),
       ),
     );
   }
@@ -629,15 +613,13 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text('Delete Report?'),
-          content: const Text(
-            'This action cannot be undone. Are you sure you want to delete this saved report?',
-          ),
+          title: Text(model.t('dialog_delete_report_title')),
+          content: Text(model.t('dialog_delete_report_msg')),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Cancel',
+                model.t('btn_cancel'),
                 style: TextStyle(
                   color: isDark
                       ? const Color(0xFF9CA3AF)
@@ -650,9 +632,9 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                 model.deleteSavedReport(reportId);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Report deleted successfully'),
-                    backgroundColor: Color(0xFFDC2626),
+                  SnackBar(
+                    content: Text(model.t('msg_delete_success')),
+                    backgroundColor: const Color(0xFFDC2626),
                   ),
                 );
               },
@@ -663,7 +645,7 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Delete'),
+              child: Text(model.t('menu_delete')),
             ),
           ],
         );

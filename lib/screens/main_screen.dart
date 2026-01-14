@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../state/accounting_model.dart';
 import 'home_screen.dart';
 import 'saved_reports_screen.dart';
 import 'settings_screen.dart';
@@ -22,7 +24,10 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       extendBody: true,
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
+        duration: _getTransitionDuration(_currentIndex),
+        transitionBuilder: (child, animation) {
+          return FadeTransition(opacity: animation, child: child);
+        },
         child: KeyedSubtree(
           key: ValueKey<int>(_currentIndex),
           child: _buildPage(_currentIndex, isDark),
@@ -43,14 +48,21 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ],
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildNavItem(0, 'HOME', Icons.home_outlined),
-              _buildNavItem(1, 'REPORTS', Icons.pie_chart_outline),
-              _buildNavItem(2, 'SETTINGS', Icons.settings_outlined),
-              _buildNavItem(3, 'PROFILE', Icons.person_outline),
-            ],
+          child: Consumer<AccountingModel>(
+            builder: (context, model, child) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildNavItem(0, model.t('nav_home'), Icons.home_outlined),
+                  _buildNavItem(
+                      1, model.t('nav_reports'), Icons.pie_chart_outline),
+                  _buildNavItem(
+                      2, model.t('nav_settings'), Icons.settings_outlined),
+                  _buildNavItem(
+                      3, model.t('nav_profile'), Icons.person_outline),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -73,6 +85,18 @@ class _MainScreenState extends State<MainScreen> {
             child: Text('Profile Coming Soon'),
           ),
         );
+    }
+  }
+
+  Duration _getTransitionDuration(int index) {
+    switch (index) {
+      case 1: // Saved Reports
+        return const Duration(milliseconds: 200);
+      case 2: // Settings
+        return const Duration(milliseconds: 400);
+      case 0: // Home
+      default:
+        return const Duration(milliseconds: 300);
     }
   }
 

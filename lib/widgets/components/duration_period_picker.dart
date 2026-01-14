@@ -74,7 +74,7 @@ class DurationPeriodPicker extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Report Duration',
+                model.t('label_report_duration'),
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -111,9 +111,24 @@ class DurationPeriodPicker extends StatelessWidget {
                         isDark ? const Color(0xFF374151) : Colors.white,
                     items: ['Daily', 'Weekly', 'Monthly', 'Yearly']
                         .map((String value) {
+                      String localizedValue = value;
+                      switch (value) {
+                        case 'Daily':
+                          localizedValue = model.t('duration_daily');
+                          break;
+                        case 'Weekly':
+                          localizedValue = model.t('duration_weekly');
+                          break;
+                        case 'Monthly':
+                          localizedValue = model.t('duration_monthly');
+                          break;
+                        case 'Yearly':
+                          localizedValue = model.t('duration_yearly');
+                          break;
+                      }
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value),
+                        child: Text(localizedValue),
                       );
                     }).toList(),
                     onChanged: (String? newValue) {
@@ -180,7 +195,7 @@ class DurationPeriodPicker extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Select Period',
+                  model.t('label_select_period'),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -196,7 +211,7 @@ class DurationPeriodPicker extends StatelessWidget {
                       color: isDark
                           ? const Color(0xFF9CA3AF)
                           : const Color(0xFF6B7280)),
-                  tooltip: 'Clear selected dates',
+                  tooltip: model.t('tooltip_clear_dates'),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   onPressed: () {
@@ -241,7 +256,7 @@ class DurationPeriodPicker extends StatelessWidget {
                           Expanded(
                             child: Text(
                               periodStartController.text.isEmpty
-                                  ? 'Start date'
+                                  ? model.t('hint_start_date')
                                   : '${_weekdayAbbrev(periodStartController.text)}, ${periodStartController.text}',
                               style: TextStyle(
                                 fontSize: 14,
@@ -300,7 +315,7 @@ class DurationPeriodPicker extends StatelessWidget {
                           Expanded(
                             child: Text(
                               periodEndController.text.isEmpty
-                                  ? 'End date'
+                                  ? model.t('hint_end_date')
                                   : '${_weekdayAbbrev(periodEndController.text)}, ${periodEndController.text}',
                               textAlign: TextAlign.left,
                               style: TextStyle(
@@ -356,7 +371,7 @@ class DurationPeriodPicker extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(
                       periodController.text.isEmpty
-                          ? 'dd-mm-yyyy'
+                          ? model.t('hint_date_format')
                           : periodController.text,
                       style: TextStyle(
                         fontSize: 14,
@@ -395,7 +410,7 @@ class DurationPeriodPicker extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Select Period',
+                  model.t('label_select_period'),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -456,7 +471,7 @@ class DurationPeriodPicker extends StatelessWidget {
                           Expanded(
                             child: Text(
                               periodStartController.text.isEmpty
-                                  ? 'Start date'
+                                  ? model.t('hint_start_date')
                                   : '${_weekdayAbbrev(periodStartController.text)}, ${periodStartController.text}',
                               style: TextStyle(
                                 fontSize: 14,
@@ -515,7 +530,7 @@ class DurationPeriodPicker extends StatelessWidget {
                           Expanded(
                             child: Text(
                               periodEndController.text.isEmpty
-                                  ? 'End date'
+                                  ? model.t('hint_end_date')
                                   : '${_weekdayAbbrev(periodEndController.text)}, ${periodEndController.text}',
                               textAlign: TextAlign.left,
                               style: TextStyle(
@@ -572,7 +587,7 @@ class DurationPeriodPicker extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(
                       periodController.text.isEmpty
-                          ? 'yyyy'
+                          ? model.t('hint_year_format')
                           : periodController.text,
                       style: TextStyle(
                         fontSize: 14,
@@ -624,7 +639,7 @@ class DurationPeriodPicker extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'Select Period',
+                          model.t('label_select_period'),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -640,7 +655,7 @@ class DurationPeriodPicker extends StatelessWidget {
                               color: isDark
                                   ? const Color(0xFF9CA3AF)
                                   : const Color(0xFF6B7280)),
-                          tooltip: 'Clear selected year',
+                          tooltip: model.t('tooltip_clear_year'),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                           onPressed: () {
@@ -693,7 +708,7 @@ class DurationPeriodPicker extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Select Period',
+                  model.t('label_select_period'),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,

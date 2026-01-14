@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../state/accounting_model.dart';
 
 class SubscriptionPlansDialog extends StatelessWidget {
   final bool open;
@@ -10,34 +12,46 @@ class SubscriptionPlansDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!open) return const SizedBox.shrink();
+    final model = Provider.of<AccountingModel>(context);
+
     return Dialog(
       child: SizedBox(
         width: 700,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Text('Choose Your Plan',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(model.t('title_choose_plan'),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(children: [
               Expanded(
-                  child: _PlanCard(name: 'Free', price: '₹0', features: [
-                'Up to 10 entries per month',
-                'Basic tracking'
-              ])),
+                  child: _PlanCard(
+                      name: model.t('plan_free'),
+                      price: model.t('price_free'),
+                      features: [
+                    model.t('feat_10_entries'),
+                    model.t('feat_basic_tracking')
+                  ])),
               const SizedBox(width: 8),
               Expanded(
                   child: _PlanCard(
-                      name: 'Professional',
-                      price: '₹299',
+                      name: model.t('plan_professional'),
+                      price: model.t('price_pro'),
                       popular: true,
-                      features: ['Unlimited entries', 'Multi-currency'])),
+                      features: [
+                    model.t('feat_unlimited'),
+                    model.t('feat_multi_currency')
+                  ])),
               const SizedBox(width: 8),
               Expanded(
                   child: _PlanCard(
-                      name: 'Business',
-                      price: '₹999',
-                      features: ['Multi-user', 'Advanced analytics'])),
+                      name: model.t('plan_business'),
+                      price: model.t('price_business'),
+                      features: [
+                    model.t('feat_multi_user'),
+                    model.t('feat_advanced_analytics')
+                  ])),
             ])
           ]),
         ),
@@ -79,8 +93,10 @@ class _PlanCard extends StatelessWidget {
                     decoration: BoxDecoration(
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(20)),
-                    child: const Text('Most Popular',
-                        style: TextStyle(color: Colors.white)))),
+                    child: Text(
+                        Provider.of<AccountingModel>(context)
+                            .t('label_most_popular'),
+                        style: const TextStyle(color: Colors.white)))),
           const SizedBox(height: 8),
           Text(name,
               style:
@@ -98,7 +114,9 @@ class _PlanCard extends StatelessWidget {
           const SizedBox(height: 12),
           ElevatedButton(
               onPressed: () {},
-              child: Text(name == 'Free' ? 'Current Plan' : 'Contact Us'))
+              child: Text(name == 'Free'
+                  ? Provider.of<AccountingModel>(context).t('btn_current_plan')
+                  : Provider.of<AccountingModel>(context).t('btn_contact_us')))
         ]),
       ),
     );

@@ -68,13 +68,13 @@ class _AccountingFormState extends State<AccountingForm> {
     switch (key) {
       case 'personal':
       case 'family':
-        return 'Enter Family Name';
+        return model.t('hint_header_family');
       case 'business':
-        return 'Enter Business Name';
+        return model.t('hint_header_business');
       case 'institute':
-        return 'Enter Institute Name';
+        return model.t('hint_header_institute');
       default:
-        return 'Enter Name as per Use';
+        return model.t('hint_header_default');
     }
   }
 
@@ -94,6 +94,13 @@ class _AccountingFormState extends State<AccountingForm> {
     } else {
       model = Provider.of<AccountingModel>(context);
     }
+
+    // Initialize defaults with translations
+    balanceCardTitles = {
+      'cash': model.t('balance_title_cash'),
+      'bank': model.t('balance_title_bank'),
+      'other': model.t('balance_title_other'),
+    };
 
     // If customTitle is provided, set it in the model
     if (widget.customTitle != null && widget.customTitle!.isNotEmpty) {
@@ -172,6 +179,12 @@ class _AccountingFormState extends State<AccountingForm> {
   }
 
   String _getCurrencyName(String currencyCode) {
+    if (currencyCode == 'INR') return model.t('currency_rupee');
+    if (currencyCode == 'USD') return model.t('currency_dollar');
+    if (currencyCode == 'EUR') return model.t('currency_euro');
+    if (currencyCode == 'GBP') return model.t('currency_pound');
+    if (currencyCode == 'JPY') return model.t('currency_yen');
+
     const currencyNames = {
       'INR': 'Indian Rupee',
       'USD': 'US Dollar',
@@ -1956,7 +1969,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Back to Dashboard',
+                                  model.t('link_back_dashboard'),
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: isDark
@@ -1999,7 +2012,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                   icon: const Icon(Icons.edit_outlined,
                                       size: 24), // Bigger icon
                                   color: const Color(0xFF4F46E5),
-                                  tooltip: 'Edit Heading',
+                                  tooltip: model.t('tooltip_edit_heading'),
                                 ),
                               ],
                             ),
@@ -2038,7 +2051,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                             ? const Color(0xFF1F2937)
                                             : Colors.white,
                                         title: Text(
-                                          'Edit Page Title',
+                                          model.t('dialog_edit_page_title'),
                                           style: TextStyle(
                                             color: isDark
                                                 ? Colors.white
@@ -2055,7 +2068,8 @@ class _AccountingFormState extends State<AccountingForm> {
                                                 : Colors.black87,
                                           ),
                                           decoration: InputDecoration(
-                                            hintText: 'Enter page title',
+                                            hintText:
+                                                model.t('hint_page_title'),
                                             hintStyle: TextStyle(
                                               color: isDark
                                                   ? const Color(0xFF6B7280)
@@ -2104,7 +2118,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                             onPressed: () =>
                                                 Navigator.pop(context),
                                             child: Text(
-                                              'Cancel',
+                                              model.t('btn_cancel'),
                                               style: TextStyle(
                                                 color: isDark
                                                     ? const Color(0xFF9CA3AF)
@@ -2121,7 +2135,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                             onPressed: () => Navigator.pop(
                                                 context,
                                                 controller.text.trim()),
-                                            child: const Text('Save'),
+                                            child: Text(model.t('btn_save')),
                                           ),
                                         ],
                                       ),
@@ -2158,7 +2172,7 @@ class _AccountingFormState extends State<AccountingForm> {
                           // Subtitle
                           Center(
                             child: Text(
-                              'Track all Income and Expenses',
+                              model.t('subtitle_track_income_expenses'),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isDark
@@ -2180,7 +2194,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                         ? const Color(0xFF1F2937)
                                         : Colors.white,
                                     title: Text(
-                                      'Select Currency',
+                                      model.t('dialog_select_currency'),
                                       style: TextStyle(
                                         color: isDark
                                             ? Colors.white
@@ -2253,7 +2267,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                       TextButton(
                                         onPressed: () => Navigator.pop(context),
                                         child: Text(
-                                          'Cancel',
+                                          model.t('btn_cancel'),
                                           style: TextStyle(
                                             color: isDark
                                                 ? Colors.grey[400]
@@ -2332,9 +2346,9 @@ class _AccountingFormState extends State<AccountingForm> {
                                     _showBasicReport(context, model);
                                   },
                                   icon: const Icon(Icons.description, size: 20),
-                                  label: const Text(
-                                    'View Report',
-                                    style: TextStyle(
+                                  label: Text(
+                                    model.t('btn_view_report'),
+                                    style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -2361,9 +2375,9 @@ class _AccountingFormState extends State<AccountingForm> {
                                     _showDetailedReport(context, model);
                                   },
                                   icon: const Icon(Icons.article, size: 20),
-                                  label: const Text(
-                                    'Detail Report',
-                                    style: TextStyle(
+                                  label: Text(
+                                    model.t('btn_detail_report'),
+                                    style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -2433,9 +2447,9 @@ class _AccountingFormState extends State<AccountingForm> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Opening Balances B/F',
-                  style: TextStyle(
+                Text(
+                  model.t('label_opening_balances_bf'),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.receiptColor,
@@ -2463,7 +2477,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 false,
                 Icons.account_balance_wallet_outlined,
                 const Color(0xFF10B981), // Green
-                "PREVIOUS DAY'S CLOSING"),
+                model.t('label_prev_day_closing')),
             const SizedBox(height: 12),
             _buildBalanceCard(
                 isDark,
@@ -2473,7 +2487,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 false,
                 Icons.account_balance_outlined,
                 const Color(0xFF3B82F6), // Blue
-                "PREVIOUS DAY'S CLOSING"),
+                model.t('label_prev_day_closing')),
             const SizedBox(height: 12),
             _buildBalanceCard(
                 isDark,
@@ -2483,7 +2497,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 false,
                 Icons.savings_outlined,
                 const Color(0xFFF59E0B), // Amber
-                "PREVIOUS DAY'S CLOSING"),
+                model.t('label_prev_day_closing')),
 
             // Custom balance cards (deletable)
             ...model.customOpeningBalances.keys.map((key) {
@@ -2500,7 +2514,7 @@ class _AccountingFormState extends State<AccountingForm> {
               child: OutlinedButton.icon(
                 onPressed: () => _addNewBalanceBox(),
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Balance Box'),
+                label: Text(model.t('btn_add_balance_box')),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.receiptColor,
                   side: const BorderSide(color: AppTheme.receiptColor),
@@ -2574,7 +2588,7 @@ class _AccountingFormState extends State<AccountingForm> {
   Widget _buildCustomBalanceCard(bool isDark, String key) {
     // Get or initialize title and description for custom balance
     if (!balanceCardTitles.containsKey(key)) {
-      balanceCardTitles[key] = 'Custom Balance';
+      balanceCardTitles[key] = model.t('label_custom_balance');
     }
     if (!balanceCardDescriptions.containsKey(key)) {
       balanceCardDescriptions[key] = '';
@@ -2585,7 +2599,7 @@ class _AccountingFormState extends State<AccountingForm> {
         BalanceCard(
           isDark: isDark,
           title: balanceCardTitles[key]!,
-          subtitle: 'CUSTOM OPENING BALANCE',
+          subtitle: model.t('subtitle_custom_opening_balance'),
           icon: Icons.account_balance_wallet_outlined,
           iconColor: const Color(0xFF8B5CF6), // Purple
           initialDescription: balanceCardDescriptions[key]!,
@@ -2631,7 +2645,7 @@ class _AccountingFormState extends State<AccountingForm> {
 
     setState(() {
       model.addCustomOpeningBalance(key);
-      balanceCardTitles[key] = 'Custom Balance';
+      balanceCardTitles[key] = model.t('label_custom_balance');
       balanceCardDescriptions[key] = '';
     });
   }
@@ -2705,9 +2719,9 @@ class _AccountingFormState extends State<AccountingForm> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Receipts',
-                    style: TextStyle(
+                  Text(
+                    model.t('label_receipts'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.receiptColor,
@@ -2720,7 +2734,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   _addNewCategoryBox(true); // true = receipt/income
                 },
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Entry'),
+                label: Text(model.t('btn_add_entry')),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.receiptColor,
                   side: BorderSide(
@@ -2749,7 +2763,8 @@ class _AccountingFormState extends State<AccountingForm> {
                 _buildCategoryCard(
                   isDark,
                   key,
-                  model.receiptLabels[key] ?? 'New Income Category',
+                  model.receiptLabels[key] ??
+                      model.t('label_new_income_category'),
                   _formatCategoryTotal(key, false),
                   AppTheme.receiptColor,
                   categoryExpansionState[key] ?? true,
@@ -2769,7 +2784,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'other_income',
-            'Other Income',
+            model.t('label_other_income'),
             _formatCategoryTotal('other_income', false),
             AppTheme.receiptColor,
             categoryExpansionState['other_income'] ?? true,
@@ -2811,9 +2826,9 @@ class _AccountingFormState extends State<AccountingForm> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Income',
-                    style: TextStyle(
+                  Text(
+                    model.t('label_income'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.receiptColor,
@@ -2826,7 +2841,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   _addNewCategoryBox(true); // true = receipt/income
                 },
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Entry'),
+                label: Text(model.t('btn_add_entry')),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.receiptColor,
                   side: BorderSide(
@@ -2855,7 +2870,8 @@ class _AccountingFormState extends State<AccountingForm> {
                 _buildCategoryCard(
                   isDark,
                   key,
-                  model.receiptLabels[key] ?? 'New Income Category',
+                  model.receiptLabels[key] ??
+                      model.t('label_new_income_category'),
                   _formatCategoryTotal(key, false),
                   AppTheme.receiptColor,
                   categoryExpansionState[key] ?? true,
@@ -2875,7 +2891,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'salary',
-            'Salary / Wages',
+            model.t('label_salary_wages'),
             _formatCategoryTotal('salary', false),
             AppTheme.receiptColor,
             categoryExpansionState['salary'] ?? true,
@@ -2892,7 +2908,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'business_income',
-            'Business Income',
+            model.t('label_business_income'),
             _formatCategoryTotal('business_income', false),
             AppTheme.receiptColor,
             categoryExpansionState['business_income'] ?? false,
@@ -2909,7 +2925,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'rental_income',
-            'Rental Income',
+            model.t('label_rental_income'),
             _formatCategoryTotal('rental_income', false),
             AppTheme.receiptColor,
             categoryExpansionState['rental_income'] ?? false,
@@ -2926,7 +2942,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'investment_returns',
-            'Investment Returns / Interest',
+            model.t('label_investment_returns'),
             _formatCategoryTotal('investment_returns', false),
             AppTheme.receiptColor,
             categoryExpansionState['investment_returns'] ?? false,
@@ -2937,6 +2953,40 @@ class _AccountingFormState extends State<AccountingForm> {
               });
             },
             showEntry: categoryExpansionState['investment_returns'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'gifts_received',
+            model.t('label_gifts_received'),
+            _formatCategoryTotal('gifts_received', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['gifts_received'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['gifts_received'] =
+                    !(categoryExpansionState['gifts_received'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['gifts_received'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'other_income',
+            model.t('label_other_income'),
+            _formatCategoryTotal('other_income', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['other_income'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['other_income'] =
+                    !(categoryExpansionState['other_income'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['other_income'] ?? false,
             receipt: true,
           ),
         ],
@@ -2968,9 +3018,9 @@ class _AccountingFormState extends State<AccountingForm> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Sales (Receipts)',
-                    style: TextStyle(
+                  Text(
+                    model.t('label_sales_receipts'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.receiptColor,
@@ -2983,7 +3033,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   _addNewCategoryBox(true); // true = receipt/income
                 },
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Entry'),
+                label: Text(model.t('btn_add_entry')),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.receiptColor,
                   side: BorderSide(
@@ -3012,7 +3062,8 @@ class _AccountingFormState extends State<AccountingForm> {
                 _buildCategoryCard(
                   isDark,
                   key,
-                  model.receiptLabels[key] ?? 'New Income Category',
+                  model.receiptLabels[key] ??
+                      model.t('label_new_income_category'),
                   _formatCategoryTotal(key, false),
                   AppTheme.receiptColor,
                   categoryExpansionState[key] ?? true,
@@ -3032,7 +3083,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'sales',
-            'Sales Revenue',
+            model.t('label_sales_revenue'),
             _formatCategoryTotal('sales', false),
             AppTheme.receiptColor,
             categoryExpansionState['sales'] ?? true,
@@ -3049,7 +3100,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'service_income',
-            'Service Income',
+            model.t('label_service_income'),
             _formatCategoryTotal('service_income', false),
             AppTheme.receiptColor,
             categoryExpansionState['service_income'] ?? false,
@@ -3066,7 +3117,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'interest_received',
-            'Interest Received',
+            model.t('label_interest_received'),
             _formatCategoryTotal('interest_received', false),
             AppTheme.receiptColor,
             categoryExpansionState['interest_received'] ?? false,
@@ -3083,7 +3134,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'commission_received',
-            'Commission Received',
+            model.t('label_commission_received'),
             _formatCategoryTotal('commission_received', false),
             AppTheme.receiptColor,
             categoryExpansionState['commission_received'] ?? false,
@@ -3094,6 +3145,57 @@ class _AccountingFormState extends State<AccountingForm> {
               });
             },
             showEntry: categoryExpansionState['commission_received'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'loan_received',
+            model.t('label_loan_received'),
+            _formatCategoryTotal('loan_received', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['loan_received'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['loan_received'] =
+                    !(categoryExpansionState['loan_received'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['loan_received'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'investment',
+            model.t('label_investment'),
+            _formatCategoryTotal('investment', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['investment'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['investment'] =
+                    !(categoryExpansionState['investment'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['investment'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'other_income',
+            model.t('label_other_income'),
+            _formatCategoryTotal('other_income', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['other_income'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['other_income'] =
+                    !(categoryExpansionState['other_income'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['other_income'] ?? false,
             receipt: true,
           ),
         ],
@@ -3125,9 +3227,9 @@ class _AccountingFormState extends State<AccountingForm> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Receipts',
-                    style: TextStyle(
+                  Text(
+                    model.t('label_receipts'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.receiptColor,
@@ -3140,7 +3242,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   _addNewCategoryBox(true); // true = receipt/income
                 },
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Entry'),
+                label: Text(model.t('btn_add_entry')),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.receiptColor,
                   side: BorderSide(
@@ -3169,7 +3271,8 @@ class _AccountingFormState extends State<AccountingForm> {
                 _buildCategoryCard(
                   isDark,
                   key,
-                  model.receiptLabels[key] ?? 'New Income Category',
+                  model.receiptLabels[key] ??
+                      model.t('label_new_income_category'),
                   _formatCategoryTotal(key, false),
                   AppTheme.receiptColor,
                   categoryExpansionState[key] ?? true,
@@ -3189,7 +3292,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'fees_collected',
-            'Fees Collected (Tuition / Admission)',
+            model.t('label_fees_collected'),
             _formatCategoryTotal('fees_collected', false),
             AppTheme.receiptColor,
             categoryExpansionState['fees_collected'] ?? true,
@@ -3206,7 +3309,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'exam_fees',
-            'Exam Fees',
+            model.t('label_exam_fees'),
             _formatCategoryTotal('exam_fees', false),
             AppTheme.receiptColor,
             categoryExpansionState['exam_fees'] ?? false,
@@ -3223,7 +3326,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'donations',
-            'Donations Received',
+            model.t('label_donations'),
             _formatCategoryTotal('donations', false),
             AppTheme.receiptColor,
             categoryExpansionState['donations'] ?? false,
@@ -3240,7 +3343,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'grants',
-            'Grants / Subsidies',
+            model.t('label_grants'),
             _formatCategoryTotal('grants', false),
             AppTheme.receiptColor,
             categoryExpansionState['grants'] ?? false,
@@ -3251,6 +3354,57 @@ class _AccountingFormState extends State<AccountingForm> {
               });
             },
             showEntry: categoryExpansionState['grants'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'event_income',
+            model.t('label_event_income'),
+            _formatCategoryTotal('event_income', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['event_income'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['event_income'] =
+                    !(categoryExpansionState['event_income'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['event_income'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'rental_income_inst',
+            model.t('label_rental_income_inst'),
+            _formatCategoryTotal('rental_income_inst', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['rental_income_inst'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['rental_income_inst'] =
+                    !(categoryExpansionState['rental_income_inst'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['rental_income_inst'] ?? false,
+            receipt: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'other_income_inst',
+            model.t('label_other_income_inst'),
+            _formatCategoryTotal('other_income_inst', false),
+            AppTheme.receiptColor,
+            categoryExpansionState['other_income_inst'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['other_income_inst'] =
+                    !(categoryExpansionState['other_income_inst'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['other_income_inst'] ?? false,
             receipt: true,
           ),
         ],
@@ -3296,9 +3450,9 @@ class _AccountingFormState extends State<AccountingForm> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Expenses',
-                    style: TextStyle(
+                  Text(
+                    model.t('label_expenses'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.paymentColor,
@@ -3311,7 +3465,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   _addNewCategoryBox(false); // false = payment/expense
                 },
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Entry'),
+                label: Text(model.t('btn_add_entry')),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.paymentColor,
                   side: BorderSide(
@@ -3340,7 +3494,8 @@ class _AccountingFormState extends State<AccountingForm> {
                 _buildCategoryCard(
                   isDark,
                   key,
-                  model.paymentLabels[key] ?? 'New Expense Category',
+                  model.paymentLabels[key] ??
+                      model.t('label_new_expense_category'),
                   _formatCategoryTotal(key, true),
                   AppTheme.paymentColor,
                   categoryExpansionState[key] ?? true,
@@ -3360,7 +3515,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'groceries',
-            'Groceries / Food',
+            model.t('label_groceries'),
             _formatCategoryTotal('groceries', true),
             AppTheme.paymentColor,
             categoryExpansionState['groceries'] ?? true,
@@ -3377,7 +3532,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'rent_payment',
-            'Rent / EMI Payment',
+            model.t('label_rent_emi'),
             _formatCategoryTotal('rent_payment', true),
             AppTheme.paymentColor,
             categoryExpansionState['rent_payment'] ?? false,
@@ -3394,7 +3549,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'education',
-            'Education Expenses',
+            model.t('label_education'),
             _formatCategoryTotal('education', true),
             AppTheme.paymentColor,
             categoryExpansionState['education'] ?? false,
@@ -3411,7 +3566,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'transport',
-            'Transport / Fuel',
+            model.t('label_transport'),
             _formatCategoryTotal('transport', true),
             AppTheme.paymentColor,
             categoryExpansionState['transport'] ?? false,
@@ -3422,6 +3577,40 @@ class _AccountingFormState extends State<AccountingForm> {
               });
             },
             showEntry: categoryExpansionState['transport'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'shopping',
+            model.t('label_shopping'),
+            _formatCategoryTotal('shopping', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['shopping'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['shopping'] =
+                    !(categoryExpansionState['shopping'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['shopping'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'other_expenses',
+            model.t('label_other_expenses'),
+            _formatCategoryTotal('other_expenses', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['other_expenses'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['other_expenses'] =
+                    !(categoryExpansionState['other_expenses'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['other_expenses'] ?? false,
             isExpense: true,
           ),
         ],
@@ -3453,9 +3642,9 @@ class _AccountingFormState extends State<AccountingForm> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Purchases (Payments)',
-                    style: TextStyle(
+                  Text(
+                    model.t('label_purchases_payments'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.paymentColor,
@@ -3468,7 +3657,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   _addNewCategoryBox(false); // false = payment/expense
                 },
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Entry'),
+                label: Text(model.t('btn_add_entry')),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.paymentColor,
                   side: BorderSide(
@@ -3497,7 +3686,8 @@ class _AccountingFormState extends State<AccountingForm> {
                 _buildCategoryCard(
                   isDark,
                   key,
-                  model.paymentLabels[key] ?? 'New Expense Category',
+                  model.paymentLabels[key] ??
+                      model.t('label_new_expense_category'),
                   _formatCategoryTotal(key, true),
                   AppTheme.paymentColor,
                   categoryExpansionState[key] ?? true,
@@ -3517,7 +3707,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'purchases',
-            'Raw Material / Goods Purchase',
+            model.t('label_raw_materials'),
             _formatCategoryTotal('purchases', true),
             AppTheme.paymentColor,
             categoryExpansionState['purchases'] ?? true,
@@ -3534,7 +3724,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'salaries',
-            'Salaries / Wages',
+            model.t('label_salaries_wages_exp'),
             _formatCategoryTotal('salaries', true),
             AppTheme.paymentColor,
             categoryExpansionState['salaries'] ?? false,
@@ -3551,7 +3741,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'rent_commercial',
-            'Rent / Lease',
+            model.t('label_rent_lease'),
             _formatCategoryTotal('rent_commercial', true),
             AppTheme.paymentColor,
             categoryExpansionState['rent_commercial'] ?? false,
@@ -3568,7 +3758,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'utilities_business',
-            'Utilities (Power / Water / Internet)',
+            model.t('label_utilities_business'),
             _formatCategoryTotal('utilities_business', true),
             AppTheme.paymentColor,
             categoryExpansionState['utilities_business'] ?? false,
@@ -3579,6 +3769,57 @@ class _AccountingFormState extends State<AccountingForm> {
               });
             },
             showEntry: categoryExpansionState['utilities_business'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'loan_repayment',
+            model.t('label_loan_repayment'),
+            _formatCategoryTotal('loan_repayment', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['loan_repayment'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['loan_repayment'] =
+                    !(categoryExpansionState['loan_repayment'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['loan_repayment'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'maintenance',
+            model.t('label_maintenance'),
+            _formatCategoryTotal('maintenance', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['maintenance'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['maintenance'] =
+                    !(categoryExpansionState['maintenance'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['maintenance'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'other_expenses',
+            model.t('label_other_expenses'),
+            _formatCategoryTotal('other_expenses', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['other_expenses'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['other_expenses'] =
+                    !(categoryExpansionState['other_expenses'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['other_expenses'] ?? false,
             isExpense: true,
           ),
         ],
@@ -3610,9 +3851,9 @@ class _AccountingFormState extends State<AccountingForm> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Payments',
-                    style: TextStyle(
+                  Text(
+                    model.t('label_payments'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.paymentColor,
@@ -3625,7 +3866,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   _addNewCategoryBox(false); // false = payment/expense
                 },
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Entry'),
+                label: Text(model.t('btn_add_entry')),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.paymentColor,
                   side: BorderSide(
@@ -3654,7 +3895,8 @@ class _AccountingFormState extends State<AccountingForm> {
                 _buildCategoryCard(
                   isDark,
                   key,
-                  model.paymentLabels[key] ?? 'New Expense Category',
+                  model.paymentLabels[key] ??
+                      model.t('label_new_expense_category'),
                   _formatCategoryTotal(key, true),
                   AppTheme.paymentColor,
                   categoryExpansionState[key] ?? true,
@@ -3674,7 +3916,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'staff_salaries',
-            'Staff Salaries (Teaching)',
+            model.t('label_staff_salaries'),
             _formatCategoryTotal('staff_salaries', true),
             AppTheme.paymentColor,
             categoryExpansionState['staff_salaries'] ?? true,
@@ -3691,7 +3933,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'non_teaching_salaries',
-            'Non-Teaching Staff Salaries',
+            model.t('label_non_teaching_salaries'),
             _formatCategoryTotal('non_teaching_salaries', true),
             AppTheme.paymentColor,
             categoryExpansionState['non_teaching_salaries'] ?? false,
@@ -3708,7 +3950,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'utilities_inst',
-            'Utilities (Electricity / Water / Internet)',
+            model.t('label_utilities_inst'),
             _formatCategoryTotal('utilities_inst', true),
             AppTheme.paymentColor,
             categoryExpansionState['utilities_inst'] ?? false,
@@ -3725,7 +3967,7 @@ class _AccountingFormState extends State<AccountingForm> {
           _buildCategoryCard(
             isDark,
             'library_supplies',
-            'Library / Books / Supplies',
+            model.t('label_library_supplies'),
             _formatCategoryTotal('library_supplies', true),
             AppTheme.paymentColor,
             categoryExpansionState['library_supplies'] ?? false,
@@ -3736,6 +3978,57 @@ class _AccountingFormState extends State<AccountingForm> {
               });
             },
             showEntry: categoryExpansionState['library_supplies'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'maintenance_inst',
+            model.t('label_maintenance_inst'),
+            _formatCategoryTotal('maintenance_inst', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['maintenance_inst'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['maintenance_inst'] =
+                    !(categoryExpansionState['maintenance_inst'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['maintenance_inst'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'statutory_payments',
+            model.t('label_statutory_payments'),
+            _formatCategoryTotal('statutory_payments', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['statutory_payments'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['statutory_payments'] =
+                    !(categoryExpansionState['statutory_payments'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['statutory_payments'] ?? false,
+            isExpense: true,
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryCard(
+            isDark,
+            'other_expenses_inst',
+            model.t('label_other_expenses_inst'),
+            _formatCategoryTotal('other_expenses_inst', true),
+            AppTheme.paymentColor,
+            categoryExpansionState['other_expenses_inst'] ?? false,
+            () {
+              setState(() {
+                categoryExpansionState['other_expenses_inst'] =
+                    !(categoryExpansionState['other_expenses_inst'] ?? false);
+              });
+            },
+            showEntry: categoryExpansionState['other_expenses_inst'] ?? false,
             isExpense: true,
           ),
         ],
@@ -3767,9 +4060,9 @@ class _AccountingFormState extends State<AccountingForm> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Payments',
-                    style: TextStyle(
+                  Text(
+                    model.t('label_payments'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.paymentColor,
@@ -3782,7 +4075,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   _addNewCategoryBox(false); // false = payment/expense
                 },
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Entry'),
+                label: Text(model.t('btn_add_entry')),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.paymentColor,
                   side: BorderSide(
@@ -3811,7 +4104,8 @@ class _AccountingFormState extends State<AccountingForm> {
                 _buildCategoryCard(
                   isDark,
                   key,
-                  model.paymentLabels[key] ?? 'New Expense Category',
+                  model.paymentLabels[key] ??
+                      model.t('label_new_expense_category'),
                   _formatCategoryTotal(key, true),
                   AppTheme.paymentColor,
                   categoryExpansionState[key] ?? true,
@@ -3929,7 +4223,7 @@ class _AccountingFormState extends State<AccountingForm> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16)),
                               title: Text(
-                                'Edit Title',
+                                model.t('dialog_edit_title'),
                                 style: TextStyle(
                                   color: isDark ? Colors.white : Colors.black87,
                                   fontWeight: FontWeight.bold,
@@ -3943,7 +4237,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                   color: isDark ? Colors.white : Colors.black87,
                                 ),
                                 decoration: InputDecoration(
-                                  hintText: 'Enter title',
+                                  hintText: model.t('hint_edit_title'),
                                   hintStyle: TextStyle(
                                     color: isDark
                                         ? const Color(0xFF6B7280)
@@ -3965,7 +4259,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
                                   child: Text(
-                                    'Cancel',
+                                    model.t('btn_cancel'),
                                     style: TextStyle(
                                       color: isDark
                                           ? const Color(0xFF9CA3AF)
@@ -3984,7 +4278,7 @@ class _AccountingFormState extends State<AccountingForm> {
                                   ),
                                   onPressed: () => Navigator.pop(
                                       context, controller.text.trim()),
-                                  child: const Text('Save'),
+                                  child: Text(model.t('btn_save')),
                                 ),
                               ],
                             ),
@@ -4050,30 +4344,25 @@ class _AccountingFormState extends State<AccountingForm> {
                       GestureDetector(
                         onTap: () async {
                           // Show confirmation dialog
-                          final categoryName = isExpense
-                              ? (model.paymentLabels[accountKey] ??
-                                  'this category')
-                              : (model.receiptLabels[accountKey] ??
-                                  'this category');
-
                           final confirm = await showDialog<bool>(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text('Duplicate Category'),
+                              title: Text(
+                                  model.t('dialog_duplicate_category_title')),
                               content: Text(
-                                  'Create a copy of "$categoryName" with all its entries and data?'),
+                                  model.t('dialog_duplicate_category_msg')),
                               actions: [
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.pop(context, false),
-                                  child: const Text('Cancel'),
+                                  child: Text(model.t('btn_cancel')),
                                 ),
                                 ElevatedButton(
                                   onPressed: () => Navigator.pop(context, true),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF4F46E5),
                                   ),
-                                  child: const Text('Duplicate'),
+                                  child: Text(model.t('btn_duplicate')),
                                 ),
                               ],
                             ),
@@ -4102,21 +4391,22 @@ class _AccountingFormState extends State<AccountingForm> {
                           final confirm = await showDialog<bool>(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text('Delete Category'),
-                              content: Text(
-                                  'Are you sure you want to delete this category? All entries will be lost.'),
+                              title:
+                                  Text(model.t('dialog_delete_category_title')),
+                              content:
+                                  Text(model.t('dialog_delete_category_msg')),
                               actions: [
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.pop(context, false),
-                                  child: const Text('Cancel'),
+                                  child: Text(model.t('btn_cancel')),
                                 ),
                                 ElevatedButton(
                                   onPressed: () => Navigator.pop(context, true),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red,
                                   ),
-                                  child: const Text('Delete'),
+                                  child: Text(model.t('btn_delete')),
                                 ),
                               ],
                             ),
@@ -4196,7 +4486,7 @@ class _AccountingFormState extends State<AccountingForm> {
             ),
             child: Center(
               child: Text(
-                'No entries yet. Click "+ Add New Entry Box" above to get started.',
+                m.t('label_no_entries'),
                 style: TextStyle(
                   fontSize: 14,
                   color: isDark
@@ -4232,7 +4522,7 @@ class _AccountingFormState extends State<AccountingForm> {
                     children: [
                       Expanded(
                         child: Text(
-                          'ENTRY #${entryIndex + 1}',
+                          '${m.t('label_entry_number')} ${entryIndex + 1}',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
@@ -4246,7 +4536,7 @@ class _AccountingFormState extends State<AccountingForm> {
                         IconButton(
                           icon: const Icon(Icons.delete_outline, size: 18),
                           color: Colors.redAccent,
-                          tooltip: 'Remove entry',
+                          tooltip: m.t('tooltip_remove_entry'),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                           onPressed: () {
@@ -4258,7 +4548,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Description/Source',
+                    m.t('label_description_source'),
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark
@@ -4272,7 +4562,7 @@ class _AccountingFormState extends State<AccountingForm> {
                     initialValue: entry.description,
                     maxLines: 2,
                     decoration: InputDecoration(
-                      hintText: 'e.g., Transaction ID / Payee Name / Date',
+                      hintText: m.t('hint_description'),
                       hintStyle: TextStyle(
                         fontSize: 14,
                         color: isDark
@@ -4328,7 +4618,7 @@ class _AccountingFormState extends State<AccountingForm> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Cash:',
+                                  m.t('label_cash'),
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: isDark
@@ -4402,7 +4692,7 @@ class _AccountingFormState extends State<AccountingForm> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Bank/Online:',
+                                  m.t('label_bank_online'),
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: isDark
@@ -4477,7 +4767,7 @@ class _AccountingFormState extends State<AccountingForm> {
                               IconButton(
                                 icon: const Icon(Icons.copy_rounded, size: 16),
                                 color: Colors.blueAccent,
-                                tooltip: 'Duplicate Row',
+                                tooltip: m.t('tooltip_duplicate_row'),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
                                 onPressed: () {
@@ -4576,7 +4866,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${model.duration.toString().split('.').last.toUpperCase()} SUMMARY',
+                      '${model.duration.toString().split('.').last.toUpperCase()} ${model.t('label_summary')}',
                       style: TextStyle(
                         fontSize: 19, // Slightly smaller to "fit in"
                         fontWeight: FontWeight.w900,
@@ -4588,7 +4878,7 @@ class _AccountingFormState extends State<AccountingForm> {
                     ),
                     const SizedBox(height: 2), // Reduced from 4
                     Text(
-                      'LIVE FINANCIAL ASSESSMENT',
+                      model.t('label_live_assessment'),
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -4627,18 +4917,18 @@ class _AccountingFormState extends State<AccountingForm> {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
-                          'Save',
-                          style: TextStyle(
+                          model.t('label_save'),
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             height: 1.0,
                           ),
                         ),
                         Text(
-                          'Report',
-                          style: TextStyle(
+                          model.t('label_report'),
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                             height: 1.0,
@@ -4669,7 +4959,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   child: Column(
                     children: [
                       Text(
-                        'Total Income',
+                        model.t('label_total_income'),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -4708,7 +4998,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   child: Column(
                     children: [
                       Text(
-                        'Total Expenses',
+                        model.t('label_total_expenses'),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -4768,7 +5058,9 @@ class _AccountingFormState extends State<AccountingForm> {
                     child: Column(
                       children: [
                         Text(
-                          isNegative ? 'Net Deficit' : 'Net Surplus',
+                          isNegative
+                              ? model.t('label_net_deficit')
+                              : model.t('label_net_surplus'),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -4812,7 +5104,7 @@ class _AccountingFormState extends State<AccountingForm> {
                           child: Column(
                             children: [
                               Text(
-                                'Total Balance (B/F)',
+                                model.t('label_total_balance_bf_text'),
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -4837,12 +5129,14 @@ class _AccountingFormState extends State<AccountingForm> {
                               const SizedBox(height: 4),
                               Text(
                                 model.duration == DurationType.Daily
-                                    ? "Today's Opening Balance"
+                                    ? model.t('label_opening_today')
                                     : model.duration == DurationType.Weekly
-                                        ? "This Week's Opening Balance"
+                                        ? model.t('label_opening_this_week')
                                         : model.duration == DurationType.Monthly
-                                            ? "This Month's Opening Balance"
-                                            : "This Year's Opening Balance",
+                                            ? model
+                                                .t('label_opening_this_month')
+                                            : model
+                                                .t('label_opening_this_year'),
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w500,
@@ -4877,7 +5171,7 @@ class _AccountingFormState extends State<AccountingForm> {
                           child: Column(
                             children: [
                               Text(
-                                'Closing Balance (C/F)',
+                                model.t('label_closing_balance_cf_text'),
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -4899,12 +5193,14 @@ class _AccountingFormState extends State<AccountingForm> {
                               const SizedBox(height: 4),
                               Text(
                                 model.duration == DurationType.Daily
-                                    ? "Tomorrow's Opening Balance"
+                                    ? model.t('label_opening_tomorrow')
                                     : model.duration == DurationType.Weekly
-                                        ? "Next Week's Opening Balance"
+                                        ? model.t('label_opening_next_week')
                                         : model.duration == DurationType.Monthly
-                                            ? "Next Month's Opening Balance"
-                                            : "Next Year's Opening Balance",
+                                            ? model
+                                                .t('label_opening_next_month')
+                                            : model
+                                                .t('label_opening_next_year'),
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w500,
@@ -4973,7 +5269,8 @@ class _AccountingFormState extends State<AccountingForm> {
   void _showSaveReportDialog(BuildContext context, AccountingModel model) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final nameController = TextEditingController(
-      text: 'Report - ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+      text:
+          '${model.t('label_report')} - ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
     );
 
     showDialog(
@@ -4987,7 +5284,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 color: isDark ? Colors.white : const Color(0xFF111827)),
             const SizedBox(width: 12),
             Text(
-              'Save Report',
+              model.t('label_save_report'),
               style: TextStyle(
                 color: isDark ? Colors.white : const Color(0xFF111827),
                 fontWeight: FontWeight.bold,
@@ -5000,7 +5297,7 @@ class _AccountingFormState extends State<AccountingForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Give this snapshot a name to easily edit it later.',
+              model.t('msg_report_snapshot'),
               style: TextStyle(
                 fontSize: 14,
                 color:
@@ -5015,7 +5312,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
-                labelText: 'Report Name',
+                labelText: model.t('label_report_name'),
                 labelStyle: TextStyle(
                   color: isDark
                       ? const Color(0xFF9CA3AF)
@@ -5054,7 +5351,7 @@ class _AccountingFormState extends State<AccountingForm> {
               foregroundColor:
                   isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
             ),
-            child: const Text('Cancel'),
+            child: Text(model.t('btn_cancel')),
           ),
           ElevatedButton(
             onPressed: () {
@@ -5067,9 +5364,9 @@ class _AccountingFormState extends State<AccountingForm> {
                 );
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Report saved successfully!'),
-                    backgroundColor: Color(0xFF10B981),
+                  SnackBar(
+                    content: Text(model.t('msg_save_success')),
+                    backgroundColor: const Color(0xFF10B981),
                   ),
                 );
               }
@@ -5089,9 +5386,9 @@ class _AccountingFormState extends State<AccountingForm> {
               )),
               elevation: WidgetStateProperty.all(0),
             ),
-            child: const Text(
-              'Save',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            child: Text(
+              model.t('label_save'),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ],

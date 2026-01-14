@@ -282,6 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showAddNewPageDialog(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final controller = TextEditingController();
+    final model = Provider.of<AccountingModel>(context, listen: false);
 
     showDialog(
       context: context,
@@ -295,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Icon(Icons.add_circle_outline,
                     color: Theme.of(context).primaryColor),
                 SizedBox(width: 12),
-                Text('New Accounting Page'),
+                Text(model.t('dialog_new_page_title')),
               ],
             ),
             content: Column(
@@ -303,7 +304,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Enter a name for your new accounting page:',
+                  model.t('dialog_new_page_msg'),
                   style: TextStyle(
                     fontSize: 14,
                     color: isDark
@@ -320,14 +321,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         () {}); // Rebuild dialog to update button state
                   },
                   decoration: InputDecoration(
-                    hintText: 'e.g., Rental Property, Side Business',
+                    hintText: model.t('hint_new_page'),
                   ),
                 ),
                 if (!hasText)
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
-                      'Title is required',
+                      model.t('err_title_required'),
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.red.shade400,
@@ -339,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                child: Text(model.t('btn_cancel')),
               ),
               ElevatedButton(
                 onPressed: hasText
@@ -357,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? const Color(0xFF64748B)
                       : const Color(0xFF94A3B8),
                 ),
-                child: const Text('Create'),
+                child: Text(model.t('btn_create')),
               ),
             ],
           );
@@ -528,15 +529,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       children: [
                         TextSpan(
-                          text: 'KAACHA PAKKA ',
+                          text: Provider.of<AccountingModel>(context)
+                              .t('app_title_1'),
                           style: TextStyle(
                             color:
                                 isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
                         ),
-                        const TextSpan(
-                          text: 'KHATA',
-                          style: TextStyle(
+                        TextSpan(
+                          text: Provider.of<AccountingModel>(context)
+                              .t('app_title_2'),
+                          style: const TextStyle(
                             color: Color(0xFF00C853), // Matching Green
                           ),
                         ),
@@ -546,7 +549,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 2),
                   // Subtitle: PREMIUM DIGITAL LEDGER
                   Text(
-                    'PREMIUM DIGITAL LEDGER',
+                    Provider.of<AccountingModel>(context).t('app_subtitle'),
                     style: GoogleFonts.outfit(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -561,7 +564,50 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        actions: const [],
+        actions: [
+          Consumer<AccountingModel>(
+            builder: (context, model, child) {
+              return PopupMenuButton<String>(
+                icon: Row(
+                  children: [
+                    Icon(Icons.language,
+                        color: isDark ? const Color(0xFF94A3B8) : Colors.grey),
+                    const SizedBox(width: 4),
+                    Text(
+                      model.language.toUpperCase(),
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? const Color(0xFF94A3B8) : Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                onSelected: (value) {
+                  model.setLanguage(value);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          'Language switched to ${value == 'en' ? 'English' : 'Hindi'}'),
+                      backgroundColor: const Color(0xFF10B981),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'en',
+                    child: Text('English'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'hi',
+                    child: Text('Hindi'),
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SafeArea(
         child: Center(
@@ -575,10 +621,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 Consumer<AccountingModel>(
                   builder: (context, model, child) {
                     final name = model.userName;
+                    final greeting = name != null
+                        ? '${model.t('greeting')}, $name 👋'
+                        : '${model.t('greeting_default')} 👋';
                     return Text(
-                      name != null
-                          ? 'Hi, $name 👋'
-                          : 'Hello there! 👋', // Added wave emoji and casual tone
+                      greeting,
                       style: GoogleFonts.outfit(
                         fontSize: 24,
                         fontWeight: FontWeight.w600,
@@ -607,16 +654,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         children: [
                           TextSpan(
-                            text: 'Simplify your\n',
+                            text: Provider.of<AccountingModel>(context)
+                                .t('hero_title_1'),
                             style: TextStyle(
                               color: isDark
                                   ? Colors.white
                                   : const Color(0xFF0F172A),
                             ),
                           ),
-                          const TextSpan(
-                            text: 'Business Accounting.',
-                            style: TextStyle(
+                          TextSpan(
+                            text: Provider.of<AccountingModel>(context)
+                                .t('hero_title_2'),
+                            style: const TextStyle(
                               color: Color(0xFF00C853), // Vivid Green
                             ),
                           ),
@@ -629,7 +678,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.only(
                           right: 40.0), // Give it some breathing room
                       child: Text(
-                        'The easiest way for small businesses to track daily cash flow and generate reports.',
+                        Provider.of<AccountingModel>(context)
+                            .t('hero_subtitle'),
                         style: GoogleFonts.outfit(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -659,7 +709,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '100% SAFE & SECURE',
+                            Provider.of<AccountingModel>(context)
+                                .t('badge_safe_secure'),
                             style: GoogleFonts.outfit(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -681,7 +732,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Select Your Use Case',
+                        Provider.of<AccountingModel>(context)
+                            .t('section_use_case'),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -694,6 +746,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       // Use Case List with Builder to allow logic
                       Builder(
                         builder: (context) {
+                          final model = Provider.of<AccountingModel>(context);
                           // Prepare list of items
                           final List<Map<String, dynamic>> items = [];
 
@@ -708,28 +761,27 @@ class _HomeScreenState extends State<HomeScreen> {
                               case UserType.personal:
                                 icon =
                                     Icons.groups_rounded; // Family group icon
-                                color = const Color(
-                                    0xFF00C853); // Green (Matches Image)
-                                subtitle = 'HOME EXPENSES & SAVINGS';
-                                title = 'My Personal / Family Accounts';
+                                color = const Color(0xFF00C853); // Green
+                                subtitle = model.t('subtitle_personal');
+                                title = model.t('card_personal');
                                 break;
                               case UserType.business:
                                 icon = Icons.store_rounded;
                                 color = const Color(0xFF2563EB); // Blue
-                                subtitle = 'DAILY CASH FLOW & PROFITS';
-                                title = 'My Business / Shop / Firm Accounts';
+                                subtitle = model.t('subtitle_business');
+                                title = model.t('card_business');
                                 break;
                               case UserType.institute:
                                 icon = Icons.school_rounded;
                                 color = const Color(0xFF7C3AED); // Purple
-                                subtitle = 'FEES & STAFF SALARIES';
-                                title = 'My Institute / Organization Accounts';
+                                subtitle = model.t('subtitle_institute');
+                                title = model.t('card_institute');
                                 break;
                               case UserType.other:
                                 icon = Icons.category_rounded;
                                 color = const Color(0xFFF59E0B); // Amber
-                                subtitle = 'CUSTOM LEDGER & TRACKING';
-                                title = 'My Other Accounts';
+                                subtitle = model.t('subtitle_other');
+                                title = model.t('card_other');
                                 break;
                             }
                             items.add({
@@ -769,7 +821,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           // Add "Add New" card
                           items.add({
                             'id': 'add_new',
-                            'title': 'Add New Page',
+                            'title': model.t('card_add_new'),
                             'subtitle': 'CREATE NEW CATEGORY',
                             'icon': Icons.add_rounded,
                             'type': 'add_new',
@@ -924,7 +976,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: Theme.of(context).primaryColor),
                             const SizedBox(width: 8),
                             Text(
-                              'Recent Pages',
+                              Provider.of<AccountingModel>(context)
+                                  .t('section_recent'),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,

@@ -70,14 +70,17 @@ class _AccountEntryWidgetState extends State<AccountEntryWidget>
               // Edit label
               IconButton(
                   icon: Icon(Icons.edit, color: accent),
-                  tooltip: 'Edit account label',
+                  tooltip: Provider.of<AccountingModel>(context)
+                      .t('tooltip_edit_label'),
                   onPressed: () async {
                     final controller =
                         TextEditingController(text: widget.label);
                     final newLabel = await showDialog<String?>(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                              title: const Text('Edit account label'),
+                              title: Text(Provider.of<AccountingModel>(context,
+                                      listen: false)
+                                  .t('dialog_edit_account_label')),
                               content: TextField(
                                   controller: controller,
                                   decoration: const InputDecoration()),
@@ -85,11 +88,17 @@ class _AccountEntryWidgetState extends State<AccountEntryWidget>
                                 TextButton(
                                     onPressed: () =>
                                         Navigator.of(ctx).pop(null),
-                                    child: const Text('Cancel')),
+                                    child: Text(Provider.of<AccountingModel>(
+                                            context,
+                                            listen: false)
+                                        .t('btn_cancel'))),
                                 ElevatedButton(
                                     onPressed: () => Navigator.of(ctx)
                                         .pop(controller.text.trim()),
-                                    child: const Text('Save'))
+                                    child: Text(Provider.of<AccountingModel>(
+                                            context,
+                                            listen: false)
+                                        .t('btn_save')))
                               ],
                             ));
                     if (newLabel != null && newLabel.isNotEmpty) {
@@ -104,23 +113,34 @@ class _AccountEntryWidgetState extends State<AccountEntryWidget>
               // Remove account
               IconButton(
                   icon: Icon(Icons.delete_outline, color: Colors.redAccent),
-                  tooltip: 'Remove account',
+                  tooltip: Provider.of<AccountingModel>(context)
+                      .t('tooltip_remove_account'),
                   onPressed: () async {
                     final confirm = await showDialog<bool>(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                              title: const Text('Remove account?'),
-                              content: const Text(
-                                  'This will remove the entire account and its entries.'),
+                              title: Text(Provider.of<AccountingModel>(context,
+                                      listen: false)
+                                  .t('dialog_remove_account')),
+                              content: Text(Provider.of<AccountingModel>(
+                                      context,
+                                      listen: false)
+                                  .t('msg_remove_account')),
                               actions: [
                                 TextButton(
                                     onPressed: () =>
                                         Navigator.of(ctx).pop(false),
-                                    child: const Text('Cancel')),
+                                    child: Text(Provider.of<AccountingModel>(
+                                            context,
+                                            listen: false)
+                                        .t('btn_cancel'))),
                                 ElevatedButton(
                                     onPressed: () =>
                                         Navigator.of(ctx).pop(true),
-                                    child: const Text('Remove'))
+                                    child: Text(Provider.of<AccountingModel>(
+                                            context,
+                                            listen: false)
+                                        .t('btn_remove')))
                               ],
                             ));
                     if (confirm == true) {
@@ -161,7 +181,9 @@ class _AccountEntryWidgetState extends State<AccountEntryWidget>
                                   child: TextFormField(
                                     initialValue: e.description,
                                     decoration: InputDecoration(
-                                        labelText: 'Description',
+                                        labelText: Provider.of<AccountingModel>(
+                                                context)
+                                            .t('label_description'),
                                         filled: true,
                                         fillColor: Colors.white,
                                         border: OutlineInputBorder(
@@ -181,7 +203,8 @@ class _AccountEntryWidgetState extends State<AccountEntryWidget>
                                 IconButton(
                                   icon: const Icon(Icons.delete_outline),
                                   color: Colors.grey,
-                                  tooltip: 'Remove entry',
+                                  tooltip: Provider.of<AccountingModel>(context)
+                                      .t('tooltip_remove_entry'),
                                   onPressed: () {
                                     final model = Provider.of<AccountingModel>(
                                         context,
@@ -202,7 +225,10 @@ class _AccountEntryWidgetState extends State<AccountEntryWidget>
                                                     r.cash.toStringAsFixed(2),
                                                 textAlign: TextAlign.right,
                                                 decoration: InputDecoration(
-                                                    labelText: 'Cash',
+                                                    labelText: Provider.of<
+                                                                AccountingModel>(
+                                                            context)
+                                                        .t('label_cash'),
                                                     filled: true,
                                                     fillColor:
                                                         Colors.grey.shade50,
@@ -235,7 +261,10 @@ class _AccountEntryWidgetState extends State<AccountEntryWidget>
                                                     r.bank.toStringAsFixed(2),
                                                 textAlign: TextAlign.right,
                                                 decoration: InputDecoration(
-                                                    labelText: 'Bank/Online',
+                                                    labelText: Provider.of<
+                                                                AccountingModel>(
+                                                            context)
+                                                        .t('label_bank_online'),
                                                     filled: true,
                                                     fillColor:
                                                         Colors.grey.shade50,
@@ -291,7 +320,9 @@ class _AccountEntryWidgetState extends State<AccountEntryWidget>
                                         receipt: widget.isReceipt);
                                   },
                                   icon: const Icon(Icons.add_circle_outline),
-                                  label: const Text('Add row'),
+                                  label: Text(
+                                      Provider.of<AccountingModel>(context)
+                                          .t('btn_add_row')),
                                 ),
                               ),
                               const Divider(),
@@ -309,7 +340,8 @@ class _AccountEntryWidgetState extends State<AccountEntryWidget>
                                 receipt: widget.isReceipt);
                           },
                           icon: const Icon(Icons.add),
-                          label: const Text('Add new entry'),
+                          label: Text(Provider.of<AccountingModel>(context)
+                              .t('btn_add_new_entry')),
                         ),
                       ),
                     ],
