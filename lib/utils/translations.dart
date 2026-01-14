@@ -17,9 +17,9 @@ const Map<String, Map<String, String>> appTranslations = {
     'hero_subtitle':
         'Select a category below to start managing your daily receipts and payments.',
     'section_use_case': 'Select Your Use Case',
-    'card_personal': 'Personal',
-    'card_business': 'Business',
-    'card_institute': 'Institute',
+    'card_personal': 'My Personal Account',
+    'card_business': 'My Business/Shop/Firm account',
+    'card_institute': 'My institute Account',
     'card_other': 'Other',
     'card_desc_personal': 'Manage family income & expenses',
     'card_desc_business': 'Track sales, purchases & profit',
@@ -348,9 +348,9 @@ const Map<String, Map<String, String>> appTranslations = {
     'hero_subtitle':
         'अपनी दैनिक आय और व्यय का प्रबंधन शुरू करने के लिए नीचे एक श्रेणी चुनें।',
     'section_use_case': 'अपनी श्रेणी चुनें',
-    'card_personal': 'व्यक्तिगत',
-    'card_business': 'व्यापार',
-    'card_institute': 'संस्था',
+    'card_personal': 'मेरा व्यक्तिगत खाता',
+    'card_business': 'मेरा व्यवसाय/दुकान/फर्म खाता',
+    'card_institute': 'मेरा संस्थान खाता',
     'card_other': 'अन्य',
     'card_desc_personal': 'पारिवारिक आय और व्यय का प्रबंधन करें',
     'card_desc_business': 'बिक्री, खरीद और लाभ ट्रैक करें',
@@ -663,5 +663,20 @@ const Map<String, Map<String, String>> appTranslations = {
     'label_description': 'विवरण',
     'btn_add_row': 'पंक्ति जोड़ें',
     'btn_add_new_entry': 'नई प्रविष्टि जोड़ें',
+
+    // Default Category Translations
+    'Salary / Wages': 'वेतन / मजदूरी',
+    'Business Income': 'व्यापार आय',
+    'Rental Income': 'किराया आय',
+    'Investment Returns / Interest': 'निवेश रिटर्न / ब्याज',
+    'Gifts Received': 'प्राप्त उपहार',
+    'Other Income': 'अन्य आय',
+
+    'Groceries / Food': 'किराना / भोजन',
+    'Rent / EMI Payment': 'किराया / ईएमआई भुगतान',
+    'Education Expenses': 'शिक्षा व्यय',
+    'Transport / Fuel': 'परिवहन / ईंधन',
+    'Shopping / Personal': 'खरीदारी / व्यक्तिगत',
+    'Other Expenses': 'अन्य खर्च',
   },
 };

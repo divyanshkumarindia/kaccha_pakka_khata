@@ -4314,8 +4314,9 @@ class _AccountingFormState extends State<AccountingForm> {
                                 : (model.receiptLabels[accountKey] ?? title);
 
                             return Text(
-                              displayTitle,
+                              model.t(displayTitle),
                               style: TextStyle(
+                                // ...
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
                                 color: isDark
