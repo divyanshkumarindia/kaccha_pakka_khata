@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
-
+import '../state/accounting_model.dart';
 import 'main_screen.dart';
 
 class SignupVerifyOtpScreen extends StatefulWidget {
@@ -79,6 +80,14 @@ class _SignupVerifyOtpScreenState extends State<SignupVerifyOtpScreen> {
         await Future.delayed(const Duration(seconds: 2));
 
         if (mounted) {
+          // SAVE NAME TO APP STATE (Ensures Welcome dialog is skipped)
+          final model = Provider.of<AccountingModel>(context, listen: false);
+          if (widget.fullName.isNotEmpty) {
+            final firstName = widget.fullName.trim().split(' ').first;
+            model.setUserName(firstName);
+            model.setSkippedNameSetup(true);
+          }
+
           // 5. Navigate to Home Page
           Navigator.pushAndRemoveUntil(
             context,

@@ -50,17 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final model = Provider.of<AccountingModel>(context, listen: false);
       model.loadFromCloud(); // Fetch data from Supabase on login/startup
-      _checkAndShowNameDialog();
       _loadDefaultPageType();
     });
-  }
-
-  void _checkAndShowNameDialog() {
-    final model = Provider.of<AccountingModel>(context, listen: false);
-    // If name is null and user hasn't skipped, show dialog
-    if (model.userName == null && !model.hasSkippedNameSetup) {
-      _showNameInputDialog(context);
-    }
   }
 
   @override
@@ -88,104 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _saveCustomPages() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('custom_pages', jsonEncode(customPages));
-  }
-
-  void _showNameInputDialog(BuildContext context) {
-    if (!mounted) return;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final controller = TextEditingController();
-    final model = Provider.of<AccountingModel>(context, listen: false);
-
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Force user to enter name or skip
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final hasText = controller.text.trim().isNotEmpty;
-          return PopScope(
-            canPop: false,
-            child: AlertDialog(
-              backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-              title: const Text('Welcome!'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Please enter your name to personalize your experience.',
-                      style: TextStyle(
-                          color: isDark ? Colors.white70 : Colors.black87)),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: controller,
-                    autofocus: true,
-                    style:
-                        TextStyle(color: isDark ? Colors.white : Colors.black),
-                    decoration: InputDecoration(
-                      hintText: 'Your Name',
-                      hintStyle: TextStyle(
-                          color: isDark ? Colors.white38 : Colors.black38),
-                      filled: true,
-                      fillColor:
-                          isDark ? const Color(0xFF374151) : Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    onChanged: (_) => setDialogState(() {}),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    model.setSkippedNameSetup(true);
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    'Skip',
-                    style: TextStyle(
-                      color: isDark
-                          ? const Color(0xFF9CA3AF)
-                          : const Color(0xFF6B7280),
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: hasText
-                      ? () {
-                          final name = controller.text.trim();
-                          model.setUserName(name);
-                          model.setSkippedNameSetup(
-                              false); // Ensure skip is false if they save
-                          Navigator.pop(context);
-
-                          // Show toast message after dialog closes
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text(
-                                  'You can change your username later in Settings.'),
-                              backgroundColor: const Color(0xFF10B981),
-                              duration: const Duration(seconds: 4),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                            ),
-                          );
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Continue'),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
   }
 
   Future<void> _loadDefaultPageType() async {

@@ -101,6 +101,21 @@ class AccountingModel extends ChangeNotifier {
     final user = supabase.auth.currentUser;
     if (user == null) return;
 
+    // 1. Try to fetch Name from Auth Metadata (set during signup)
+    // Only if we don't have a local name saved yet
+    if (_userName == null) {
+      final meta = user.userMetadata;
+      if (meta != null && meta.containsKey('full_name')) {
+        final String fullName = meta['full_name'] ?? '';
+        if (fullName.isNotEmpty) {
+          // Extract first name
+          final firstName = fullName.trim().split(' ').first;
+          // Set as username (this will save to prefs too via setUserName)
+          setUserName(firstName);
+        }
+      }
+    }
+
     try {
       final response = await supabase
           .from('user_data')
