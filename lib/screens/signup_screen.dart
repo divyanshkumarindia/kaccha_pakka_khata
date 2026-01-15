@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
+import 'signup_verify_otp_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -13,7 +14,6 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
@@ -21,17 +21,13 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> _signUp() async {
     final name = _nameController.text.trim();
-    final emailInput = _emailController.text.trim();
-    final phoneInput = _phoneController.text.trim();
+    final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // Determine which contact info to use
-    final contact = emailInput.isNotEmpty ? emailInput : phoneInput;
-
-    if (name.isEmpty || contact.isEmpty || password.isEmpty) {
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Please fill in name, contact, and password.')),
+            content: Text('Please fill in name, email, and password.')),
       );
       return;
     }
@@ -39,21 +35,26 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _authService.signUp(
-        email: contact, // Passing phone or email
-        password: password,
-        fullName: name,
-      );
+      // Mock sending OTP
+      await Future.delayed(const Duration(seconds: 2));
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account created! Please login.')),
+        // Navigate to OTP Screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SignupVerifyOtpScreen(
+              fullName: name,
+              email: email,
+              password: password,
+            ),
+          ),
         );
-        Navigator.pop(context); // Go back to login/welcome
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Signup failed: ${e.toString()}')),
+          SnackBar(content: Text('Failed to initiate signup: ${e.toString()}')),
         );
       }
     } finally {
@@ -84,7 +85,6 @@ class _SignupScreenState extends State<SignupScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -183,60 +183,16 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Email AND Phone Row
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // Left: Email
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel(labelColor, 'EMAIL'),
-                                const SizedBox(height: 8),
-                                _buildTextField(
-                                  controller: _emailController,
-                                  hintText: 'email@address.com',
-                                  isDark: isDark,
-                                  fillColor: inputFillColor,
-                                  borderColor: borderColor,
-                                  textColor: textColor,
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Middle: OR
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 16),
-                            child: Text(
-                              'OR',
-                              style: GoogleFonts.outfit(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: labelColor,
-                              ),
-                            ),
-                          ),
-                          // Right: Phone
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel(labelColor, 'PHONE'),
-                                const SizedBox(height: 8),
-                                _buildTextField(
-                                  controller: _phoneController,
-                                  hintText: '+1 (555) 000-0000',
-                                  isDark: isDark,
-                                  fillColor: inputFillColor,
-                                  borderColor: borderColor,
-                                  textColor: textColor,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                      // Email Field
+                      _buildLabel(labelColor, 'EMAIL ADDRESS'),
+                      const SizedBox(height: 8),
+                      _buildTextField(
+                        controller: _emailController,
+                        hintText: 'email@address.com',
+                        isDark: isDark,
+                        fillColor: inputFillColor,
+                        borderColor: borderColor,
+                        textColor: textColor,
                       ),
                       const SizedBox(height: 16),
 

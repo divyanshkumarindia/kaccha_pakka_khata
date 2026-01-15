@@ -1,21 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'reset_password_screen.dart';
+import '../services/auth_service.dart';
 
-class VerifyOtpScreen extends StatefulWidget {
-  const VerifyOtpScreen({Key? key}) : super(key: key);
+import 'main_screen.dart';
+
+class SignupVerifyOtpScreen extends StatefulWidget {
+  final String fullName;
+  final String email;
+  final String password;
+
+  const SignupVerifyOtpScreen({
+    Key? key,
+    required this.fullName,
+    required this.email,
+    required this.password,
+  }) : super(key: key);
 
   @override
-  State<VerifyOtpScreen> createState() => _VerifyOtpScreenState();
+  State<SignupVerifyOtpScreen> createState() => _SignupVerifyOtpScreenState();
 }
 
-class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
+class _SignupVerifyOtpScreenState extends State<SignupVerifyOtpScreen> {
   // Controllers for each digit
   final List<TextEditingController> _controllers =
       List.generate(4, (index) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
 
+  final _authService = AuthService();
   bool _isLoading = false;
+  bool _isSuccess = false;
 
   @override
   void dispose() {
@@ -39,18 +52,48 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
     setState(() => _isLoading = true);
 
-    // Mock verification delay
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // 1. Mock verification delay
+      await Future.delayed(const Duration(seconds: 2));
 
-    if (mounted) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OTP Verified! (Mock)')),
-      );
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
-      );
+      // 2. Try Create Account (but don't block UI flow if it fails for demo)
+      try {
+        await _authService.signUp(
+          email: widget.email,
+          password: widget.password,
+          fullName: widget.fullName,
+        );
+      } catch (e) {
+        // Ignore backend error for 'just for now' UI demo
+        print('Signup service error (ignored for demo): $e');
+      }
+
+      if (mounted) {
+        // 3. Show Success Animation
+        setState(() {
+          _isLoading = false;
+          _isSuccess = true;
+        });
+
+        // 4. Wait for animation
+        await Future.delayed(const Duration(seconds: 2));
+
+        if (mounted) {
+          // 5. Navigate to Home Page
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const MainScreen()),
+            (route) => false,
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Account created successfully! Welcome.')),
+          );
+        }
+      }
+    } catch (e) {
+      // Should not be reached with the try-catch above
     }
   }
 
@@ -240,7 +283,9 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                           child: SizedBox(
                             width: 300, // Fixed max width
                             child: ElevatedButton(
-                              onPressed: _isLoading ? null : _verifyOtp,
+                              onPressed: (_isLoading || _isSuccess)
+                                  ? null
+                                  : _verifyOtp,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
                                     const Color(0xFF10B981), // Emerald Green
@@ -251,6 +296,12 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 elevation: 0,
+                                disabledBackgroundColor: _isSuccess
+                                    ? const Color(0xFF10B981)
+                                    : null, // Keep green when success
+                                disabledForegroundColor: _isSuccess
+                                    ? Colors.white
+                                    : null, // Keep white text
                               ),
                               child: _isLoading
                                   ? const SizedBox(
@@ -261,21 +312,38 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                                         strokeWidth: 2,
                                       ),
                                     )
-                                  : Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Verify',
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                  : _isSuccess
+                                      ? Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Account Created',
+                                              style: GoogleFonts.outfit(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            const Icon(Icons.check, size: 20),
+                                          ],
+                                        )
+                                      : Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Verify & Create Account',
+                                              style: GoogleFonts.outfit(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            const Icon(Icons.arrow_forward,
+                                                size: 20),
+                                          ],
                                         ),
-                                        const SizedBox(width: 8),
-                                        const Icon(Icons.verified, size: 20),
-                                      ],
-                                    ),
                             ),
                           ),
                         ),

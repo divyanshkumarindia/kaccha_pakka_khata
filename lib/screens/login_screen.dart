@@ -13,7 +13,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
@@ -70,7 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void dispose() {
     _emailController.dispose();
-    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -173,41 +171,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           fillColor: inputFillColor,
                           borderColor: borderColor,
                           textColor: textColor,
-                        ),
-                        const SizedBox(height: 16),
-
-                        // OR Divider
-                        Row(
-                          children: [
-                            Expanded(child: Divider(color: borderColor)),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                'OR',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12, // Smaller size for inner OR
-                                  fontWeight: FontWeight.bold,
-                                  color: labelColor,
-                                ),
-                              ),
-                            ),
-                            Expanded(child: Divider(color: borderColor)),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Phone Number Field
-                        _buildLabel(labelColor, 'Phone Number'),
-                        const SizedBox(height: 8),
-                        _buildTextField(
-                          controller: _phoneController,
-                          hintText: '+1 (555) 000-0000',
-                          isDark: isDark,
-                          fillColor: inputFillColor,
-                          borderColor: borderColor,
-                          textColor: textColor,
-                          keyboardType: TextInputType.phone,
                         ),
                         const SizedBox(height: 16),
 
