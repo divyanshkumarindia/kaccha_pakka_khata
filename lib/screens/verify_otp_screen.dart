@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'reset_password_screen.dart';
 import '../utils/toast_utils.dart';
+import '../widgets/premium_back_button.dart';
 
 class VerifyOtpScreen extends StatefulWidget {
   const VerifyOtpScreen({Key? key}) : super(key: key);
@@ -81,27 +82,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Custom Back Button
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? const Color(0xFF374151)
-                                  : const Color(0xFFF3F4F6),
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: Icon(Icons.arrow_back_ios_new,
-                                  size: 20, color: textColor),
-                              onPressed: () => Navigator.pop(context),
-                              padding: const EdgeInsets.all(12),
-                              constraints: const BoxConstraints(),
-                              style: IconButton.styleFrom(
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap),
-                            ),
-                          ),
-                        ),
+                        const PremiumBackButton(),
                         const SizedBox(height: 32),
 
                         // Shield Icon

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'verify_otp_screen.dart';
 import '../utils/toast_utils.dart';
+import '../widgets/premium_back_button.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
@@ -12,16 +13,12 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
   bool _isLoading = false;
 
   Future<void> _sendOtp() async {
     final email = _emailController.text.trim();
-    final phone = _phoneController.text.trim();
-
-    if (email.isEmpty && phone.isEmpty) {
-      ToastUtils.showErrorToast(
-          context, 'Please enter your email address or phone number.');
+    if (email.isEmpty) {
+      ToastUtils.showErrorToast(context, 'Please enter your email address.');
       return;
     }
 
@@ -50,7 +47,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   void dispose() {
     _emailController.dispose();
-    _phoneController.dispose();
     super.dispose();
   }
 
@@ -74,27 +70,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Custom Back Button
-              Align(
-                alignment: Alignment.topLeft,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF374151)
-                        : const Color(0xFFF3F4F6),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        size: 20, color: textColor),
-                    onPressed: () => Navigator.pop(context),
-                    padding: const EdgeInsets.all(12),
-                    constraints: const BoxConstraints(),
-                    style: IconButton.styleFrom(
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  ),
-                ),
-              ),
+              const PremiumBackButton(),
               const SizedBox(height: 32),
 
               // Lock Icon
@@ -189,51 +165,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
               const SizedBox(height: 24),
 
-              // OR Divider
-              Row(
-                children: [
-                  Expanded(child: Divider(color: borderColor)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'OR',
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: labelColor,
-                      ),
-                    ),
-                  ),
-                  Expanded(child: Divider(color: borderColor)),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Phone Label
-              Text(
-                'PHONE NUMBER',
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: labelColor,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Phone Input
-              TextField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                style: TextStyle(color: textColor),
-                decoration: _inputDecoration(
-                  hintText: '+1 (555) 000-0000',
-                  icon: Icons.phone_outlined,
-                  fillColor: inputFillColor,
-                  borderColor: borderColor,
-                  iconColor: labelColor,
-                ),
-              ),
               const SizedBox(height: 40),
 
               // Send OTP Button

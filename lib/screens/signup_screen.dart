@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import 'login_screen.dart';
 import 'signup_verify_otp_screen.dart';
 import '../utils/toast_utils.dart';
+import '../widgets/premium_back_button.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -121,19 +122,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Custom App Bar Area (Back Button)
-                      SafeArea(
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: IconButton(
-                            icon: Icon(Icons.arrow_back, color: textColor),
-                            onPressed: () => Navigator.pop(context),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            style: IconButton.styleFrom(
-                                tapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap),
-                          ),
-                        ),
+                      const SafeArea(
+                        child: PremiumBackButton(),
                       ),
                       const SizedBox(height: 16),
 

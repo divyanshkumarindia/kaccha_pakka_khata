@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 import '../utils/toast_utils.dart';
+import '../widgets/premium_back_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -101,18 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Back Button
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: IconButton(
-                            icon: Icon(Icons.arrow_back, color: textColor),
-                            onPressed: () => Navigator.pop(context),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            style: IconButton.styleFrom(
-                                tapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap),
-                          ),
-                        ),
+                        const PremiumBackButton(),
                         const SizedBox(height: 8),
                         const Spacer(),
 
