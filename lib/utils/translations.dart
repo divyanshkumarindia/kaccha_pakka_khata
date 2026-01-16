@@ -5,6 +5,7 @@ const Map<String, Map<String, String>> appTranslations = {
     'nav_reports': 'REPORTS',
     'nav_settings': 'SETTINGS',
     'nav_profile': 'PROFILE',
+    'nav_notes': 'NOTES',
 
     // Home Screen
     'greeting': 'Hi',
@@ -336,6 +337,7 @@ const Map<String, Map<String, String>> appTranslations = {
     'nav_reports': 'रिपोर्ट्स',
     'nav_settings': 'सेटिंग्स',
     'nav_profile': 'प्रोफाइल',
+    'nav_notes': 'नोट्स',
 
     // Home Screen
     'greeting': 'नमस्ते',

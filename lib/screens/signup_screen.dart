@@ -33,11 +33,22 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      ToastUtils.showErrorToast(context, 'Please enter a valid email address.',
+          bottomPadding: 25.0);
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      // Mock sending OTP
-      await Future.delayed(const Duration(seconds: 2));
+      // 1. Trigger Supabase Signup (Sends OTP Email)
+      await _authService.signUp(
+        email: email,
+        password: password,
+        fullName: name,
+      );
 
       if (mounted) {
         // Navigate to OTP Screen
@@ -47,15 +58,17 @@ class _SignupScreenState extends State<SignupScreen> {
             builder: (context) => SignupVerifyOtpScreen(
               fullName: name,
               email: email,
-              password: password,
+              password:
+                  password, // Still passing password if needed for auto-login fallback?
+              // Actually verifyOTP logs them in, so pw might not be needed
+              // but keep it just in case logic changes.
             ),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ToastUtils.showErrorToast(
-            context, 'Failed to initiate signup: ${e.toString()}',
+        ToastUtils.showErrorToast(context, 'Failed to sign up: ${e.toString()}',
             bottomPadding: 25.0);
       }
     } finally {

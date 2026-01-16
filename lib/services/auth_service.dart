@@ -80,6 +80,34 @@ class AuthService {
     await _supabase.auth.resetPasswordForEmail(email);
   }
 
+  // Verify OTP
+  Future<AuthResponse> verifyOTP({
+    required String email,
+    required String token,
+    required OtpType type,
+  }) async {
+    return await _supabase.auth.verifyOTP(
+      email: email,
+      token: token,
+      type: type,
+    );
+  }
+
+  // Resend OTP
+  Future<void> resendOTP({required String email}) async {
+    await _supabase.auth.resend(
+      type: OtpType.signup,
+      email: email,
+    );
+  }
+
+  // Update Password
+  Future<UserResponse> updatePassword(String password) async {
+    return await _supabase.auth.updateUser(
+      UserAttributes(password: password),
+    );
+  }
+
   // Sign Out
   Future<void> signOut() async {
     try {

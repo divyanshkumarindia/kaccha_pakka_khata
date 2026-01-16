@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../state/accounting_model.dart';
@@ -55,20 +56,12 @@ class _SignupVerifyOtpScreenState extends State<SignupVerifyOtpScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // 1. Mock verification delay
-      await Future.delayed(const Duration(seconds: 2));
-
-      // 2. Try Create Account (but don't block UI flow if it fails for demo)
-      try {
-        await _authService.signUp(
-          email: widget.email,
-          password: widget.password,
-          fullName: widget.fullName,
-        );
-      } catch (e) {
-        // Ignore backend error for 'just for now' UI demo
-        print('Signup service error (ignored for demo): $e');
-      }
+      // 2. Verify OTP using Supabase
+      await _authService.verifyOTP(
+        email: widget.email,
+        token: otp,
+        type: OtpType.signup,
+      );
 
       if (mounted) {
         // 3. Show Success Animation
@@ -81,7 +74,7 @@ class _SignupVerifyOtpScreenState extends State<SignupVerifyOtpScreen> {
         await Future.delayed(const Duration(seconds: 2));
 
         if (mounted) {
-          // SAVE NAME TO APP STATE (Ensures Welcome dialog is skipped)
+          // SAVE NAME TO APP STATE
           final model = Provider.of<AccountingModel>(context, listen: false);
           if (widget.fullName.isNotEmpty) {
             final firstName = widget.fullName.trim().split(' ').first;
@@ -96,13 +89,27 @@ class _SignupVerifyOtpScreenState extends State<SignupVerifyOtpScreen> {
             (route) => false,
           );
 
-          ToastUtils.showSuccessToast(
-              context, 'Account created successfully! Welcome.',
+          ToastUtils.showSuccessToast(context, 'Account verified! Welcome.',
               bottomPadding: 130.0);
         }
       }
+    } on AuthException catch (e) {
+      setState(() => _isLoading = false);
+
+      String message = e.message;
+      // Detailed check for user already exists
+      if (message.toLowerCase().contains('already registered') ||
+          message.toLowerCase().contains('duplicate key') ||
+          message.toLowerCase().contains('user already exists')) {
+        message =
+            'An account with this email already exists. Please login instead.';
+      }
+
+      ToastUtils.showErrorToast(context, message, bottomPadding: 25.0);
     } catch (e) {
-      // Should not be reached with the try-catch above
+      setState(() => _isLoading = false);
+      ToastUtils.showErrorToast(context, 'Signup failed: ${e.toString()}',
+          bottomPadding: 25.0);
     }
   }
 
@@ -344,10 +351,22 @@ class _SignupVerifyOtpScreenState extends State<SignupVerifyOtpScreen> {
                           ),
                           const SizedBox(height: 8),
                           GestureDetector(
-                            onTap: () {
-                              ToastUtils.showSuccessToast(
-                                  context, 'Code resent!',
-                                  bottomPadding: 25.0);
+                            onTap: () async {
+                              try {
+                                await _authService.resendOTP(
+                                    email: widget.email);
+                                if (context.mounted) {
+                                  ToastUtils.showSuccessToast(context,
+                                      'Code resent to ${widget.email}!',
+                                      bottomPadding: 25.0);
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ToastUtils.showErrorToast(
+                                      context, 'Failed to resend: $e',
+                                      bottomPadding: 25.0);
+                                }
+                              }
                             },
                             child: Text(
                               'Resend Code',

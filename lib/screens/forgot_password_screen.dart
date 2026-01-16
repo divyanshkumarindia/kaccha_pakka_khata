@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'verify_otp_screen.dart';
+import '../services/auth_service.dart'; // Added
+import 'reset_password_verify_screen.dart'; // Added
 import '../utils/toast_utils.dart';
 import '../widgets/premium_back_button.dart';
 
@@ -23,18 +24,30 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
 
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      ToastUtils.showErrorToast(context, 'Please enter a valid email address.',
+          bottomPadding: 25.0);
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      // Mock OTP sending logic for now as requested
-      await Future.delayed(const Duration(seconds: 2));
+      // Trigger Supabase Password Reset Email
+      final authService = AuthService(); // Using locally or via provider
+      await authService.resetPassword(email: email);
 
       if (mounted) {
-        ToastUtils.showSuccessToast(context, 'OTP sent successfully!',
+        ToastUtils.showSuccessToast(context, 'Reset code sent to $email',
             bottomPadding: 25.0);
+
+        // Navigate to Reset Verify Screen
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const VerifyOtpScreen()),
+          MaterialPageRoute(
+            builder: (context) => ResetPasswordVerifyScreen(email: email),
+          ),
         );
       }
     } catch (e) {
