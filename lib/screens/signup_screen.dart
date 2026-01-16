@@ -123,10 +123,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Custom App Bar Area (Back Button)
-                      const SafeArea(
-                        child: PremiumBackButton(),
-                      ),
-                      const SizedBox(height: 16),
+                      const PremiumBackButton(),
+                      const SizedBox(height: 10),
 
                       // Logo
                       Center(

@@ -134,7 +134,7 @@ class _SignupVerifyOtpScreenState extends State<SignupVerifyOtpScreen> {
                   children: [
                     // Custom Back Button
                     const PremiumBackButton(),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 10),
 
                     // Shield Icon
                     Center(

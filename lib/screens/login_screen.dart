@@ -97,13 +97,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 constraints: const BoxConstraints(maxWidth: 450),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0, vertical: 8.0),
+                      horizontal: 24.0, vertical: 16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Back Button
                       const PremiumBackButton(),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
 
                       // Icon
                       Center(
