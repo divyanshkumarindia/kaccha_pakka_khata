@@ -45,9 +45,19 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: AuthService().currentUser != null
-          ? const MainScreen()
-          : const WelcomeScreen(),
+      home: StreamBuilder<AuthState>(
+        stream: AuthService().authStateChanges,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Check current user while waiting for stream
+            return AuthService().currentUser != null
+                ? const MainScreen()
+                : const WelcomeScreen();
+          }
+          final session = snapshot.data?.session;
+          return session != null ? const MainScreen() : const WelcomeScreen();
+        },
+      ),
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),

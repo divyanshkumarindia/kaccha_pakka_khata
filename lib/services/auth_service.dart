@@ -1,7 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   // Singleton Pattern
@@ -92,36 +93,23 @@ class AuthService {
   static String get kIosClientId => dotenv.env['GOOGLE_IOS_CLIENT_ID'] ?? '';
 
   // Sign In with Google
-  Future<AuthResponse> signInWithGoogle() async {
+  Future<bool> signInWithGoogle() async {
     try {
-      // Initialize GoogleSignIn (v7.x uses singleton pattern)
-      // Initialize GoogleSignIn
-      await GoogleSignIn.instance.initialize(
-        serverClientId: kWebClientId,
-        clientId: Platform.isIOS ? kIosClientId : null,
+      // Use Supabase OAuth Flow (Web-based)
+      // This handles both Web and Mobile (via deep link)
+      final bool result = await _supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        authScreenLaunchMode: kIsWeb
+            ? LaunchMode.platformDefault
+            : LaunchMode.externalApplication,
+        queryParams: {
+          'access_type': 'offline',
+          'prompt': 'select_account',
+          if (kIsWeb) 'client_id': kWebClientId,
+        },
       );
 
-      // Authenticate using the new v7.x API
-      final GoogleSignInAccount? googleUser =
-          await GoogleSignIn.instance.authenticate();
-
-      if (googleUser == null) {
-        throw Exception('Google Sign-In was cancelled');
-      }
-
-      // Token access is now synchronous in v7.x
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-      final idToken = googleAuth.idToken;
-
-      if (idToken == null) {
-        throw Exception('No ID Token found.');
-      }
-
-      // Exchange the tokens for a Supabase session
-      return await _supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-      );
+      return result;
     } catch (e) {
       print("Supabase Google Sign-In Error: $e");
       rethrow;

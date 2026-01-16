@@ -12,13 +12,20 @@ class SignupScreen extends StatefulWidget {
   State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends State<SignupScreen>
+    with WidgetsBindingObserver {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
   bool _isPasswordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   Future<void> _signUp() async {
     final name = _nameController.text.trim();
@@ -89,18 +96,35 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = true);
     try {
       await _authService.signInWithGoogle();
-      if (mounted) {
-        // Navigate to Home upon success
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-      }
+      // Navigation handled by lifecycle observer
     } catch (e) {
       if (mounted) {
         ToastUtils.showErrorToast(
             context, 'Google Sign-In failed: ${e.toString()}',
             bottomPadding: 25.0);
+        setState(() => _isLoading = false);
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkSessionAndNavigate();
+    }
+  }
+
+  Future<void> _checkSessionAndNavigate() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+
+    final user = _authService.currentUser;
+    if (user != null) {
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+    } else {
+      if (_isLoading) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -109,6 +133,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 

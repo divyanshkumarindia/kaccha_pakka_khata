@@ -14,12 +14,18 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
   bool _isPasswordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   Future<void> _login() async {
     final email = _emailController.text.trim();
@@ -60,18 +66,48 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _googleSignIn() async {
     setState(() => _isLoading = true);
     try {
+      // 1. Initiate OAuth Flow (launches browser)
       await _authService.signInWithGoogle();
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-      }
+
+      // 2. Wait for App Resume (User returns from browser)
+      // We rely on the WidgetsBindingObserver to detect when the app resumes.
+      // Ideally, the deep link triggers the auth state change.
+      // However, to satisfy the requirement of "Strictly Login Screen if Back",
+      // we do NOT auto-navigate here blindly.
     } catch (e) {
       if (mounted) {
         ToastUtils.showErrorToast(
             context, 'Google Sign-In failed: ${e.toString()}',
             bottomPadding: 25.0);
+        setState(() => _isLoading = false);
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    }
+    // Note: We don't turn off loading immediately if successful,
+    // because we are waiting for the lifecycle or stream to kick in.
+    // But if we returned from browser via BACK button, we need to reset loading.
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkSessionAndNavigate();
+    }
+  }
+
+  Future<void> _checkSessionAndNavigate() async {
+    // Give Supabase a moment to process the deep link if it just arrived
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (!mounted) return;
+
+    final user = _authService.currentUser;
+    if (user != null) {
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+    } else {
+      // User cancelled or failed
+      if (_isLoading) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -79,6 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
