@@ -4,7 +4,56 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io';
 
 class AuthService {
+  // Singleton Pattern
+  static final AuthService _instance = AuthService._internal();
+
+  factory AuthService() {
+    return _instance;
+  }
+
+  // Private client instance
   final SupabaseClient _supabase = Supabase.instance.client;
+
+  AuthService._internal() {
+    _initializeAuthListener();
+  }
+
+  void _initializeAuthListener() {
+    _supabase.auth.onAuthStateChange.listen((data) async {
+      final AuthChangeEvent event = data.event;
+      final Session? session = data.session;
+
+      // Listen for Sign In (including initial session and post-signup)
+      if (event == AuthChangeEvent.signedIn ||
+          event == AuthChangeEvent.initialSession) {
+        if (session != null) {
+          try {
+            final userId = session.user.id;
+            // Check if user_data row exists to avoid overwriting with empty data
+            // (Using maybeSingle to safely check existence)
+            final existingData = await _supabase
+                .from('user_data')
+                .select()
+                .eq('user_id', userId)
+                .maybeSingle();
+
+            if (existingData == null) {
+              // Insert new row if missing
+              await _supabase.from('user_data').insert({
+                'user_id': userId,
+                'data': {}, // Initialize empty JSON
+                'updated_at': DateTime.now().toIso8601String(),
+              });
+              print("User Data row created for $userId");
+            }
+          } catch (e) {
+            // Silently ignore or log error (e.g., duplicated concurrent insert)
+            print("Error syncing user_data: $e");
+          }
+        }
+      }
+    });
+  }
 
   // Get current user
   User? get currentUser => _supabase.auth.currentUser;
