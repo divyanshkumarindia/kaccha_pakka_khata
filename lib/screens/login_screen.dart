@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       ToastUtils.showErrorToast(context, 'Please enter email and password.',
-          bottomPadding: 140.0);
+          bottomPadding: 25.0);
       return;
     }
 
@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (mounted) {
         ToastUtils.showErrorToast(context, 'Login failed: ${e.toString()}',
-            bottomPadding: 130.0);
+            bottomPadding: 25.0);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ToastUtils.showErrorToast(
             context, 'Google Sign-In failed: ${e.toString()}',
-            bottomPadding: 130.0);
+            bottomPadding: 25.0);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

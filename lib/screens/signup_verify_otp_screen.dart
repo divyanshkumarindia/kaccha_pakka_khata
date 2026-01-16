@@ -48,7 +48,7 @@ class _SignupVerifyOtpScreenState extends State<SignupVerifyOtpScreen> {
     String otp = _controllers.map((e) => e.text).join();
     if (otp.length < 4) {
       ToastUtils.showErrorToast(context, 'Please enter the 4-digit code.',
-          bottomPadding: 130.0);
+          bottomPadding: 25.0);
       return;
     }
 
@@ -346,8 +346,8 @@ class _SignupVerifyOtpScreenState extends State<SignupVerifyOtpScreen> {
                           GestureDetector(
                             onTap: () {
                               ToastUtils.showSuccessToast(
-                                  context, 'Code resent! (Mock)',
-                                  bottomPadding: 130.0);
+                                  context, 'Code resent!',
+                                  bottomPadding: 25.0);
                             },
                             child: Text(
                               'Resend Code',

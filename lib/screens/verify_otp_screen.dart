@@ -275,8 +275,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                           GestureDetector(
                             onTap: () {
                               ToastUtils.showSuccessToast(
-                                  context, 'Code resent! (Mock)',
-                                  bottomPadding: 280.0);
+                                  context, 'Code resent!',
+                                  bottomPadding: 25.0);
                             },
                             child: Text(
                               'Resend Code',

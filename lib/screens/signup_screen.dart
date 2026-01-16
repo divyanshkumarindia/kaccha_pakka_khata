@@ -305,35 +305,38 @@ class _SignupScreenState extends State<SignupScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 18),
 
                       // Footer: Already have an account? Log In
-                      GestureDetector(
-                        onTap: () {
-                          // Navigate to Login Screen
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LoginScreen()),
-                          );
-                        },
-                        child: RichText(
-                          text: TextSpan(
-                            style: GoogleFonts.outfit(
-                              fontSize: 14,
-                              color: labelColor,
-                            ),
-                            children: [
-                              const TextSpan(text: 'Already have an account? '),
-                              TextSpan(
-                                text: 'Log In',
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      const Color(0xFF6366F1), // Primary Color
-                                ),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            // Navigate to Login Screen
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginScreen()),
+                            );
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              style: GoogleFonts.outfit(
+                                fontSize: 14,
+                                color: labelColor,
                               ),
-                            ],
+                              children: [
+                                const TextSpan(
+                                    text: 'Already have an account? '),
+                                TextSpan(
+                                  text: 'Log In',
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(
+                                        0xFF6366F1), // Primary Color
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

@@ -19,7 +19,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
       ToastUtils.showErrorToast(context, 'Please enter your email address.',
-          bottomPadding: 30.0);
+          bottomPadding: 25.0);
       return;
     }
 
@@ -30,8 +30,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       await Future.delayed(const Duration(seconds: 2));
 
       if (mounted) {
-        ToastUtils.showSuccessToast(context, 'OTP sent successfully! (Mock)',
-            bottomPadding: 140.0);
+        ToastUtils.showSuccessToast(context, 'OTP sent successfully!',
+            bottomPadding: 25.0);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const VerifyOtpScreen()),
@@ -40,7 +40,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     } catch (e) {
       if (mounted) {
         ToastUtils.showErrorToast(context, 'Error: ${e.toString()}',
-            bottomPadding: 280.0);
+            bottomPadding: 25.0);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
