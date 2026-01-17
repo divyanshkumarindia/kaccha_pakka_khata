@@ -11,6 +11,7 @@ import 'components/balance_card.dart';
 import 'components/duration_period_picker.dart';
 import 'components/premium_card.dart';
 import '../utils/report_generator.dart';
+import 'package:my_daily_balance_flutter/services/user_config_service.dart';
 
 /// Shared accounting form widget extracted from the Family screen.
 /// Accepts a `templateKey` so templates can pass different labels/configs later.
@@ -35,16 +36,19 @@ class AccountingForm extends StatefulWidget {
 class _AccountingFormState extends State<AccountingForm> {
   late AccountingModel model;
 
+  // Services
+  final UserConfigService _userConfigService = UserConfigService();
+
+  // Header Title Controller
+  final TextEditingController _headerTitleController = TextEditingController();
+  bool _headerLoaded = false;
+
   bool isOpeningBalancesExpanded = true;
   // Map to track expansion state for all categories dynamically
   Map<String, bool> categoryExpansionState = {};
   late TextEditingController periodController;
   late TextEditingController periodStartController;
   late TextEditingController periodEndController;
-
-  // Header Title Controller
-  late TextEditingController _headerTitleController;
-  bool _headerLoaded = false;
 
   // Balance card custom titles and descriptions
   Map<String, String> balanceCardTitles = {
@@ -61,8 +65,37 @@ class _AccountingFormState extends State<AccountingForm> {
   @override
   void initState() {
     super.initState();
-    _headerTitleController = TextEditingController();
+    model = widget.providedModel ??
+        Provider.of<AccountingModel>(context, listen: false);
+
+    // Initialize controller with model value if exists
+    final key = widget.customPageId ?? widget.templateKey;
+    if (model.pageHeaderTitles.containsKey(key)) {
+      _headerTitleController.text = model.pageHeaderTitles[key]!;
+    }
+
     _loadBalanceCardData();
+    _loadUserConfig();
+  }
+
+  Future<void> _loadUserConfig() async {
+    final config = await _userConfigService.getConfig();
+    if (config.containsKey('header_title') && mounted) {
+      final title = config['header_title'];
+      if (title != null) {
+        setState(() {
+          _headerTitleController.text = title;
+        });
+
+        // Update local model
+        final key = widget.customPageId ?? widget.templateKey;
+        model.setPageHeaderTitle(key, title);
+
+        setState(() {
+          _headerLoaded = true;
+        });
+      }
+    }
   }
 
   String _getHeaderHint(String key) {
@@ -643,6 +676,9 @@ class _AccountingFormState extends State<AccountingForm> {
         });
         final key = widget.customPageId ?? widget.templateKey;
         model.setPageHeaderTitle(key, result);
+
+        // Save to Supabase config
+        await _userConfigService.updateConfig({'header_title': result});
       }
     }
   }
