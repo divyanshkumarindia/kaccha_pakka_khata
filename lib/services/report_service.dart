@@ -28,4 +28,18 @@ class ReportService {
       rethrow;
     }
   }
+
+  /// Fetches a stream of reports for the current user, ordered by creation date descending.
+  Stream<List<Map<String, dynamic>>> getReportsStream() {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      return Stream.value([]);
+    }
+
+    return _supabase
+        .from('reports')
+        .stream(primaryKey: ['id'])
+        .eq('user_id', user.id)
+        .order('created_at', ascending: false);
+  }
 }
