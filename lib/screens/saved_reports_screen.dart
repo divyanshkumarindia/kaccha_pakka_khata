@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_daily_balance_flutter/services/report_service.dart';
 import 'package:my_daily_balance_flutter/theme.dart';
+import 'report_viewer_screen.dart';
 
 class SavedReportsScreen extends StatefulWidget {
   const SavedReportsScreen({super.key});
@@ -171,9 +172,17 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
             ),
             IconButton(
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Viewing reports not yet implemented')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReportViewerScreen(
+                      reportData: report['report_data'] ?? {},
+                      reportType: report['report_type'] ?? 'Normal',
+                      reportDate: reportDate != null
+                          ? DateFormat('dd MMM yyyy').format(reportDate)
+                          : '',
+                    ),
+                  ),
                 );
               },
               icon: Icon(
