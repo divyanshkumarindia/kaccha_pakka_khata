@@ -1,28 +1,28 @@
-<<<<<<< HEAD
-# my_daily_balance Flutter skeleton
+# My Daily Balance 💎
 
-This folder contains a minimal Flutter project skeleton created inside the existing `my_daily_balance` workspace so you can start building the Flutter app here.
+> **A high-fidelity, secure personal utility application demonstrating modern Flutter architecture and premium UI/UX design.**
 
-What was created:
-- `pubspec.yaml` — basic dependencies and flutter section
-- `lib/main.dart` — minimal MaterialApp with `HomePage`
-- `web/index.html` — minimal (for web target)
-- `android/README.md` and `ios/README.md` — placeholders for native platform folders
-- `.gitignore` — common Flutter ignore entries
+This project is a showcase of engineering excellence, built to demonstrate **scalable code**, **pixel-perfect implementation**, and **seamless user experiences**. It handles secure data, real-time synchronization, and professional-grade report generation.
 
-How to use (if you have Flutter installed):
+## 🚀 Technical Highlights
 
-1. Open a terminal in this folder:
+Designed with a focus on code quality and performance:
 
-   cd my_daily_balance\flutter_app
+-   **💎 Premium UI/UX**: Custom-designed interfaces with smooth transitions and responsive layouts that adapt from mobile to web.
+-   **🔐 Robust Authentication**: Secure, production-ready login flows including **Google Sign-In**, OTP verification, and state persistence via **Supabase**.
+-   **🛡️ Clean Architecture**: Modular codebase emphasizing separation of concerns, maintainability, and testability.
+-   **📄 Advanced Features**: Integrated PDF generation engine for exporting professional documents directly from the app.
+-   **⚡ Performance**: Optimized for 60fps rendering and instant load times.
 
-2. Get packages and run:
+## 🎨 App Preview
 
-   flutter pub get
-   flutter run
+An interface designed to delight.
 
-You can target a device or web (e.g., `-d chrome`).
-=======
-# my_daily_balance
-A flutter app.
->>>>>>> fd9bff4469a4677def344f432cc176d6b9a28ece
+<div align="center">
+  <img src="images/dashboard.png" width="300" alt="App Dashboard Preview" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);" />
+</div>
+
+> *This project represents a commitment to high standards in mobile development, combining aesthetic sensibility with solid engineering principles.*
+
+---
+*Built with ❤️ using Flutter.*
