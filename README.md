@@ -19,7 +19,7 @@ Designed with a focus on code quality and performance:
 An interface designed to delight.
 
 <div align="center">
-  <img src="images/dashboard.png" width="300" alt="App Dashboard Preview" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);" />
+  <img src="Images/dashboard.png" width="300" alt="App Dashboard Preview" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);" />
 </div>
 
 > *This project represents a commitment to high standards in mobile development, combining aesthetic sensibility with solid engineering principles.*
