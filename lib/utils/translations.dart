@@ -10,8 +10,8 @@ const Map<String, Map<String, String>> appTranslations = {
     // Home Screen
     'greeting': 'Hi',
     'greeting_default': 'Hello there!',
-    'app_title_1': 'KAACHA PAKKA ',
-    'app_title_2': 'KHATA',
+    'app_title_1': 'KPK ',
+    'app_title_2': 'ACCOUNTING',
     'app_subtitle': 'PREMIUM DIGITAL LEDGER',
     'hero_title_1': 'Track Your ',
     'hero_title_2': 'Daily Balance',
