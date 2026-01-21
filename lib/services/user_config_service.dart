@@ -48,7 +48,7 @@ class UserConfigService {
         'updated_at': DateTime.now().toIso8601String(),
       }, onConflict: 'user_id'); // Ensure we update based on user_id
     } catch (e) {
-      print('Error updating user config: $e');
+      print('❌ Error updating user config: $e');
       // In a real app, you might want to rethrow or handle this more gracefully
     }
   }

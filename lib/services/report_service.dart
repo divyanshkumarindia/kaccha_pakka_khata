@@ -24,7 +24,7 @@ class ReportService {
         'created_at': DateTime.now().toIso8601String(),
       });
     } catch (e) {
-      print('Error saving report: $e');
+      print('❌ Error saving report to Supabase: $e'); // Explicit error logging
       rethrow;
     }
   }
@@ -59,5 +59,25 @@ class ReportService {
         .stream(primaryKey: ['id'])
         .eq('user_id', user.id)
         .order('created_at', ascending: !isDescending);
+  }
+
+  /// Simple connection test to verify Supabase access.
+  /// Returns "Success" or the error message.
+  Future<String> checkConnection() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) return '❌ User not logged in';
+
+      // Perform a lightweight fetch (count)
+      await _supabase
+          .from('reports')
+          .select('id')
+          .eq('user_id', user.id)
+          .limit(1);
+
+      return '✅ Connection Successful! (Can read from "reports" table)';
+    } catch (e) {
+      return '❌ Connection Failed: $e';
+    }
   }
 }
