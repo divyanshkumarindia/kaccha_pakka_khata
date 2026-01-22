@@ -80,4 +80,23 @@ class ReportService {
       return '❌ Connection Failed: $e';
     }
   }
+
+  /// Deletes a report by its ID.
+  ///
+  /// [id] - The unique identifier of the report to delete.
+  ///
+  /// Throws an exception if the user is not logged in or if the delete fails.
+  Future<void> deleteReport(String id) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception('User not logged in');
+    }
+
+    try {
+      await _supabase.from('reports').delete().eq('id', id);
+    } catch (e) {
+      print('❌ Error deleting report: $e');
+      rethrow;
+    }
+  }
 }

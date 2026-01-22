@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_daily_balance_flutter/services/report_service.dart';
@@ -17,10 +19,86 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
   bool _isDescending = true;
   String _searchQuery = '';
 
+  // Local state for optimistic UI updates
+  List<Map<String, dynamic>> _localReports = [];
+  bool _hasPendingDelete = false;
+  Timer? _pendingDeleteTimer;
+  Map<String, dynamic>? _pendingDeleteReport;
+  int? _pendingDeleteIndex;
+
   @override
   void dispose() {
     _searchController.dispose();
+    _pendingDeleteTimer?.cancel();
     super.dispose();
+  }
+
+  void _deleteReport(Map<String, dynamic> report, int index) {
+    // Cancel any existing pending delete
+    _pendingDeleteTimer?.cancel();
+
+    setState(() {
+      _hasPendingDelete = true;
+      _pendingDeleteReport = report;
+      _pendingDeleteIndex = index;
+      _localReports.removeAt(index);
+    });
+
+    // Show SnackBar with Undo option
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Report Deleted'),
+        duration: const Duration(seconds: 5),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: _undoDelete,
+        ),
+      ),
+    );
+
+    // Start timer to actually delete after 5 seconds
+    _pendingDeleteTimer = Timer(const Duration(seconds: 5), () async {
+      if (_pendingDeleteReport != null) {
+        try {
+          await _reportService
+              .deleteReport(_pendingDeleteReport!['id'].toString());
+        } catch (e) {
+          // If delete fails, restore the item
+          if (mounted) {
+            _undoDelete();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to delete report: $e')),
+            );
+          }
+        }
+        _clearPendingDelete();
+      }
+    });
+  }
+
+  void _undoDelete() {
+    _pendingDeleteTimer?.cancel();
+    if (_pendingDeleteReport != null && _pendingDeleteIndex != null) {
+      setState(() {
+        // Re-insert at original position, clamping to valid range
+        final insertIndex = _pendingDeleteIndex!.clamp(0, _localReports.length);
+        _localReports.insert(insertIndex, _pendingDeleteReport!);
+      });
+    }
+    _clearPendingDelete();
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
+
+  void _clearPendingDelete() {
+    _pendingDeleteTimer = null;
+    _pendingDeleteReport = null;
+    _pendingDeleteIndex = null;
+    if (mounted) {
+      setState(() {
+        _hasPendingDelete = false;
+      });
+    }
   }
 
   @override
@@ -112,7 +190,18 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
 
                 final reports = snapshot.data ?? [];
 
-                if (reports.isEmpty) {
+                // Sync local state with stream (only when no pending delete)
+                if (!_hasPendingDelete) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted && !_hasPendingDelete) {
+                      setState(() {
+                        _localReports = List.from(reports);
+                      });
+                    }
+                  });
+                }
+
+                if (_localReports.isEmpty && reports.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -137,12 +226,17 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
                   );
                 }
 
+                // Use local reports for display
+                final displayReports =
+                    _localReports.isNotEmpty ? _localReports : reports;
+
                 return ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  itemCount: reports.length,
+                  itemCount: displayReports.length,
                   itemBuilder: (context, index) {
-                    final report = reports[index];
-                    return _buildReportCard(context, report, isDark);
+                    final report = displayReports[index];
+                    return _buildDismissibleReportCard(
+                        context, report, index, isDark);
                   },
                 );
               },
@@ -150,6 +244,30 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDismissibleReportCard(
+    BuildContext context,
+    Map<String, dynamic> report,
+    int index,
+    bool isDark,
+  ) {
+    return Dismissible(
+      key: Key(report['id'].toString()),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      onDismissed: (_) => _deleteReport(report, index),
+      child: _buildReportCard(context, report, isDark),
     );
   }
 
