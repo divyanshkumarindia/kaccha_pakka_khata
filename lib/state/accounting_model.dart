@@ -754,6 +754,12 @@ class AccountingModel extends ChangeNotifier {
 
   double get netBalance => receiptsTotal - paymentsTotal;
 
+  /// Check if the stored firm name is just a default placeholder
+  bool get isDefaultFirmName {
+    return userTypeConfigs.values
+        .any((config) => config.firmNamePlaceholder == firmName);
+  }
+
   // ====== SERIALIZATION FOR SAVED REPORTS ======
   Map<String, dynamic> exportState() {
     return {

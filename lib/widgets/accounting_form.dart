@@ -791,9 +791,9 @@ class _AccountingFormState extends State<AccountingForm> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          model.firmName.isNotEmpty
+                          model.firmName.isNotEmpty && !model.isDefaultFirmName
                               ? model.firmName
-                              : 'Financial Report',
+                              : model.t('card_${model.userType.name}'),
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -888,9 +888,9 @@ class _AccountingFormState extends State<AccountingForm> {
                     children: [
                       // Firm Name and Period Header
                       Text(
-                        model.firmName.isNotEmpty
+                        model.firmName.isNotEmpty && !model.isDefaultFirmName
                             ? model.firmName
-                            : 'Financial Report',
+                            : model.t('card_${model.userType.name}'),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -920,7 +920,7 @@ class _AccountingFormState extends State<AccountingForm> {
 
                       // Receipts Table
                       _buildDetailedTable(
-                        'Receipts ($currencySymbol)',
+                        '${model.userType == UserType.personal ? model.t('label_income') : model.t('label_receipts')} ($currencySymbol)',
                         AppTheme.receiptColor,
                         isDark
                             ? const Color(0xFF111827)
@@ -1026,7 +1026,9 @@ class _AccountingFormState extends State<AccountingForm> {
                           // Total Receipts
                           _buildTableRow(
                             [
-                              'Total Receipts',
+                              model.userType == UserType.personal
+                                  ? model.t('label_total_income')
+                                  : model.t('label_total_receipts'),
                               _formatAmount(totalReceiptsCash),
                               _formatAmount(totalReceiptsBank),
                               _formatAmount(
@@ -1044,7 +1046,7 @@ class _AccountingFormState extends State<AccountingForm> {
 
                       // Payments Table
                       _buildDetailedTable(
-                        'Payments ($currencySymbol)',
+                        '${model.userType == UserType.personal ? model.t('label_expenses') : model.t('label_payments')} ($currencySymbol)',
                         AppTheme.paymentColor,
                         isDark
                             ? const Color(0xFF111827)
@@ -1106,7 +1108,9 @@ class _AccountingFormState extends State<AccountingForm> {
                           // Total Payments
                           _buildTableRow(
                             [
-                              'Total Payments',
+                              model.userType == UserType.personal
+                                  ? model.t('label_total_expenses')
+                                  : model.t('label_total_payments'),
                               _formatAmount(totalPaymentsCash + closingCash),
                               _formatAmount(totalPaymentsBank + closingBank),
                               _formatAmount(totalPaymentsCash +
@@ -4969,7 +4973,7 @@ class _AccountingFormState extends State<AccountingForm> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final nameController = TextEditingController(
       text:
-          '${model.t('label_report')} - ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+          '${model.t('label_report')} - ${DateFormat('dd MMM yyyy hh:mm a').format(DateTime.now())}',
     );
 
     showDialog(
