@@ -421,11 +421,15 @@ class _HoverableCategoryCardState extends State<_HoverableCategoryCard> {
     // Base colors
     final baseBg = widget.isAddNew
         ? widget.bgColor
-        : (widget.isDark ? widget.color.withOpacity(0.15) : widget.bgColor);
+        : (widget.isDark
+            ? widget.color.withValues(alpha: 0.15)
+            : widget.bgColor);
 
     final baseBorder = widget.isAddNew
         ? widget.borderColor
-        : (widget.isDark ? widget.color.withOpacity(0.3) : widget.borderColor);
+        : (widget.isDark
+            ? widget.color.withValues(alpha: 0.3)
+            : widget.borderColor);
 
     // Hover adjustments
     Color displayBg = baseBg;
@@ -434,8 +438,9 @@ class _HoverableCategoryCardState extends State<_HoverableCategoryCard> {
         displayBg = widget.isDark ? Colors.white10 : Colors.grey.shade50;
       } else {
         displayBg = widget.isDark
-            ? widget.color.withOpacity(0.25)
-            : Color.alphaBlend(widget.color.withOpacity(0.1), widget.bgColor);
+            ? widget.color.withValues(alpha: 0.25)
+            : Color.alphaBlend(
+                widget.color.withValues(alpha: 0.1), widget.bgColor);
       }
     }
 
@@ -456,7 +461,7 @@ class _HoverableCategoryCardState extends State<_HoverableCategoryCard> {
                   ? widget.color
                   : (widget.isAddNew
                       ? baseBorder
-                      : widget.color.withOpacity(0.6)), // Darker border
+                      : widget.color.withValues(alpha: 0.6)), // Darker border
               width: widget.isActive ? 2 : (widget.isAddNew ? 2 : 1.5),
               style: BorderStyle.solid,
             ),
@@ -465,7 +470,8 @@ class _HoverableCategoryCardState extends State<_HoverableCategoryCard> {
                 BoxShadow(
                   color: widget.isAddNew
                       ? Colors.transparent
-                      : widget.color.withOpacity(widget.isActive ? 0.3 : 0.2),
+                      : widget.color
+                          .withValues(alpha: widget.isActive ? 0.3 : 0.2),
                   blurRadius: widget.isActive ? 8 : 12,
                   offset:
                       widget.isActive ? const Offset(0, 2) : const Offset(0, 4),
