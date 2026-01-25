@@ -278,7 +278,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -352,9 +352,9 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.15), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.15), width: 1),
       ),
       child: Column(
         children: [
@@ -393,7 +393,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -428,9 +428,9 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.15), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.15), width: 1),
       ),
       child: Column(
         children: [
