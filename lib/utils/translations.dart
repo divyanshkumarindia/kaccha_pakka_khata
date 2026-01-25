@@ -97,41 +97,12 @@ const Map<String, Map<String, String>> appTranslations = {
     'msg_restore_success': 'Data restored successfully!',
     'dialog_clear_title': 'Clear All Data?',
     'dialog_clear_msg':
-        'This will permanently delete all your accounting data including pages, categories, and saved reports. This action cannot be undone!',
+        'This will permanently delete all your accounting data including pages and categories. This action cannot be undone!',
     'btn_delete_all': 'Delete All',
     'msg_clear_success': 'All data cleared successfully',
     'dialog_logout_title': 'Log Out',
     'dialog_logout_msg': 'Are you sure you want to sign out?',
     'msg_coming_soon': 'Coming soon!',
-
-    // Saved Reports Screen
-    'title_saved_reports': 'Saved Reports',
-    'tooltip_oldest': 'Oldest First',
-    'tooltip_newest': 'Newest First',
-    'sort_date': 'Sort by Date',
-    'sort_name': 'Sort by Name',
-    'hint_search_reports': 'Search saved reports...',
-    'empty_reports_title': 'No Saved Reports',
-    'empty_reports_msg': 'Save reports from the Home tab\nto access them here',
-    'label_report_date': 'Report Date',
-    'label_saved_on': 'Saved On',
-    'label_currency': 'Currency',
-    'label_report_data': 'Report Data',
-    'menu_view': 'View',
-    'menu_edit': 'Edit',
-    'menu_share': 'Share',
-    'menu_delete': 'Delete',
-    'dialog_load_title': 'Edit Report?',
-    'dialog_load_msg':
-        'This will overwrite your current active session data with the contents of this report.\n\nAny unsaved changes in your current session will be lost.',
-    'btn_load_edit': 'Load & Edit',
-    'msg_load_success': 'Report loaded! Return to Home to view.',
-    'msg_load_error': 'Error loading report',
-    'dialog_delete_report_title': 'Delete Report?',
-    'dialog_delete_report_msg':
-        'This action cannot be undone. Are you sure you want to delete this saved report?',
-    'msg_delete_success': 'Report deleted successfully',
-    'msg_share_soon': 'Share functionality coming soon!',
 
     // Accounting Form
     'link_back_dashboard': 'Back to Dashboard',
@@ -434,36 +405,6 @@ const Map<String, Map<String, String>> appTranslations = {
     'dialog_logout_title': 'लॉग आउट',
     'dialog_logout_msg': 'क्या आप वाकई साइन आउट करना चाहते हैं?',
     'msg_coming_soon': 'जल्द आ रहा है!',
-
-    // Saved Reports Screen
-    'title_saved_reports': 'सहेजी गई रिपोर्ट्स',
-    'tooltip_oldest': 'सबसे पुराना पहले',
-    'tooltip_newest': 'नवीनतम पहले',
-    'sort_date': 'तारीख के अनुसार',
-    'sort_name': 'नाम के अनुसार',
-    'hint_search_reports': 'रिपोर्ट खोजें...',
-    'empty_reports_title': 'कोई रिपोर्ट नहीं',
-    'empty_reports_msg':
-        'होम टैब से रिपोर्ट सहेजें\nउन्हें यहां एक्सेस करने के लिए',
-    'label_report_date': 'रिपोर्ट की तारीख',
-    'label_saved_on': 'सहेजा गया',
-    'label_currency': 'मुद्रा',
-    'label_report_data': 'रिपोर्ट डेटा',
-    'menu_view': 'देखें',
-    'menu_edit': 'संपादित करें',
-    'menu_share': 'साझा करें',
-    'menu_delete': 'हटाएं',
-    'dialog_load_title': 'रिपोर्ट संपादित करें?',
-    'dialog_load_msg':
-        'यह आपके वर्तमान सक्रिय सत्र डेटा को इस रिपोर्ट की सामग्री के साथ अधिलेखित कर देगा।\n\nआपके वर्तमान सत्र में कोई भी सहेजा नहीं गया परिवर्तन खो जाएगा।',
-    'btn_load_edit': 'लोड और संपादित करें',
-    'msg_load_success': 'रिपोर्ट लोड हो गई! देखने के लिए होम पर लौटें।',
-    'msg_load_error': 'रिपोर्ट लोड करने में त्रुटि',
-    'dialog_delete_report_title': 'रिपोर्ट हटाएं?',
-    'dialog_delete_report_msg':
-        'इस कार्रवाई को पूर्ववत नहीं किया जा सकता है। क्या आप वाकई इस सहेजी गई रिपोर्ट को हटाना चाहते हैं?',
-    'msg_delete_success': 'रिपोर्ट सफलतापूर्वक हटा दी गई',
-    'msg_share_soon': 'साझाकरण कार्यक्षमता जल्द आ रही है!',
 
     // Accounting Form
     'link_back_dashboard': 'डैशबोर्ड पर वापस',

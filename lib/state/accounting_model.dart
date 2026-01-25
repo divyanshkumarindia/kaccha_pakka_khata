@@ -42,8 +42,18 @@ class AccountingModel extends ChangeNotifier {
         periodEndDate = '' {
     _initializeAccounts();
     loadSettings();
-    loadSavedReports();
+    _migrateRemoveSavedReports(); // Clean up old saved reports data
     loadFromCloud(); // Try to sync from cloud on startup
+  }
+
+  // One-time migration to remove legacy saved_reports
+  Future<void> _migrateRemoveSavedReports() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('saved_reports');
+    } catch (e) {
+      // Ignore errors
+    }
   }
 
   /// Helper to get translated string
@@ -744,73 +754,6 @@ class AccountingModel extends ChangeNotifier {
 
   double get netBalance => receiptsTotal - paymentsTotal;
 
-  // ====== SAVED REPORTS FUNCTIONALITY ======
-  List<Map<String, dynamic>> _savedReports = [];
-  List<Map<String, dynamic>> get savedReports => _savedReports;
-
-  Future<void> loadSavedReports() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final reportsJson = prefs.getString('saved_reports');
-      if (reportsJson != null && reportsJson.isNotEmpty) {
-        final List<dynamic> decoded = jsonDecode(reportsJson);
-        _savedReports = decoded.cast<Map<String, dynamic>>();
-        notifyListeners();
-      }
-    } catch (e) {
-      // ignore errors
-    }
-  }
-
-  Future<void> saveReport(String title, String reportDate, String reportData,
-      {String? useCaseType}) async {
-    final report = {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'title': title,
-      'report_date': reportDate, // Use standardized key
-      'savedAt': DateTime.now().toIso8601String(),
-      'currency': currency,
-      'duration': duration.index,
-      'data': reportData,
-      'use_case_type': useCaseType, // Persist use case type locally
-    };
-    _savedReports.insert(0, report);
-    await _persistSavedReports();
-    notifyListeners();
-  }
-
-  Future<void> updateSavedReport(String id, String title, String reportData,
-      {String? useCaseType}) async {
-    final index = _savedReports.indexWhere((r) => r['id'] == id);
-    if (index != -1) {
-      _savedReports[index] = {
-        ..._savedReports[index],
-        'title': title,
-        'data': reportData,
-        'report_date': DateTime.now().toIso8601String(), // Refresh timestamp
-        'savedAt': DateTime.now().toIso8601String(),
-        'use_case_type': useCaseType ?? _savedReports[index]['use_case_type'],
-      };
-      await _persistSavedReports();
-      notifyListeners();
-    }
-  }
-
-  Future<void> deleteSavedReport(String reportId) async {
-    _savedReports.removeWhere((report) => report['id'] == reportId);
-    await _persistSavedReports();
-    notifyListeners();
-  }
-
-  Future<void> _persistSavedReports() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('saved_reports', jsonEncode(_savedReports));
-    } catch (e) {
-      // ignore errors
-    }
-  }
-
   // ====== SERIALIZATION FOR SAVED REPORTS ======
   Map<String, dynamic> exportState() {
     return {
@@ -1068,7 +1011,7 @@ class AccountingModel extends ChangeNotifier {
       await prefs.clear();
 
       // Reset all data
-      _savedReports = [];
+
       _selectedCurrency = 'INR';
       _isDarkMode = false;
       _autoSaveReports = false;

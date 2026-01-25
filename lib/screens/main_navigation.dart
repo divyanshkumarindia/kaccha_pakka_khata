@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'accounting_screen.dart';
-import 'saved_reports_screen.dart';
 import 'settings_screen.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -11,11 +10,10 @@ class MainNavigation extends StatefulWidget {
 }
 
 class _MainNavigationState extends State<MainNavigation> {
-  int _currentIndex = 1; // Start with Home (center tab)
+  int _currentIndex = 0; // Start with Home
 
   // Pages for each tab
   final List<Widget> _pages = [
-    const SavedReportsScreen(),
     const AccountingScreen(),
     const SettingsScreen(),
   ];
@@ -43,11 +41,6 @@ class _MainNavigationState extends State<MainNavigation> {
         animationDuration: const Duration(milliseconds: 400),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.bookmark_border),
-            selectedIcon: Icon(Icons.bookmark),
-            label: 'Saved',
-          ),
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),

@@ -5055,28 +5055,8 @@ class _AccountingFormState extends State<AccountingForm> {
                 final stateMap = model.exportState();
                 stateMap['saved_view_type'] =
                     reportType; // Persist view type explicitly
-                final data = jsonEncode(stateMap);
 
-                // 1. Save/Update locally
-                if (widget.reportId != null) {
-                  await model.updateSavedReport(
-                    widget.reportId!,
-                    nameController.text,
-                    data,
-                    useCaseType: Provider.of<AppState>(context, listen: false)
-                        .activeUseCaseString,
-                  );
-                } else {
-                  await model.saveReport(
-                    nameController.text,
-                    DateTime.now().toIso8601String(), // Pass precise timestamp
-                    data,
-                    useCaseType: Provider.of<AppState>(context, listen: false)
-                        .activeUseCaseString,
-                  );
-                }
-
-                // 2. Save/Update to Supabase
+                // Save/Update to Supabase (cloud only)
                 try {
                   if (widget.reportId != null) {
                     await _reportService.updateReport(

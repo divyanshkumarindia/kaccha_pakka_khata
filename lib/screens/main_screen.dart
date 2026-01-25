@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/accounting_model.dart';
 import 'home_screen.dart';
-import 'saved_reports_screen.dart';
 import 'settings_screen.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
@@ -75,9 +74,7 @@ class _MainScreenState extends State<MainScreen> {
                 children: [
                   _buildNavItem(0, model.t('nav_home'), Icons.home_outlined),
                   _buildNavItem(
-                      1, model.t('nav_reports'), Icons.pie_chart_outline),
-                  _buildNavItem(
-                      2, model.t('nav_settings'), Icons.settings_outlined),
+                      1, model.t('nav_settings'), Icons.settings_outlined),
                 ],
               );
             },
@@ -92,8 +89,6 @@ class _MainScreenState extends State<MainScreen> {
       case 0:
         return const HomeScreen();
       case 1:
-        return const SavedReportsScreen();
-      case 2:
         return const SettingsScreen();
       default:
         return const HomeScreen();

@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:my_daily_balance_flutter/services/report_service.dart';
-import 'package:my_daily_balance_flutter/state/accounting_model.dart';
 import 'report_viewer_screen.dart';
 
 class CategoryReportsScreen extends StatefulWidget {
@@ -53,56 +51,12 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
   }
 
   void _refreshReports() {
-    final model = Provider.of<AccountingModel>(context, listen: false);
-
     setState(() {
-      _reportsStream = _reportService
-          .getReportsStream(
+      _reportsStream = _reportService.getReportsStream(
         query: _searchQuery,
         isDescending: _isDescending,
         useCaseType: widget.useCaseType,
-      )
-          .map((cloudReports) {
-        // 1. Get local reports from AccountingModel
-        final localReports = model.savedReports.where((r) {
-          if (r['use_case_type'] != widget.useCaseType) {
-            return false;
-          }
-          if (_searchQuery.isNotEmpty) {
-            final title = (r['title'] ?? '').toString().toLowerCase();
-            final date =
-                (r['report_date'] ?? r['date'] ?? '').toString().toLowerCase();
-            final q = _searchQuery.toLowerCase();
-            if (!title.contains(q) && !date.contains(q)) return false;
-          }
-          return true;
-        }).toList();
-
-        // 2. Merge and De-duplicate
-        final merged = [...cloudReports];
-        for (var lr in localReports) {
-          if (!merged.any((cr) => cr['id'] == lr['id'])) {
-            merged.add(lr);
-          }
-        }
-
-        // 3. Sort
-        merged.sort((a, b) {
-          final dateAString =
-              a['report_date'] ?? a['savedAt'] ?? a['date'] ?? '';
-          final dateBString =
-              b['report_date'] ?? b['savedAt'] ?? b['date'] ?? '';
-
-          final dateA = DateTime.tryParse(dateAString) ?? DateTime(0);
-          final dateB = DateTime.tryParse(dateBString) ?? DateTime(0);
-
-          return _isDescending
-              ? dateB.compareTo(dateA)
-              : dateA.compareTo(dateB);
-        });
-
-        return merged;
-      });
+      );
     });
   }
 
