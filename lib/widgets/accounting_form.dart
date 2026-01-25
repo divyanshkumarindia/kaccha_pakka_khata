@@ -818,16 +818,6 @@ class _AccountingFormState extends State<AccountingForm> {
                   runSpacing: 8,
                   children: [
                     _buildPremiumActionButton(
-                      'Save Report',
-                      Icons.save,
-                      AppTheme.primaryColor,
-                      () {
-                        Navigator.pop(context);
-                        _showSaveReportDialog(context, model,
-                            reportType: 'Detailed');
-                      },
-                    ),
-                    _buildPremiumActionButton(
                       'Download Excel',
                       Icons.file_download,
                       AppTheme.receiptColor,

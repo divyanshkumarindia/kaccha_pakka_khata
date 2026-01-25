@@ -161,6 +161,36 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
     final closingBank = totalReceiptsBank - totalPaymentsBank;
     final closingTotal = openingTotal + netSurplus;
 
+    // --- LOAN LIABILITY TRACKING ---
+    double totalLoansReceived = 0.0;
+    double totalLoanRepayments = 0.0;
+
+    // Calculate loans received from receipt accounts
+    _model.receiptAccounts.forEach((key, entries) {
+      if (key.toLowerCase().contains('loan')) {
+        for (var entry in entries) {
+          for (var row in entry.rows) {
+            totalLoansReceived += row.cash + row.bank;
+          }
+        }
+      }
+    });
+
+    // Calculate loan repayments from payment accounts
+    _model.paymentAccounts.forEach((key, entries) {
+      if (key.toLowerCase().contains('loan')) {
+        for (var entry in entries) {
+          for (var row in entry.rows) {
+            totalLoanRepayments += row.cash + row.bank;
+          }
+        }
+      }
+    });
+
+    final netLoanLiability = totalLoansReceived - totalLoanRepayments;
+    final hasLoanTransactions =
+        totalLoansReceived > 0 || totalLoanRepayments > 0;
+
     return Container(
       constraints: const BoxConstraints(maxWidth: 900),
       padding: const EdgeInsets.all(16),
@@ -354,7 +384,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.15), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.15), width: 1),
       ),
       child: Column(
         children: [
@@ -430,7 +460,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.15), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.15), width: 1),
       ),
       child: Column(
         children: [
