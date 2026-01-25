@@ -8,6 +8,7 @@ class BalanceCard extends StatefulWidget {
   final IconData? icon;
   final Color? iconColor;
   final String? initialDescription;
+  final double? initialAmount;
   final Function(String)? onTitleChanged;
   final Function(String)? onDescriptionChanged;
   final Function(String)? onAmountChanged;
@@ -20,6 +21,7 @@ class BalanceCard extends StatefulWidget {
     this.icon,
     this.iconColor,
     this.initialDescription,
+    this.initialAmount,
     this.onTitleChanged,
     this.onDescriptionChanged,
     this.onAmountChanged,
@@ -42,8 +44,39 @@ class _BalanceCardState extends State<BalanceCard> {
                 widget.initialDescription!.isNotEmpty)
             ? widget.initialDescription
             : '');
-    // Amount always starts empty (shows ghost text '0')
-    amountController = TextEditingController();
+    // Initialize amount if provided
+    String initialAmountText = '';
+    if (widget.initialAmount != null && widget.initialAmount! != 0.0) {
+      if (widget.initialAmount == widget.initialAmount!.roundToDouble()) {
+        initialAmountText = widget.initialAmount!.toInt().toString();
+      } else {
+        initialAmountText = widget.initialAmount!.toString();
+      }
+    }
+    amountController = TextEditingController(text: initialAmountText);
+  }
+
+  @override
+  void didUpdateWidget(covariant BalanceCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialDescription != oldWidget.initialDescription) {
+      if (descriptionController.text != (widget.initialDescription ?? '')) {
+        descriptionController.text = widget.initialDescription ?? '';
+      }
+    }
+    if (widget.initialAmount != oldWidget.initialAmount) {
+      String newText = '';
+      if (widget.initialAmount != null && widget.initialAmount! != 0.0) {
+        if (widget.initialAmount == widget.initialAmount!.roundToDouble()) {
+          newText = widget.initialAmount!.toInt().toString();
+        } else {
+          newText = widget.initialAmount!.toString();
+        }
+      }
+      if (amountController.text != newText) {
+        amountController.text = newText;
+      }
+    }
   }
 
   @override

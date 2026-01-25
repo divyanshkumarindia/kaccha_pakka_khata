@@ -142,6 +142,8 @@ class ReportService {
       final updates = <String, dynamic>{};
       if (reportData != null) updates['report_data'] = reportData;
       if (reportType != null) updates['report_type'] = reportType;
+      updates['report_date'] =
+          DateTime.now().toIso8601String(); // Refresh timestamp
 
       if (updates.isEmpty) return;
 
@@ -152,6 +154,21 @@ class ReportService {
           .eq('user_id', user.id);
     } catch (e) {
       print('❌ Error updating report: $e');
+      rethrow;
+    }
+  }
+
+  /// Deletes all reports for the current user.
+  Future<void> deleteAllUserReports() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception('User not logged in');
+    }
+
+    try {
+      await _supabase.from('reports').delete().eq('user_id', user.id);
+    } catch (e) {
+      print('❌ Error deleting all reports: $e');
       rethrow;
     }
   }

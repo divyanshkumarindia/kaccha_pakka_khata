@@ -10,6 +10,7 @@ import '../theme.dart';
 import 'components/balance_card.dart';
 import 'components/duration_period_picker.dart';
 import 'components/premium_card.dart';
+import 'package:my_daily_balance_flutter/state/app_state.dart';
 import '../utils/report_generator.dart';
 import 'package:my_daily_balance_flutter/services/report_service.dart';
 import 'package:my_daily_balance_flutter/services/user_config_service.dart';
@@ -21,6 +22,8 @@ class AccountingForm extends StatefulWidget {
   final AccountingModel? providedModel;
   final String? customTitle;
   final String? customPageId;
+  final Map<String, dynamic>? initialState;
+  final String? reportId;
 
   const AccountingForm({
     Key? key,
@@ -28,6 +31,8 @@ class AccountingForm extends StatefulWidget {
     this.providedModel,
     this.customTitle,
     this.customPageId,
+    this.initialState,
+    this.reportId,
   }) : super(key: key);
 
   @override
@@ -52,23 +57,16 @@ class _AccountingFormState extends State<AccountingForm> {
   late TextEditingController periodStartController;
   late TextEditingController periodEndController;
 
-  // Balance card custom titles and descriptions
-  Map<String, String> balanceCardTitles = {
-    'cash': "Yesterday's Cash (B/F)",
-    'bank': "Yesterday's Bank (B/F)",
-    'other': "Other Funds (B/F)",
-  };
-  Map<String, String> balanceCardDescriptions = {
-    'cash': '', // Empty by default, will show ghost text
-    'bank': '',
-    'other': '',
-  };
-
   @override
   void initState() {
     super.initState();
     model = widget.providedModel ??
         Provider.of<AccountingModel>(context, listen: false);
+
+    // If initial state is provided (Edit Mode), load it immediately
+    if (widget.initialState != null) {
+      model.importState(widget.initialState!);
+    }
 
     // Initialize controller with model value if exists
     final key = widget.customPageId ?? widget.templateKey;
@@ -131,24 +129,9 @@ class _AccountingFormState extends State<AccountingForm> {
       model = Provider.of<AccountingModel>(context);
     }
 
-    // Initialize defaults with translations
-    balanceCardTitles = {
-      'cash': model.t('balance_title_cash'),
-      'bank': model.t('balance_title_bank'),
-      'other': model.t('balance_title_other'),
-    };
-
-    // If customTitle is provided, set it in the model
-    if (widget.customTitle != null && widget.customTitle!.isNotEmpty) {
-      model.pageTitle = widget.customTitle;
-    }
-
     periodController = TextEditingController(text: model.periodDate);
     periodStartController = TextEditingController(text: model.periodStartDate);
     periodEndController = TextEditingController(text: model.periodEndDate);
-
-    // Load balance card titles and descriptions
-    _loadBalanceCardTitlesAndDescriptions();
 
     // Initialize Header Title if not loaded
     if (!_headerLoaded) {
@@ -158,19 +141,6 @@ class _AccountingFormState extends State<AccountingForm> {
         _headerTitleController.text = savedTitle;
       }
       _headerLoaded = true;
-    }
-  }
-
-  Future<void> _loadBalanceCardTitlesAndDescriptions() async {
-    for (String cardType in ['cash', 'bank', 'other']) {
-      final title = await model.getBalanceCardTitle(cardType);
-      final desc = await model.getBalanceCardDescription(cardType);
-      if (mounted) {
-        setState(() {
-          if (title != null) balanceCardTitles[cardType] = title;
-          if (desc != null) balanceCardDescriptions[cardType] = desc;
-        });
-      }
     }
   }
 
@@ -686,507 +656,6 @@ class _AccountingFormState extends State<AccountingForm> {
   }
 
   // Show Basic Report Dialog
-  void _showBasicReport(BuildContext context, AccountingModel model) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currencySymbol = _getCurrencySymbol(model.currency);
-
-    // Calculate closing balance
-    final closingBalance = model.netBalance;
-    final netReceipts = model.receiptsTotal;
-    final netPayments = model.paymentsTotal;
-
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 850, maxHeight: 750),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with title and period
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF374151) : Colors.white,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: isDark
-                          ? const Color(0xFF4B5563)
-                          : const Color(0xFFE5E7EB),
-                    ),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          model.firmName.isNotEmpty
-                              ? model.firmName
-                              : 'Financial Report',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryColor,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close, size: 24),
-                          iconSize: 24,
-                          padding: const EdgeInsets.all(8),
-                          constraints: const BoxConstraints(
-                            minWidth: 44,
-                            minHeight: 44,
-                          ),
-                          tooltip: 'Close',
-                          style: IconButton.styleFrom(
-                            tapTargetSize: MaterialTapTargetSize.padded,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _getReportPeriodText(model),
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDark ? Colors.grey[400] : Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Action Buttons
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF111827)
-                      : const Color(0xFFF9FAFB),
-                  border: Border(
-                    bottom: BorderSide(
-                      color: isDark
-                          ? const Color(0xFF374151)
-                          : const Color(0xFFE5E7EB),
-                    ),
-                  ),
-                ),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _buildPremiumActionButton(
-                      'Save Report',
-                      Icons.save,
-                      AppTheme.primaryColor,
-                      () {
-                        Navigator.pop(context);
-                        _showSaveReportDialog(context, model);
-                      },
-                    ),
-                    _buildPremiumActionButton(
-                      'Download Excel',
-                      Icons.file_download,
-                      const Color(0xFF10B981),
-                      () {
-                        Navigator.pop(context);
-                        ReportGenerator.generateAndShareExcel(context, model);
-                      },
-                    ),
-                    _buildPremiumActionButton(
-                      'Download PDF',
-                      Icons.picture_as_pdf,
-                      AppTheme.paymentColor,
-                      () {
-                        Navigator.pop(context);
-                        ReportGenerator.generateAndSharePdf(context, model);
-                      },
-                    ),
-                    _buildActionButton(
-                      'Print',
-                      Icons.print,
-                      isDark
-                          ? const Color(0xFF6B7280)
-                          : const Color(0xFF374151),
-                      () {
-                        Navigator.pop(context);
-                        ReportGenerator.printReport(context, model);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              // Main Content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      // Firm Name and Period Header
-                      Text(
-                        model.firmName.isNotEmpty
-                            ? model.firmName
-                            : 'Financial Report',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _getReportPeriodText(model),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: isDark ? Colors.grey[400] : Colors.grey[600],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '(All amounts in ${_getCurrencyName(model.currency)})',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark ? Colors.grey[500] : Colors.grey[500],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Row-wise Layout - Receipts Section
-                      Column(
-                        children: [
-                          // Receipts Section
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? const Color(0xFF111827)
-                                  : const Color(0xFFF0FDF4),
-                              border: Border.all(
-                                color: isDark
-                                    ? const Color(0xFF374151)
-                                    : AppTheme.receiptColor,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              children: [
-                                // Receipts Header
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF10B981),
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(7),
-                                      topRight: Radius.circular(7),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'Receipts ($currencySymbol)',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                // Receipts Content
-                                Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Opening Balance
-                                      _buildReportItemRow(
-                                        'Opening Balances B/F',
-                                        '',
-                                        isDark,
-                                        isBold: true,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      _buildReportItemRow(
-                                        '  Balance B/F:',
-                                        '$currencySymbol${_formatAmount(model.openingCash + model.openingBank + model.openingOther + model.customOpeningBalances.values.fold(0.0, (sum, val) => sum + val))}',
-                                        isDark,
-                                      ),
-                                      const Divider(height: 16),
-                                      // Income Categories
-                                      ...model.receiptAccounts.entries
-                                          .map((entry) {
-                                        final categoryTotal =
-                                            entry.value.fold<double>(
-                                          0.0,
-                                          (sum, e) =>
-                                              sum +
-                                              e.rows.fold<double>(
-                                                  0.0,
-                                                  (s, row) =>
-                                                      s + row.cash + row.bank),
-                                        );
-                                        if (categoryTotal > 0) {
-                                          return Padding(
-                                            padding: const EdgeInsets.only(
-                                                bottom: 8),
-                                            child: _buildReportItemRow(
-                                              model.receiptLabels[entry.key] ??
-                                                  entry.key,
-                                              '$currencySymbol${_formatAmount(categoryTotal)}',
-                                              isDark,
-                                            ),
-                                          );
-                                        }
-                                        return const SizedBox.shrink();
-                                      }).toList(),
-                                      const Divider(height: 16, thickness: 2),
-                                      // Total Receipts
-                                      _buildReportItemRow(
-                                        'Total Receipts:',
-                                        '$currencySymbol${_formatAmount(netReceipts)}',
-                                        isDark,
-                                        isBold: true,
-                                        color: AppTheme.receiptColor,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Payments Section
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? const Color(0xFF111827)
-                                  : const Color(0xFFFEF2F2),
-                              border: Border.all(
-                                color: isDark
-                                    ? const Color(0xFF374151)
-                                    : AppTheme.paymentColor,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              children: [
-                                // Payments Header
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.paymentColor,
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(7),
-                                      topRight: Radius.circular(7),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'Payments ($currencySymbol)',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                // Payments Content
-                                Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Expense Categories
-                                      ...model.paymentAccounts.entries
-                                          .map((entry) {
-                                        final categoryTotal =
-                                            entry.value.fold<double>(
-                                          0.0,
-                                          (sum, e) =>
-                                              sum +
-                                              e.rows.fold<double>(
-                                                  0.0,
-                                                  (s, row) =>
-                                                      s + row.cash + row.bank),
-                                        );
-                                        if (categoryTotal > 0) {
-                                          return Padding(
-                                            padding: const EdgeInsets.only(
-                                                bottom: 8),
-                                            child: _buildReportItemRow(
-                                              model.paymentLabels[entry.key] ??
-                                                  entry.key,
-                                              '$currencySymbol${_formatAmount(categoryTotal)}',
-                                              isDark,
-                                            ),
-                                          );
-                                        }
-                                        return const SizedBox.shrink();
-                                      }).toList(),
-                                      const Divider(height: 16),
-                                      // Closing Balance C/F
-                                      _buildReportItemRow(
-                                        'Closing Balance C/F',
-                                        '',
-                                        isDark,
-                                        isBold: true,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      _buildReportItemRow(
-                                        '  Balance:',
-                                        '$currencySymbol${_formatAmount(closingBalance)}',
-                                        isDark,
-                                      ),
-                                      const Divider(height: 16, thickness: 2),
-                                      // Total Payments
-                                      _buildReportItemRow(
-                                        'Total Payments:',
-                                        '$currencySymbol${_formatAmount(netPayments)}',
-                                        isDark,
-                                        isBold: true,
-                                        color: AppTheme.paymentColor,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Net Receipts and Net Payments Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFECFDF5),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                    color: AppTheme.receiptColor, width: 1.5),
-                              ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Net Receipts',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: AppTheme.receiptColor,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '$currencySymbol${_formatAmount(netReceipts)}',
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.receiptColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFEF2F2),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                    color: AppTheme.paymentColor, width: 1.5),
-                              ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Net Payments',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: AppTheme.paymentColor,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '$currencySymbol${_formatAmount(netPayments)}',
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.paymentColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Closing Balance (Prominent)
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEEF2FF),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                              color: AppTheme.primaryColor, width: 2),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Closing Balance',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF4F46E5),
-                              ),
-                            ),
-                            Text(
-                              '$currencySymbol${_formatAmount(closingBalance)}',
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF4F46E5),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   // Helper: Format number for reports (removes .00, keeps decimals when needed)
   String _formatAmount(double amount) {
@@ -1223,40 +692,6 @@ class _AccountingFormState extends State<AccountingForm> {
         elevation: 1,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-    );
-  }
-
-  // Helper: Build report item row for basic report
-  Widget _buildReportItemRow(String label, String value, bool isDark,
-      {bool isBold = false, Color? color}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 3,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
-              color: color ?? (isDark ? Colors.grey[300] : Colors.black87),
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 2,
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-              color: color ?? (isDark ? Colors.white : Colors.black87),
-            ),
-            textAlign: TextAlign.right,
-          ),
-        ),
-      ],
     );
   }
 
@@ -1388,7 +823,8 @@ class _AccountingFormState extends State<AccountingForm> {
                       AppTheme.primaryColor,
                       () {
                         Navigator.pop(context);
-                        _showSaveReportDialog(context, model);
+                        _showSaveReportDialog(context, model,
+                            reportType: 'Detailed');
                       },
                     ),
                     _buildPremiumActionButton(
@@ -1524,8 +960,8 @@ class _AccountingFormState extends State<AccountingForm> {
                           ...model.customOpeningBalances.entries
                               .where((e) => e.value > 0)
                               .map((entry) {
-                            final title = balanceCardTitles[entry.key] ??
-                                'Custom Balance';
+                            final title = model.getBalanceCardTitle(entry.key,
+                                defaultValue: 'Custom Balance');
                             return _buildTableRow(
                               [
                                 '   $title',
@@ -2370,35 +1806,6 @@ class _AccountingFormState extends State<AccountingForm> {
                           // Report Buttons
                           Row(
                             children: [
-                              // View Report Button
-                              Expanded(
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    _showBasicReport(context, model);
-                                  },
-                                  icon: const Icon(Icons.description, size: 20),
-                                  label: Text(
-                                    model.t('btn_view_report'),
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppTheme.primaryColor,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    elevation: 2,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
                               // Detailed View Report Button
                               Expanded(
                                 child: ElevatedButton.icon(
@@ -2406,9 +1813,10 @@ class _AccountingFormState extends State<AccountingForm> {
                                     _showDetailedReport(context, model);
                                   },
                                   icon: const Icon(Icons.article, size: 20),
-                                  label: Text(
-                                    model.t('btn_detail_report'),
-                                    style: const TextStyle(
+                                  label: const Text(
+                                    'View Balance Report',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -2441,6 +1849,69 @@ class _AccountingFormState extends State<AccountingForm> {
 
                           // Expenses Section
                           _buildExpensesSection(isDark, model),
+                          const SizedBox(height: 24),
+
+                          // Save Data Button (Quick Action)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () async {
+                                    // Save the current state to local preferences
+                                    await model.saveToPrefs();
+
+                                    // Trigger cloud sync as well via the model's persistence
+                                    // model.saveToPrefs() already calls _syncToCloud() internally
+
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: const Row(
+                                            children: [
+                                              Icon(Icons.check_circle,
+                                                  color: Colors.white,
+                                                  size: 20),
+                                              SizedBox(width: 8),
+                                              Text('Data saved successfully'),
+                                            ],
+                                          ),
+                                          backgroundColor:
+                                              AppTheme.receiptColor,
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          duration: const Duration(seconds: 2),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  icon:
+                                      const Icon(Icons.save_rounded, size: 20),
+                                  label: const Text(
+                                    'Save Data',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.receiptColor,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 24),
 
                           // Financial Summary
@@ -2503,32 +1974,38 @@ class _AccountingFormState extends State<AccountingForm> {
             _buildBalanceCard(
                 isDark,
                 'cash',
-                balanceCardTitles['cash']!,
-                balanceCardDescriptions['cash']!,
+                model.getBalanceCardTitle('cash',
+                    defaultValue: model.t('balance_title_cash')),
+                model.getBalanceCardDescription('cash'),
                 false,
                 Icons.account_balance_wallet_outlined,
                 const Color(0xFF10B981), // Green
-                model.t('label_prev_day_closing')),
+                model.t('label_prev_day_closing'),
+                model.openingCash),
             const SizedBox(height: 12),
             _buildBalanceCard(
                 isDark,
                 'bank',
-                balanceCardTitles['bank']!,
-                balanceCardDescriptions['bank']!,
+                model.getBalanceCardTitle('bank',
+                    defaultValue: model.t('balance_title_bank')),
+                model.getBalanceCardDescription('bank'),
                 false,
                 Icons.account_balance_outlined,
                 const Color(0xFF3B82F6), // Blue
-                model.t('label_prev_day_closing')),
+                model.t('label_prev_day_closing'),
+                model.openingBank),
             const SizedBox(height: 12),
             _buildBalanceCard(
                 isDark,
                 'other',
-                balanceCardTitles['other']!,
-                balanceCardDescriptions['other']!,
+                model.getBalanceCardTitle('other',
+                    defaultValue: model.t('balance_title_other')),
+                model.getBalanceCardDescription('other'),
                 false,
                 Icons.savings_outlined,
                 const Color(0xFFF59E0B), // Amber
-                model.t('label_prev_day_closing')),
+                model.t('label_prev_day_closing'),
+                model.openingOther),
 
             // Custom balance cards (deletable)
             ...model.customOpeningBalances.keys.map((key) {
@@ -2570,7 +2047,8 @@ class _AccountingFormState extends State<AccountingForm> {
       bool isDeletable,
       IconData icon,
       Color iconColor,
-      String subtitle) {
+      String subtitle,
+      double initialAmount) {
     return BalanceCard(
       isDark: isDark,
       title: title,
@@ -2578,17 +2056,12 @@ class _AccountingFormState extends State<AccountingForm> {
       icon: icon,
       iconColor: iconColor,
       initialDescription: description,
+      initialAmount: initialAmount,
       onTitleChanged: (newTitle) {
         model.setBalanceCardTitle(cardType, newTitle);
-        setState(() {
-          balanceCardTitles[cardType] = newTitle;
-        });
       },
       onDescriptionChanged: (newDescription) {
         model.setBalanceCardDescription(cardType, newDescription);
-        setState(() {
-          balanceCardDescriptions[cardType] = newDescription;
-        });
       },
       onAmountChanged: (newAmount) {
         final value = double.tryParse(newAmount) ?? 0.0;
@@ -2617,34 +2090,22 @@ class _AccountingFormState extends State<AccountingForm> {
   }
 
   Widget _buildCustomBalanceCard(bool isDark, String key) {
-    // Get or initialize title and description for custom balance
-    if (!balanceCardTitles.containsKey(key)) {
-      balanceCardTitles[key] = model.t('label_custom_balance');
-    }
-    if (!balanceCardDescriptions.containsKey(key)) {
-      balanceCardDescriptions[key] = '';
-    }
-
     return Stack(
       children: [
         BalanceCard(
           isDark: isDark,
-          title: balanceCardTitles[key]!,
+          title: model.getBalanceCardTitle(key,
+              defaultValue: model.t('label_custom_balance')),
           subtitle: model.t('subtitle_custom_opening_balance'),
           icon: Icons.account_balance_wallet_outlined,
           iconColor: const Color(0xFF8B5CF6), // Purple
-          initialDescription: balanceCardDescriptions[key]!,
+          initialDescription: model.getBalanceCardDescription(key),
+          initialAmount: model.customOpeningBalances[key],
           onTitleChanged: (newTitle) {
             model.setBalanceCardTitle(key, newTitle);
-            setState(() {
-              balanceCardTitles[key] = newTitle;
-            });
           },
           onDescriptionChanged: (newDescription) {
             model.setBalanceCardDescription(key, newDescription);
-            setState(() {
-              balanceCardDescriptions[key] = newDescription;
-            });
           },
           onAmountChanged: (newAmount) {
             final value = double.tryParse(newAmount) ?? 0.0;
@@ -2673,20 +2134,54 @@ class _AccountingFormState extends State<AccountingForm> {
   void _addNewBalanceBox() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final key = 'custom_balance_$timestamp';
-
-    setState(() {
-      model.addCustomOpeningBalance(key);
-      balanceCardTitles[key] = model.t('label_custom_balance');
-      balanceCardDescriptions[key] = '';
-    });
+    model.addCustomOpeningBalance(key);
   }
 
-  void _deleteBalanceBox(String key) {
-    setState(() {
+  void _deleteBalanceBox(String key) async {
+    // Show confirmation dialog before deleting
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1F2937)
+            : Colors.white,
+        title: Text(
+          model.t('dialog_delete_balance_title'),
+          style: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          model.t('dialog_delete_balance_msg'),
+          style: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white70
+                : Colors.black87,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(model.t('btn_cancel')),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(model.t('btn_delete')),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
       model.removeCustomOpeningBalance(key);
-      balanceCardTitles.remove(key);
-      balanceCardDescriptions.remove(key);
-    });
+    }
   }
 
   // Helper methods for live calculations
@@ -5102,9 +4597,7 @@ class _AccountingFormState extends State<AccountingForm> {
                               const SizedBox(height: 8),
                               Text(
                                 AppTheme.formatCurrency(
-                                    model.openingCash +
-                                        model.openingBank +
-                                        model.openingOther,
+                                    model.totalOpeningBalance,
                                     currency: model.currency),
                                 style: const TextStyle(
                                   fontSize: 20,
@@ -5252,7 +4745,8 @@ class _AccountingFormState extends State<AccountingForm> {
     );
   }
 
-  void _showSaveReportDialog(BuildContext context, AccountingModel model) {
+  void _showSaveReportDialog(BuildContext context, AccountingModel model,
+      {String reportType = 'Normal'}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final nameController = TextEditingController(
       text:
@@ -5270,7 +4764,7 @@ class _AccountingFormState extends State<AccountingForm> {
                 color: isDark ? Colors.white : const Color(0xFF111827)),
             const SizedBox(width: 12),
             Text(
-              model.t('label_save_report'),
+              'Save View Balance Report',
               style: TextStyle(
                 color: isDark ? Colors.white : const Color(0xFF111827),
                 fontWeight: FontWeight.bold,
@@ -5343,18 +4837,45 @@ class _AccountingFormState extends State<AccountingForm> {
             onPressed: () async {
               if (nameController.text.isNotEmpty) {
                 final stateMap = model.exportState();
+                stateMap['saved_view_type'] =
+                    reportType; // Persist view type explicitly
                 final data = jsonEncode(stateMap);
 
-                // 1. Save locally
-                await model.saveReport(
-                  nameController.text,
-                  DateFormat('dd MMM yyyy').format(DateTime.now()),
-                  data,
-                );
+                // 1. Save/Update locally
+                if (widget.reportId != null) {
+                  await model.updateSavedReport(
+                    widget.reportId!,
+                    nameController.text,
+                    data,
+                    useCaseType: Provider.of<AppState>(context, listen: false)
+                        .activeUseCaseString,
+                  );
+                } else {
+                  await model.saveReport(
+                    nameController.text,
+                    DateTime.now().toIso8601String(), // Pass precise timestamp
+                    data,
+                    useCaseType: Provider.of<AppState>(context, listen: false)
+                        .activeUseCaseString,
+                  );
+                }
 
-                // 2. Save to Supabase
+                // 2. Save/Update to Supabase
                 try {
-                  await _reportService.saveReport('Normal', stateMap);
+                  if (widget.reportId != null) {
+                    await _reportService.updateReport(
+                      widget.reportId!,
+                      reportData: stateMap,
+                      reportType: reportType,
+                    );
+                  } else {
+                    await _reportService.saveReport(
+                      reportType,
+                      stateMap,
+                      useCaseType: Provider.of<AppState>(context, listen: false)
+                          .activeUseCaseString,
+                    );
+                  }
                 } catch (e) {
                   print('Remote save error: $e');
                 }

@@ -8,12 +8,16 @@ class AccountingTemplateScreen extends StatelessWidget {
   final String templateKey;
   final String? customTitle;
   final String? customPageId;
+  final Map<String, dynamic>? initialState; // For editing existing reports
+  final String? reportId; // For updating existing report
 
   const AccountingTemplateScreen({
     Key? key,
     required this.templateKey,
     this.customTitle,
     this.customPageId,
+    this.initialState,
+    this.reportId,
   }) : super(key: key);
 
   @override
@@ -22,6 +26,8 @@ class AccountingTemplateScreen extends StatelessWidget {
       templateKey: templateKey,
       customTitle: customTitle,
       customPageId: customPageId,
+      initialState: initialState,
+      reportId: reportId,
     );
   }
 }

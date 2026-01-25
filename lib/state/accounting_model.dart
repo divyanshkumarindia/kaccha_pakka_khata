@@ -3,6 +3,7 @@ import '../models/accounting.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../services/report_service.dart';
 
 import '../utils/translations.dart';
 
@@ -29,6 +30,8 @@ class AccountingModel extends ChangeNotifier {
   double openingOther = 0.0;
 
   Map<String, double> customOpeningBalances = {};
+  Map<String, String> balanceCardTitles = {};
+  Map<String, String> balanceCardDescriptions = {};
 
   AccountingModel({required this.userType})
       : firmName = userTypeConfigs[userType]!.firmNamePlaceholder,
@@ -256,26 +259,16 @@ class AccountingModel extends ChangeNotifier {
   }
 
   // Balance card title and description persistence
-  Future<String?> getBalanceCardTitle(String cardType) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs
-          .getString('balance_${cardType}_title_${userType.toString()}');
-    } catch (_) {
-      return null;
-    }
+  String getBalanceCardTitle(String cardType, {String? defaultValue}) {
+    return balanceCardTitles[cardType] ?? defaultValue ?? cardType;
   }
 
-  Future<String?> getBalanceCardDescription(String cardType) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString('balance_${cardType}_desc_${userType.toString()}');
-    } catch (_) {
-      return null;
-    }
+  String getBalanceCardDescription(String cardType, {String? defaultValue}) {
+    return balanceCardDescriptions[cardType] ?? defaultValue ?? '';
   }
 
   Future<void> setBalanceCardTitle(String cardType, String title) async {
+    balanceCardTitles[cardType] = title;
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
@@ -286,6 +279,7 @@ class AccountingModel extends ChangeNotifier {
 
   Future<void> setBalanceCardDescription(
       String cardType, String description) async {
+    balanceCardDescriptions[cardType] = description;
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
@@ -723,8 +717,19 @@ class AccountingModel extends ChangeNotifier {
 
   double get receiptsTotal {
     double sum = openingCash + openingBank + openingOther;
+    customOpeningBalances.forEach((k, v) {
+      sum += v;
+    });
     receiptAccounts.forEach((k, v) {
       sum += _calculateAccountTotal(v);
+    });
+    return sum;
+  }
+
+  double get totalOpeningBalance {
+    double sum = openingCash + openingBank + openingOther;
+    customOpeningBalances.forEach((k, v) {
+      sum += v;
     });
     return sum;
   }
@@ -757,19 +762,38 @@ class AccountingModel extends ChangeNotifier {
     }
   }
 
-  Future<void> saveReport(String title, String date, String reportData) async {
+  Future<void> saveReport(String title, String reportDate, String reportData,
+      {String? useCaseType}) async {
     final report = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
       'title': title,
-      'date': date,
+      'report_date': reportDate, // Use standardized key
       'savedAt': DateTime.now().toIso8601String(),
       'currency': currency,
       'duration': duration.index,
       'data': reportData,
+      'use_case_type': useCaseType, // Persist use case type locally
     };
     _savedReports.insert(0, report);
     await _persistSavedReports();
     notifyListeners();
+  }
+
+  Future<void> updateSavedReport(String id, String title, String reportData,
+      {String? useCaseType}) async {
+    final index = _savedReports.indexWhere((r) => r['id'] == id);
+    if (index != -1) {
+      _savedReports[index] = {
+        ..._savedReports[index],
+        'title': title,
+        'data': reportData,
+        'report_date': DateTime.now().toIso8601String(), // Refresh timestamp
+        'savedAt': DateTime.now().toIso8601String(),
+        'use_case_type': useCaseType ?? _savedReports[index]['use_case_type'],
+      };
+      await _persistSavedReports();
+      notifyListeners();
+    }
   }
 
   Future<void> deleteSavedReport(String reportId) async {
@@ -803,6 +827,8 @@ class AccountingModel extends ChangeNotifier {
       'openingBank': openingBank,
       'openingOther': openingOther,
       'customOpeningBalances': customOpeningBalances,
+      'balanceCardTitles': balanceCardTitles,
+      'balanceCardDescriptions': balanceCardDescriptions,
       'pageTitle': pageTitle,
       'receiptAccounts': receiptAccounts.map(
           (key, value) => MapEntry(key, value.map((e) => e.toJson()).toList())),
@@ -811,7 +837,7 @@ class AccountingModel extends ChangeNotifier {
     };
   }
 
-  Future<void> importState(Map<String, dynamic> data) async {
+  void importState(Map<String, dynamic> data) {
     try {
       // 1. Restore basic fields
       if (data['userType'] != null) {
@@ -839,9 +865,18 @@ class AccountingModel extends ChangeNotifier {
       openingCash = (data['openingCash'] as num?)?.toDouble() ?? 0.0;
       openingBank = (data['openingBank'] as num?)?.toDouble() ?? 0.0;
       openingOther = (data['openingOther'] as num?)?.toDouble() ?? 0.0;
+
       if (data['customOpeningBalances'] != null) {
-        customOpeningBalances =
-            Map<String, double>.from(data['customOpeningBalances']);
+        customOpeningBalances = (data['customOpeningBalances'] as Map)
+            .map((k, v) => MapEntry(k.toString(), (v as num).toDouble()));
+      }
+
+      if (data['balanceCardTitles'] != null) {
+        balanceCardTitles = Map<String, String>.from(data['balanceCardTitles']);
+      }
+      if (data['balanceCardDescriptions'] != null) {
+        balanceCardDescriptions =
+            Map<String, String>.from(data['balanceCardDescriptions']);
       }
 
       // 4. Restore Accounts (Deep copy)
@@ -917,6 +952,17 @@ class AccountingModel extends ChangeNotifier {
           prefs.getString('default_report_format') ?? 'Basic';
       _userName = prefs.getString('user_name');
       _hasSkippedNameSetup = prefs.getBool('skipped_name_setup') ?? false;
+
+      // Load opening balance titles and descriptions
+      for (String type in ['cash', 'bank', 'other']) {
+        final title =
+            prefs.getString('balance_${type}_title_${userType.toString()}');
+        final desc =
+            prefs.getString('balance_${type}_desc_${userType.toString()}');
+        if (title != null) balanceCardTitles[type] = title;
+        if (desc != null) balanceCardDescriptions[type] = desc;
+      }
+
       notifyListeners();
     } catch (e) {
       // ignore errors
@@ -1013,6 +1059,11 @@ class AccountingModel extends ChangeNotifier {
 
   Future<void> clearAllData() async {
     try {
+      // 1. Clear Cloud Reports
+      final reportService = ReportService();
+      await reportService.deleteAllUserReports();
+
+      // 2. Clear Local Preferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
 

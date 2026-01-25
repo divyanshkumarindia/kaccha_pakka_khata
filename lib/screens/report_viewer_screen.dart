@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
 import '../theme.dart';
+import 'accounting_template_screen.dart';
 
 class ReportViewerScreen extends StatefulWidget {
   final Map<String, dynamic> reportData;
   final String reportType;
   final String reportDate;
+  final String? reportId; // Added for editing support
 
   const ReportViewerScreen({
     Key? key,
     required this.reportData,
     required this.reportType,
     required this.reportDate,
+    this.reportId,
   }) : super(key: key);
 
   @override
@@ -35,7 +39,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
     // We pass UserType.personal initially, but importState will overwrite it.
     _model = AccountingModel(userType: UserType.personal);
 
-    await _model.importState(widget.reportData);
+    _model.importState(widget.reportData);
 
     if (mounted) {
       setState(() {
@@ -56,10 +60,9 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
         appBar: AppBar(
           title: Column(
             children: [
-              Text(
-                widget.reportType == 'Detailed' ? 'Detailed Report' : 'Report',
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              const Text(
+                'Report Viewer',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
                 widget.reportDate,
@@ -72,131 +75,47 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
           backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
           foregroundColor: isDark ? Colors.white : Colors.black87,
           elevation: 0,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Edit Report',
+              onPressed: () => _editReport(context),
+            ),
+          ],
         ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: widget.reportType == 'Detailed'
-                    ? _buildDetailedReportContent(context, isDark)
-                    : _buildBasicReportContent(context, isDark),
+                child: _buildDetailedReportContent(context, isDark),
               ),
       ),
     );
   }
 
-  // --- UI Builders (Adapted from AccountingForm) ---
+  void _editReport(BuildContext context) async {
+    // Export current state to pass to editor
+    final stateForEdit = _model.exportState();
 
-  Widget _buildBasicReportContent(BuildContext context, bool isDark) {
-    final currencySymbol = _getCurrencySymbol(_model.currency);
-    final closingBalance = _model.netBalance;
-    final netReceipts = _model.receiptsTotal;
-    final netPayments = _model.paymentsTotal;
+    // Determine the user type to select appropriate template key
+    String templateKey = 'family'; // Default
+    if (_model.userType == UserType.business) templateKey = 'business';
+    if (_model.userType == UserType.institute) templateKey = 'institute';
+    if (_model.userType == UserType.other) templateKey = 'other';
 
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 850),
-      child: Column(
-        children: [
-          // Report Card
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1F2937) : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Text(
-                  _model.firmName.isNotEmpty
-                      ? _model.firmName
-                      : 'Financial Report',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _getReportPeriodText(_model),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: isDark ? Colors.grey[400] : Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Net Receipts & Payments Rows
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildSummaryBox(
-                        'Net Receipts',
-                        netReceipts,
-                        AppTheme.receiptColor,
-                        const Color(0xFFECFDF5),
-                        currencySymbol,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildSummaryBox(
-                        'Net Payments',
-                        netPayments,
-                        AppTheme.paymentColor,
-                        const Color(0xFFFEF2F2),
-                        currencySymbol,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Closing Balance
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEEF2FF),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.primaryColor, width: 2),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Closing Balance',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF4F46E5),
-                        ),
-                      ),
-                      Text(
-                        '$currencySymbol${_formatAmount(closingBalance)}',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF4F46E5),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AccountingTemplateScreen(
+          templateKey: templateKey,
+          initialState: stateForEdit,
+          reportId: widget.reportId,
+        ),
       ),
     );
   }
+
+  // --- UI Builders (Adapted from AccountingForm) ---
 
   Widget _buildDetailedReportContent(BuildContext context, bool isDark) {
     // Basic logic reuse
@@ -208,11 +127,21 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
     double totalPaymentsCash = 0.0;
     double totalPaymentsBank = 0.0;
 
+    // --- Accurate Data Integration (New Calculation Logic - Fixed for Custom Balances) ---
+    double openingTotal =
+        _model.openingCash + _model.openingBank + _model.openingOther;
+    // Add custom balances to opening total
+    _model.customOpeningBalances.forEach((_, value) => openingTotal += value);
+    double dailyIncome = 0.0;
+    double dailyExpenses = 0.0;
+
+    // We reuse the existing loop values but separate "Daily" from "Opening"
     _model.receiptAccounts.forEach((key, entries) {
       for (var entry in entries) {
         for (var row in entry.rows) {
           totalReceiptsCash += row.cash;
           totalReceiptsBank += row.bank;
+          dailyIncome += row.cash + row.bank;
         }
       }
     });
@@ -222,13 +151,15 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
         for (var row in entry.rows) {
           totalPaymentsCash += row.cash;
           totalPaymentsBank += row.bank;
+          dailyExpenses += row.cash + row.bank;
         }
       }
     });
 
+    final netSurplus = dailyIncome - dailyExpenses;
     final closingCash = totalReceiptsCash - totalPaymentsCash;
     final closingBank = totalReceiptsBank - totalPaymentsBank;
-    // final totalClosing = closingCash + closingBank; // Unused variable warning fix
+    final closingTotal = openingTotal + netSurplus;
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 900),
@@ -265,6 +196,15 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
           _buildDetailedRow('Opening Balances', _model.openingCash,
               _model.openingBank + _model.openingOther, isDark,
               isBold: true),
+
+          // Custom Opening Balances (Added Fix)
+          ..._model.customOpeningBalances.entries.map((entry) {
+            final title =
+                _model.balanceCardTitles[entry.key] ?? 'Custom Balance';
+            return _buildDetailedRow(title, entry.value, 0.0, isDark,
+                isBold: false);
+          }),
+
           const Divider(),
           ..._model.receiptAccounts.entries.map((entry) {
             double cash = 0;
@@ -322,37 +262,213 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
           _buildDetailedRow(
               'Total Payments', totalPaymentsCash, totalPaymentsBank, isDark,
               isBold: true, color: AppTheme.paymentColor),
+
+          const SizedBox(height: 32),
+
+          // --- DAILY SUMMARY SECTION (Accurate Data Binding) ---
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1F2937) : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color:
+                    isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildMiniSummaryCard(
+                        'Total Income',
+                        dailyIncome,
+                        const Color(0xFF10B981),
+                        isDark,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildMiniSummaryCard(
+                        'Total Expenses',
+                        dailyExpenses,
+                        const Color(0xFFEF4444),
+                        isDark,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildMainSurplusCard(
+                  netSurplus,
+                  isDark,
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildFooterSummaryCard(
+                        'Total Balance (B/F)',
+                        openingTotal,
+                        'Today\'s Opening Balance',
+                        const Color(0xFF6366F1),
+                        isDark,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildFooterSummaryCard(
+                        'Closing Balance (C/F)',
+                        closingTotal,
+                        'Tomorrow\'s Opening Balance',
+                        const Color(0xFF3B82F6),
+                        isDark,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- UI Builders (Summary Section Refined for Compaction) ---
+
+  Widget _buildMiniSummaryCard(
+      String label, double amount, Color color, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.15), width: 1),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.white60 : Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            child: Text(
+              '${_getCurrencySymbol(_model.currency)}${_formatAmount(amount)}',
+              style: GoogleFonts.outfit(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainSurplusCard(double amount, bool isDark) {
+    final color =
+        amount >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            amount >= 0 ? 'Net Surplus' : 'Net Deficit',
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${_getCurrencySymbol(_model.currency)}${_formatAmount(amount)}',
+            style: GoogleFonts.outfit(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooterSummaryCard(
+      String label, double amount, String subLabel, Color color, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.15), width: 1),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white60 : const Color(0xFF475569),
+            ),
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            child: Text(
+              '${_getCurrencySymbol(_model.currency)}${_formatAmount(amount)}',
+              style: GoogleFonts.outfit(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subLabel,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 9,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.white38 : Colors.black38,
+            ),
+          ),
         ],
       ),
     );
   }
 
   // --- Helpers ---
-
-  Widget _buildSummaryBox(String title, double amount, Color textColor,
-      Color bgColor, String currencySymbol) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: textColor, width: 1.5),
-      ),
-      child: Column(
-        children: [
-          Text(title,
-              style: TextStyle(
-                  fontSize: 13, color: textColor, fontWeight: FontWeight.w500)),
-          const SizedBox(height: 8),
-          Text(
-            '$currencySymbol${_formatAmount(amount)}',
-            style: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildDetailedSectionHeader(
       String title, Color color, String currencySymbol, bool isDark) {
