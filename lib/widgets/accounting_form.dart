@@ -4740,7 +4740,7 @@ class _AccountingFormState extends State<AccountingForm> {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        vertical: 24, horizontal: 16),
+                        vertical: 12, horizontal: 16),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
