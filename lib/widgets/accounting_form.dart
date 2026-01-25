@@ -2180,7 +2180,8 @@ class _AccountingFormState extends State<AccountingForm> {
                         : model.duration == DurationType.Monthly
                             ? "PREVIOUS MONTH'S CLOSING"
                             : "PREVIOUS YEAR'S CLOSING",
-                model.openingCash),
+                model.openingCash,
+                key: const Key('balance_cash')),
             const SizedBox(height: 12),
             _buildBalanceCard(
                 isDark,
@@ -2204,7 +2205,8 @@ class _AccountingFormState extends State<AccountingForm> {
                         : model.duration == DurationType.Monthly
                             ? "PREVIOUS MONTH'S CLOSING"
                             : "PREVIOUS YEAR'S CLOSING",
-                model.openingBank),
+                model.openingBank,
+                key: const Key('balance_bank')),
             const SizedBox(height: 12),
             _buildBalanceCard(
                 isDark,
@@ -2228,7 +2230,8 @@ class _AccountingFormState extends State<AccountingForm> {
                         : model.duration == DurationType.Monthly
                             ? "PREVIOUS MONTH'S CLOSING"
                             : "PREVIOUS YEAR'S CLOSING",
-                model.openingOther),
+                model.openingOther,
+                key: const Key('balance_other')),
 
             // Custom balance cards (deletable)
             ...model.customOpeningBalances.keys.map((key) {
@@ -2272,7 +2275,11 @@ class _AccountingFormState extends State<AccountingForm> {
       Color iconColor,
       String subtitle,
       double initialAmount) {
+      String subtitle,
+      double initialAmount,
+      {Key? key}) {
     return BalanceCard(
+      key: key,
       isDark: isDark,
       title: title,
       subtitle: subtitle,

@@ -783,6 +783,7 @@ class AccountingModel extends ChangeNotifier {
           (key, value) => MapEntry(key, value.map((e) => e.toJson()).toList())),
       'paymentAccounts': paymentAccounts.map(
           (key, value) => MapEntry(key, value.map((e) => e.toJson()).toList())),
+      'saved_at': DateTime.now().toIso8601String(), // Add live timestamp
     };
   }
 
