@@ -1440,6 +1440,32 @@ class _AccountingFormState extends State<AccountingForm> {
                           ),
                         ),
                       ],
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            _showSaveReportDialog(context, model);
+                          },
+                          icon: const Icon(Icons.save_rounded, size: 20),
+                          label: Text(
+                            model.t('label_save_report'),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF10B981), // Green
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
