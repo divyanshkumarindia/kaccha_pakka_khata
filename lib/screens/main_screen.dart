@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/accounting_model.dart';
 import 'home_screen.dart';
+import 'saved_reports_screen.dart';
 import 'settings_screen.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
@@ -16,7 +17,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
+  int _currentIndex = 1; // Start with Home (center tab)
 
   @override
   void initState() {
@@ -72,9 +73,11 @@ class _MainScreenState extends State<MainScreen> {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildNavItem(0, model.t('nav_home'), Icons.home_outlined),
                   _buildNavItem(
-                      1, model.t('nav_settings'), Icons.settings_outlined),
+                      0, model.t('title_saved_reports'), Icons.bookmark_border),
+                  _buildNavItem(1, model.t('nav_home'), Icons.home_outlined),
+                  _buildNavItem(
+                      2, model.t('nav_settings'), Icons.settings_outlined),
                 ],
               );
             },
@@ -87,8 +90,10 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildPage(int index, bool isDark) {
     switch (index) {
       case 0:
-        return const HomeScreen();
+        return const SavedReportsScreen();
       case 1:
+        return const HomeScreen();
+      case 2:
         return const SettingsScreen();
       default:
         return const HomeScreen();
