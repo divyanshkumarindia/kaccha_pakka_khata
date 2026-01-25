@@ -370,6 +370,157 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
               ],
             ),
           ),
+
+          // --- LOAN LIABILITIES SECTION ---
+          if (hasLoanTransactions) ...[
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1F2937) : Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF374151)
+                      : const Color(0xFFE5E7EB),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Section Header
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet,
+                        color: const Color(0xFFF59E0B),
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Total Loan Liabilities',
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              isDark ? Colors.white : const Color(0xFF1F2937),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Loans Summary Cards
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildLoanCard(
+                          'Loans Received',
+                          totalLoansReceived,
+                          const Color(0xFFEF4444),
+                          Icons.arrow_downward,
+                          isDark,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildLoanCard(
+                          'Loan Repayments',
+                          totalLoanRepayments,
+                          const Color(0xFF10B981),
+                          Icons.arrow_upward,
+                          isDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Net Outstanding Liability
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: netLoanLiability > 0
+                            ? [const Color(0xFFEF4444), const Color(0xFFDC2626)]
+                            : [
+                                const Color(0xFF10B981),
+                                const Color(0xFF059669)
+                              ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: netLoanLiability > 0
+                              ? const Color(0xFFEF4444).withValues(alpha: 0.3)
+                              : const Color(0xFF10B981).withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          netLoanLiability > 0
+                              ? 'Net Outstanding Liability'
+                              : 'Loans Fully Repaid',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              netLoanLiability > 0
+                                  ? Icons.warning_amber_rounded
+                                  : Icons.check_circle,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${_getCurrencySymbol(_model.currency)}${_formatAmount(netLoanLiability.abs())}',
+                              style: GoogleFonts.outfit(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (netLoanLiability > 0) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            'Amount pending to be repaid',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -491,6 +642,51 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
               fontSize: 9,
               fontWeight: FontWeight.w500,
               color: isDark ? Colors.white38 : Colors.black38,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoanCard(
+      String label, double amount, Color color, IconData icon, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 1.5),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          FittedBox(
+            child: Text(
+              '${_getCurrencySymbol(_model.currency)}${_formatAmount(amount)}',
+              style: GoogleFonts.outfit(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
           ),
         ],

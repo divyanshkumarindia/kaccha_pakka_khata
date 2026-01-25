@@ -36,6 +36,26 @@ class ReportGenerator {
           model.openingCash + model.openingBank + model.openingOther;
       final closingBalance = openingBalance + netBalance;
 
+      // Calculate loan liabilities
+      double totalLoansReceived = 0.0;
+      double totalLoanRepayments = 0.0;
+
+      model.receiptAccounts.forEach((key, entries) {
+        if (key.toLowerCase().contains('loan')) {
+          totalLoansReceived += _calculateEntryTotal(entries);
+        }
+      });
+
+      model.paymentAccounts.forEach((key, entries) {
+        if (key.toLowerCase().contains('loan')) {
+          totalLoanRepayments += _calculateEntryTotal(entries);
+        }
+      });
+
+      final netLoanLiability = totalLoansReceived - totalLoanRepayments;
+      final hasLoanTransactions =
+          totalLoansReceived > 0 || totalLoanRepayments > 0;
+
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
@@ -143,6 +163,139 @@ class ReportGenerator {
               ),
             ),
 
+            // Loan Liabilities Section (if applicable)
+            if (hasLoanTransactions) ...[
+              pw.SizedBox(height: 20),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(16),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.orange50,
+                  border: pw.Border.all(color: PdfColors.orange300, width: 1.5),
+                  borderRadius: pw.BorderRadius.circular(8),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Row(
+                      children: [
+                        pw.Container(
+                          width: 24,
+                          height: 24,
+                          decoration: pw.BoxDecoration(
+                            color: PdfColors.orange,
+                            borderRadius: pw.BorderRadius.circular(4),
+                          ),
+                          child: pw.Center(
+                            child: pw.Text(
+                              '₹',
+                              style: pw.TextStyle(
+                                color: PdfColors.white,
+                                fontWeight: pw.FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                        pw.SizedBox(width: 8),
+                        pw.Text(
+                          'Total Loan Liabilities',
+                          style: pw.TextStyle(
+                            fontSize: 16,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 12),
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              'Loans Received',
+                              style: const pw.TextStyle(
+                                fontSize: 11,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                            pw.SizedBox(height: 4),
+                            pw.Text(
+                              _formatCurrency(totalLoansReceived, currency),
+                              style: pw.TextStyle(
+                                fontSize: 14,
+                                fontWeight: pw.FontWeight.bold,
+                                color: PdfColors.red700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.end,
+                          children: [
+                            pw.Text(
+                              'Loan Repayments',
+                              style: const pw.TextStyle(
+                                fontSize: 11,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                            pw.SizedBox(height: 4),
+                            pw.Text(
+                              _formatCurrency(totalLoanRepayments, currency),
+                              style: pw.TextStyle(
+                                fontSize: 14,
+                                fontWeight: pw.FontWeight.bold,
+                                color: PdfColors.green700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 12),
+                    pw.Divider(color: PdfColors.orange300),
+                    pw.SizedBox(height: 8),
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text(
+                          netLoanLiability > 0
+                              ? 'Net Outstanding Liability'
+                              : 'Loans Fully Repaid',
+                          style: pw.TextStyle(
+                            fontSize: 13,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                        pw.Text(
+                          _formatCurrency(netLoanLiability.abs(), currency),
+                          style: pw.TextStyle(
+                            fontSize: 16,
+                            fontWeight: pw.FontWeight.bold,
+                            color: netLoanLiability > 0
+                                ? PdfColors.red700
+                                : PdfColors.green700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (netLoanLiability > 0) ...[
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        'Amount pending to be repaid',
+                        style: const pw.TextStyle(
+                          fontSize: 9,
+                          color: PdfColors.grey600,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+
             // Footer
             pw.SizedBox(height: 30),
             pw.Center(
@@ -159,11 +312,12 @@ class ReportGenerator {
         ),
       );
 
-      // Close loading dialog
-      if (context.mounted) Navigator.pop(context);
-
       // Share/Save the PDF
       final bytes = await pdf.save();
+
+      // Close loading dialog before showing share dialog
+      if (context.mounted) Navigator.pop(context);
+
       await Printing.sharePdf(
         bytes: bytes,
         filename: 'report_${DateFormat('yyyyMMdd_HHmmss').format(now)}.pdf',
@@ -199,6 +353,26 @@ class ReportGenerator {
       final now = DateTime.now();
       final dateStr = DateFormat('dd MMM yyyy').format(now);
       final currency = model.currency;
+
+      // Calculate loan liabilities
+      double totalLoansReceived = 0.0;
+      double totalLoanRepayments = 0.0;
+
+      model.receiptAccounts.forEach((key, entries) {
+        if (key.toLowerCase().contains('loan')) {
+          totalLoansReceived += _calculateEntryTotal(entries);
+        }
+      });
+
+      model.paymentAccounts.forEach((key, entries) {
+        if (key.toLowerCase().contains('loan')) {
+          totalLoanRepayments += _calculateEntryTotal(entries);
+        }
+      });
+
+      final netLoanLiability = totalLoansReceived - totalLoanRepayments;
+      final hasLoanTransactions =
+          totalLoansReceived > 0 || totalLoanRepayments > 0;
 
       // Build CSV content
       final StringBuffer csv = StringBuffer();
@@ -269,6 +443,21 @@ class ReportGenerator {
       ]);
       final closingBalance = openingBalance + netBalance;
       addRow(['Closing Balance (C/F)', closingBalance.toStringAsFixed(2)]);
+
+      // Loan Liabilities Section (if applicable)
+      if (hasLoanTransactions) {
+        addRow([]);
+        addRow(['Loan Liabilities']);
+        addRow(['Description', 'Amount ($currency)']);
+        addRow(['Loans Received', totalLoansReceived.toStringAsFixed(2)]);
+        addRow(['Loan Repayments', totalLoanRepayments.toStringAsFixed(2)]);
+        addRow([
+          netLoanLiability > 0
+              ? 'Net Outstanding Liability'
+              : 'Loans Fully Repaid',
+          netLoanLiability.abs().toStringAsFixed(2)
+        ]);
+      }
 
       if (context.mounted) Navigator.pop(context);
 
@@ -354,6 +543,26 @@ class ReportGenerator {
       final openingBalance =
           model.openingCash + model.openingBank + model.openingOther;
       final closingBalance = openingBalance + netBalance;
+
+      // Calculate loan liabilities
+      double totalLoansReceived = 0.0;
+      double totalLoanRepayments = 0.0;
+
+      model.receiptAccounts.forEach((key, entries) {
+        if (key.toLowerCase().contains('loan')) {
+          totalLoansReceived += _calculateEntryTotal(entries);
+        }
+      });
+
+      model.paymentAccounts.forEach((key, entries) {
+        if (key.toLowerCase().contains('loan')) {
+          totalLoanRepayments += _calculateEntryTotal(entries);
+        }
+      });
+
+      final netLoanLiability = totalLoansReceived - totalLoanRepayments;
+      final hasLoanTransactions =
+          totalLoansReceived > 0 || totalLoanRepayments > 0;
 
       pdf.addPage(
         pw.MultiPage(
@@ -453,6 +662,44 @@ class ReportGenerator {
                 ],
               ),
             ),
+
+            // Loan Liabilities Section (if applicable)
+            if (hasLoanTransactions) ...[
+              pw.SizedBox(height: 20),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(16),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(width: 1.5),
+                  borderRadius: pw.BorderRadius.circular(8),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'Total Loan Liabilities',
+                      style: pw.TextStyle(
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.SizedBox(height: 12),
+                    _buildPdfRow(
+                        'Loans Received', totalLoansReceived, currency),
+                    _buildPdfRow(
+                        'Loan Repayments', totalLoanRepayments, currency),
+                    pw.Divider(),
+                    _buildPdfRow(
+                      netLoanLiability > 0
+                          ? 'Net Outstanding Liability'
+                          : 'Loans Fully Repaid',
+                      netLoanLiability.abs(),
+                      currency,
+                      isBold: true,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       );
