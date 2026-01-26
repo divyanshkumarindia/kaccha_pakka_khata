@@ -183,7 +183,7 @@ class _BalanceCardState extends State<BalanceCard> {
                           child: Text(
                             widget.title,
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: widget.isDark
                                   ? Colors.white

@@ -162,7 +162,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: _buildPremiumActionButton(
-                                  'Print',
+                                  'Print Report',
                                   Icons.print,
                                   const Color(0xFF6366F1), // Indigo color
                                   () {
@@ -343,6 +343,26 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
           ),
           const SizedBox(height: 4),
           Text(
+            'Balance Report',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.grey[300] : Colors.grey[800],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _getReportPeriodText(),
+            style: TextStyle(
+              fontSize: 13,
+              fontStyle: FontStyle.italic,
+              color: isDark ? Colors.grey[400] : Colors.grey[700],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
             _getReportTimestamp(),
             style: TextStyle(
               fontSize: 14,
@@ -387,7 +407,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
               // Cash Balance B/F - Always show
               _buildTableRow(
                 [
-                  '   Cash Balance B/F',
+                  '   ${_model.getBalanceCardTitle('cash', defaultValue: _model.getDefaultBalanceTitle('cash'))}',
                   _formatAmount(_model.openingCash),
                   '0.00',
                   _formatAmount(_model.openingCash)
@@ -397,7 +417,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
               // Bank Balance B/F - Always show
               _buildTableRow(
                 [
-                  '   Bank Balance B/F',
+                  '   ${_model.getBalanceCardTitle('bank', defaultValue: _model.getDefaultBalanceTitle('bank'))}',
                   '0.00',
                   _formatAmount(_model.openingBank),
                   _formatAmount(_model.openingBank)
@@ -407,7 +427,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
               // Other Balance B/F - Always show
               _buildTableRow(
                 [
-                  '   Other Balance B/F',
+                  '   ${_model.getBalanceCardTitle('other', defaultValue: _model.getDefaultBalanceTitle('other'))}',
                   '0.00',
                   _formatAmount(_model.openingOther),
                   _formatAmount(_model.openingOther)
@@ -430,29 +450,50 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                   isDark,
                 );
               }),
-              // Income Categories
+              // Income Categories (Detailed)
               ..._model.receiptAccounts.entries.expand((entry) {
-                double cash = 0, bank = 0;
-                entry.value.forEach((e) {
-                  e.rows.forEach((row) {
-                    cash += row.cash;
-                    bank += row.bank;
-                  });
-                });
-                if (cash + bank > 0) {
-                  return [
-                    _buildTableRow(
-                      [
-                        _model.receiptLabels[entry.key] ?? entry.key,
-                        _formatAmount(cash),
-                        _formatAmount(bank),
-                        _formatAmount(cash + bank)
-                      ],
-                      isDark,
-                    )
-                  ];
+                // Check if this category has any non-zero transactions
+                bool hasData = entry.value
+                    .any((e) => e.rows.any((r) => r.cash > 0 || r.bank > 0));
+
+                if (!hasData) return <Widget>[];
+
+                List<Widget> groupRows = [];
+
+                // 1. Category Header (Bold, like Opening Balances info)
+                groupRows.add(_buildTableRow(
+                  [
+                    _model.receiptLabels[entry.key] ?? entry.key,
+                    '',
+                    '',
+                    ''
+                  ], // Amounts empty for header
+                  isDark,
+                  isBold: true,
+                ));
+
+                // 2. Individual Transactions (Indented)
+                for (var e in entry.value) {
+                  for (var row in e.rows) {
+                    if (row.cash > 0 || row.bank > 0) {
+                      String label = row.particulars.isNotEmpty
+                          ? row.particulars
+                          : (e.description.isNotEmpty
+                              ? e.description
+                              : 'Entry');
+                      groupRows.add(_buildTableRow(
+                        [
+                          '   $label', // Indent
+                          _formatAmount(row.cash),
+                          _formatAmount(row.bank),
+                          _formatAmount(row.cash + row.bank)
+                        ],
+                        isDark,
+                      ));
+                    }
+                  }
                 }
-                return <Widget>[];
+                return groupRows;
               }).toList(),
               // Divider
               Divider(
@@ -498,29 +539,50 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                 isDark,
                 isHeader: true,
               ),
-              // Expense Categories
+              // Expense Categories (Detailed)
               ..._model.paymentAccounts.entries.expand((entry) {
-                double cash = 0, bank = 0;
-                entry.value.forEach((e) {
-                  e.rows.forEach((row) {
-                    cash += row.cash;
-                    bank += row.bank;
-                  });
-                });
-                if (cash + bank > 0) {
-                  return [
-                    _buildTableRow(
-                      [
-                        _model.paymentLabels[entry.key] ?? entry.key,
-                        _formatAmount(cash),
-                        _formatAmount(bank),
-                        _formatAmount(cash + bank)
-                      ],
-                      isDark,
-                    )
-                  ];
+                // Check if this category has any non-zero transactions
+                bool hasData = entry.value
+                    .any((e) => e.rows.any((r) => r.cash > 0 || r.bank > 0));
+
+                if (!hasData) return <Widget>[];
+
+                List<Widget> groupRows = [];
+
+                // 1. Category Header (Bold)
+                groupRows.add(_buildTableRow(
+                  [
+                    _model.paymentLabels[entry.key] ?? entry.key,
+                    '',
+                    '',
+                    ''
+                  ], // Amounts empty for header
+                  isDark,
+                  isBold: true,
+                ));
+
+                // 2. Individual Transactions (Indented)
+                for (var e in entry.value) {
+                  for (var row in e.rows) {
+                    if (row.cash > 0 || row.bank > 0) {
+                      String label = row.particulars.isNotEmpty
+                          ? row.particulars
+                          : (e.description.isNotEmpty
+                              ? e.description
+                              : 'Entry');
+                      groupRows.add(_buildTableRow(
+                        [
+                          '   $label', // Indent
+                          _formatAmount(row.cash),
+                          _formatAmount(row.bank),
+                          _formatAmount(row.cash + row.bank)
+                        ],
+                        isDark,
+                      ));
+                    }
+                  }
                 }
-                return <Widget>[];
+                return groupRows;
               }).toList(),
               // Closing Balance C/F
               _buildTableRow(
@@ -1187,6 +1249,25 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
           ),
         );
       }
+    }
+  }
+
+  // Helper: Get report period text (Matched from AccountingForm)
+  String _getReportPeriodText() {
+    switch (_model.duration) {
+      case DurationType.Daily:
+        return 'Daily Report - ${_model.periodDate.isEmpty ? "No date selected" : _model.periodDate}';
+      case DurationType.Weekly:
+        if (_model.periodStartDate.isEmpty || _model.periodEndDate.isEmpty) {
+          return 'Weekly Report - No period selected';
+        }
+        return 'Weekly Report - ${_model.periodStartDate} to ${_model.periodEndDate}';
+      case DurationType.Monthly:
+        return 'Monthly Report - ${_model.periodDate.isEmpty ? "No month selected" : _model.periodDate}';
+      case DurationType.Yearly:
+        return 'Yearly Report - ${_model.periodDate.isEmpty ? "No year selected" : _model.periodDate}';
+      default:
+        return 'Report';
     }
   }
 }

@@ -2325,6 +2325,42 @@ class _AccountingFormState extends State<AccountingForm> {
                           _buildExpensesSection(isDark, model),
                           const SizedBox(height: 24),
 
+                          // Generate Report Button (Bottom Duplicate)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  _showDetailedReport(context, model);
+                                },
+                                icon: const Icon(Icons.article, size: 20),
+                                label: const Text(
+                                  'Generate Balance Report',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.receiptColor,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 16,
+                                  ),
+                                  elevation: 2,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
                           // Financial Summary
                           _buildFinancialSummary(isDark, model),
                           const SizedBox(height: 24),

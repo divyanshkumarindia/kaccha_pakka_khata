@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../state/accounting_model.dart';
+import '../models/accounting.dart';
 import '../widgets/accounting_form.dart';
 
 /// Thin wrapper kept for backwards compatibility and explicit route name.
@@ -9,6 +12,14 @@ class FamilyAccountingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AccountingForm(templateKey: 'family');
+    // Provide a fresh model that DOES NOT load from storage/prefs.
+    // This ensures description fields start empty/default.
+    return ChangeNotifierProvider(
+      create: (_) => AccountingModel(
+        userType: UserType.personal,
+        shouldLoadFromStorage: false,
+      ),
+      child: const AccountingForm(templateKey: 'family'),
+    );
   }
 }

@@ -275,6 +275,35 @@ class AccountingModel extends ChangeNotifier {
     return balanceCardTitles[cardType] ?? defaultValue ?? cardType;
   }
 
+  /// Returns the smart default title based on duration settings.
+  /// Matches the logic used in AccountingForm.
+  String getDefaultBalanceTitle(String type) {
+    if (type == 'cash') {
+      if (duration == DurationType.Daily) return "Yesterday's Cash (B/F)";
+      if (duration == DurationType.Weekly) return "Last Week's Cash (B/F)";
+      if (duration == DurationType.Monthly) return "Last Month's Cash (B/F)";
+      if (duration == DurationType.Yearly) return "Last Year's Cash (B/F)";
+      return "Cash Balance B/F";
+    } else if (type == 'bank') {
+      if (duration == DurationType.Daily) return "Yesterday's Bank (B/F)";
+      if (duration == DurationType.Weekly) return "Last Week's Bank (B/F)";
+      if (duration == DurationType.Monthly) return "Last Month's Bank (B/F)";
+      if (duration == DurationType.Yearly) return "Last Year's Bank (B/F)";
+      return "Bank Balance B/F";
+    } else if (type == 'other') {
+      if (duration == DurationType.Daily)
+        return "Yesterday's Other Balance (B/F)";
+      if (duration == DurationType.Weekly)
+        return "Last Week's Other Balance (B/F)";
+      if (duration == DurationType.Monthly)
+        return "Last Month's Other Balance (B/F)";
+      if (duration == DurationType.Yearly)
+        return "Last Year's Other Balance (B/F)";
+      return "Other Balance B/F";
+    }
+    return type; // Fallback
+  }
+
   String getBalanceCardDescription(String cardType, {String? defaultValue}) {
     return balanceCardDescriptions[cardType] ?? defaultValue ?? '';
   }

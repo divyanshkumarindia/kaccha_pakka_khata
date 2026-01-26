@@ -118,14 +118,14 @@ class _MainScreenState extends State<MainScreen> {
             Icon(
               icon,
               color: iconColor,
-              size: 26,
+              size: 28,
             ),
             const SizedBox(height: 6),
             Text(
               label,
               style: TextStyle(
                 color: textColor,
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.5,
               ),
