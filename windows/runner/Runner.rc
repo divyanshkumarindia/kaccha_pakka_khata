@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "my_daily_balance_flutter" "\0"
+            VALUE "FileDescription", "kaccha_pakka_khata" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "my_daily_balance_flutter" "\0"
+            VALUE "InternalName", "kaccha_pakka_khata" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "my_daily_balance_flutter.exe" "\0"
-            VALUE "ProductName", "my_daily_balance_flutter" "\0"
+            VALUE "OriginalFilename", "kaccha_pakka_khata.exe" "\0"
+            VALUE "ProductName", "kaccha_pakka_khata" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
