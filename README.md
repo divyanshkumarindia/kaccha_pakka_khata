@@ -1,4 +1,4 @@
-# My Daily Balance 💎
+# Kaccha Pakka Khata 💎
 
 > **A high-fidelity, secure personal utility application demonstrating modern Flutter architecture and premium UI/UX design.**
 

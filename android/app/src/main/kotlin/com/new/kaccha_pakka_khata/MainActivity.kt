@@ -1,4 +1,4 @@
-package com.new.kacchapakkakhata
+package com.new.kaccha_pakka_khata
 
 import io.flutter.embedding.android.FlutterActivity
 

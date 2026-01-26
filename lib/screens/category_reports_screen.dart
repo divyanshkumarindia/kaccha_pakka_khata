@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:my_daily_balance_flutter/services/report_service.dart';
+import 'package:kaccha_pakka_khata/services/report_service.dart';
 import 'report_viewer_screen.dart';
 
 class CategoryReportsScreen extends StatefulWidget {

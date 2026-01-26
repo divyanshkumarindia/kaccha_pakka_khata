@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:my_daily_balance_flutter/state/accounting_model.dart';
-import 'package:my_daily_balance_flutter/models/accounting.dart';
+import 'package:kaccha_pakka_khata/state/accounting_model.dart';
+import 'package:kaccha_pakka_khata/models/accounting.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

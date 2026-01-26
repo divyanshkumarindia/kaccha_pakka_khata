@@ -10,10 +10,10 @@ import '../theme.dart';
 import 'components/balance_card.dart';
 import 'components/duration_period_picker.dart';
 import 'components/premium_card.dart';
-import 'package:my_daily_balance_flutter/state/app_state.dart';
+import 'package:kaccha_pakka_khata/state/app_state.dart';
 import '../utils/report_generator.dart';
-import 'package:my_daily_balance_flutter/services/report_service.dart';
-import 'package:my_daily_balance_flutter/services/user_config_service.dart';
+import 'package:kaccha_pakka_khata/services/report_service.dart';
+import 'package:kaccha_pakka_khata/services/user_config_service.dart';
 
 /// Shared accounting form widget extracted from the Family screen.
 /// Accepts a `templateKey` so templates can pass different labels/configs later.
