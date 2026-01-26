@@ -10,13 +10,13 @@ const Map<String, Map<String, String>> appTranslations = {
     // Home Screen
     'greeting': 'Hi',
     'greeting_default': 'Hello there!',
-    'app_title_1': 'KPK ',
-    'app_title_2': 'ACCOUNTING',
+    'app_title_1': 'KACCHA PAKKA KHATA ',
+    'app_title_2': '{KPK ACCOUNTING}',
     'app_subtitle': 'PREMIUM DIGITAL LEDGER FOR ALL',
     'hero_title_1': 'Track Your ',
     'hero_title_2': 'Daily Balance Easily',
     'hero_subtitle':
-        'Select a category below to start managing your daily receipts and payments.',
+        'Manage your daily income, expenses, and business accounts effortlessly with Kaccha Pakka Khata.',
     'section_use_case': 'Select Your Use Case',
     'card_personal': 'My Personal Account',
     'card_business': 'My Business/Shop/Firm Account',

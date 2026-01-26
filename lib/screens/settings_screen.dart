@@ -778,7 +778,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'My Daily Balance',
+              'Kaccha Pakka Khata',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

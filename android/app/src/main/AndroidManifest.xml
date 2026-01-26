@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="my_daily_balance_flutter"
+        android:label="KPK Accounting"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
