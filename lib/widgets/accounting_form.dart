@@ -75,7 +75,7 @@ class _AccountingFormState extends State<AccountingForm>
 
     _openingBalanceController = AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 800),
+        duration: const Duration(milliseconds: 600),
         value: isOpeningBalancesExpanded ? 1.0 : 0.0);
 
     // Initialize controller with model value if exists
@@ -4243,282 +4243,236 @@ class _AccountingFormState extends State<AccountingForm>
     bool isExpense = false,
     bool receipt = false,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color:
-            isDark ? Color.fromRGBO(17, 24, 39, 0.5) : const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
+    return ExpandableCategoryCard(
+      isDark: isDark,
+      isExpanded: isExpanded,
+      onTap: onToggle,
+      color: color,
+      header: Row(
         children: [
-          InkWell(
-            onTap: onToggle,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () async {
-                          // Read current title from model
-                          final current = isExpense
-                              ? (model.paymentLabels[accountKey] ?? title)
-                              : (model.receiptLabels[accountKey] ?? title);
-                          final controller =
-                              TextEditingController(text: current);
-                          final res = await showDialog<String>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor: isDark
-                                  ? const Color(0xFF1F2937)
-                                  : Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16)),
-                              title: Text(
-                                model.t('dialog_edit_title'),
-                                style: TextStyle(
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              content: TextField(
-                                controller: controller,
-                                autofocus: true,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: model.t('hint_edit_title'),
-                                  hintStyle: TextStyle(
-                                    color: isDark
-                                        ? const Color(0xFF6B7280)
-                                        : const Color(0xFF9CA3AF),
-                                  ),
-                                  filled: true,
-                                  fillColor: isDark
-                                      ? const Color(0xFF374151)
-                                      : const Color(0xFFF9FAFB),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 12),
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text(
-                                    model.t('btn_cancel'),
-                                    style: TextStyle(
-                                      color: isDark
-                                          ? const Color(0xFF9CA3AF)
-                                          : const Color(0xFF6B7280),
-                                    ),
-                                  ),
-                                ),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppTheme.primaryColor,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  onPressed: () => Navigator.pop(
-                                      context, controller.text.trim()),
-                                  child: Text(model.t('btn_save')),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (res != null && res.isNotEmpty) {
-                            if (isExpense) {
-                              model.setPaymentLabel(accountKey, res);
-                            } else {
-                              model.setReceiptLabel(accountKey, res);
-                            }
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color:
-                                const Color(0xFF6366F1).withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.edit_outlined,
-                            size: 14,
-                            color: Color(0xFF6366F1),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Consumer<AccountingModel>(
-                          builder: (context, model, child) {
-                            final displayTitle = isExpense
-                                ? (model.paymentLabels[accountKey] ?? title)
-                                : (model.receiptLabels[accountKey] ?? title);
-
-                            return Text(
-                              model.t(displayTitle),
-                              style: TextStyle(
-                                // ...
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: isDark
-                                    ? const Color(0xFFF9FAFB)
-                                    : const Color(0xFF1F2937),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: () {
-                          model.addEntryToAccount(accountKey,
-                              receipt: !isExpense);
-                        },
-                        child: Icon(
-                          Icons.add,
-                          size: 18,
-                          color: isDark
-                              ? const Color(0xFF9CA3AF)
-                              : const Color(0xFF6B7280),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: () async {
-                          // Show confirmation dialog
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text(
-                                  model.t('dialog_duplicate_category_title')),
-                              content: Text(
-                                  model.t('dialog_duplicate_category_msg')),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, false),
-                                  child: Text(model.t('btn_cancel')),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () => Navigator.pop(context, true),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF4F46E5),
-                                  ),
-                                  child: Text(model.t('btn_duplicate')),
-                                ),
-                              ],
-                            ),
-                          );
-
-                          if (confirm == true) {
-                            if (isExpense) {
-                              model.duplicatePaymentAccount(accountKey);
-                            } else {
-                              model.duplicateReceiptAccount(accountKey);
-                            }
-                          }
-                        },
-                        child: Icon(
-                          Icons.content_copy,
-                          size: 18,
-                          color: isDark
-                              ? const Color(0xFF9CA3AF)
-                              : const Color(0xFF6B7280),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: () async {
-                          // Show confirmation dialog
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title:
-                                  Text(model.t('dialog_delete_category_title')),
-                              content:
-                                  Text(model.t('dialog_delete_category_msg')),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, false),
-                                  child: Text(model.t('btn_cancel')),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () => Navigator.pop(context, true),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                  ),
-                                  child: Text(model.t('btn_delete')),
-                                ),
-                              ],
-                            ),
-                          );
-
-                          if (confirm == true) {
-                            if (isExpense) {
-                              model.removePaymentAccount(accountKey);
-                            } else {
-                              model.removeReceiptAccount(accountKey);
-                            }
-                          }
-                        },
-                        child: Icon(
-                          Icons.close,
-                          size: 18,
-                          color: isDark
-                              ? const Color(0xFF9CA3AF)
-                              : const Color(0xFF6B7280),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    Consumer<AccountingModel>(
-                      builder: (context, model, child) {
-                        final total = model.calculateAccountTotalByKey(
-                            accountKey,
-                            receipt: !isExpense);
-                        return Text(
-                          '${_getCurrencySymbol(model.currency)}${total.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: color,
-                          ),
-                        );
-                      },
+          GestureDetector(
+            onTap: () async {
+              // Read current title from model
+              final current = isExpense
+                  ? (model.paymentLabels[accountKey] ?? title)
+                  : (model.receiptLabels[accountKey] ?? title);
+              final controller = TextEditingController(text: current);
+              final res = await showDialog<String>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  backgroundColor:
+                      isDark ? const Color(0xFF1F2937) : Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  title: Text(
+                    model.t('dialog_edit_title'),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      isExpanded ? Icons.expand_less : Icons.expand_more,
-                      color: color,
+                  ),
+                  content: TextField(
+                    controller: controller,
+                    autofocus: true,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: model.t('hint_edit_title'),
+                      hintStyle: TextStyle(
+                        color: isDark
+                            ? const Color(0xFF6B7280)
+                            : const Color(0xFF9CA3AF),
+                      ),
+                      filled: true,
+                      fillColor: isDark
+                          ? const Color(0xFF374151)
+                          : const Color(0xFFF9FAFB),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        model.t('btn_cancel'),
+                        style: TextStyle(
+                          color: isDark
+                              ? const Color(0xFF9CA3AF)
+                              : const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: () =>
+                          Navigator.pop(context, controller.text.trim()),
+                      child: Text(model.t('btn_save')),
                     ),
                   ],
                 ),
-              ],
+              );
+              if (res != null && res.isNotEmpty) {
+                if (isExpense) {
+                  model.setPaymentLabel(accountKey, res);
+                } else {
+                  model.setReceiptLabel(accountKey, res);
+                }
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6366F1).withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.edit_outlined,
+                size: 14,
+                color: Color(0xFF6366F1),
+              ),
             ),
           ),
-          if (showEntry) ...[
-            const SizedBox(height: 12),
-            _buildEntryBox(isDark, isExpense, accountKey),
-          ],
+          const SizedBox(width: 8),
+          Flexible(
+            child: Consumer<AccountingModel>(
+              builder: (context, model, child) {
+                final displayTitle = isExpense
+                    ? (model.paymentLabels[accountKey] ?? title)
+                    : (model.receiptLabels[accountKey] ?? title);
+
+                return Text(
+                  model.t(displayTitle),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? const Color(0xFFF9FAFB)
+                        : const Color(0xFF1F2937),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () {
+              model.addEntryToAccount(accountKey, receipt: !isExpense);
+            },
+            child: Icon(
+              Icons.add,
+              size: 18,
+              color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+            ),
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: () async {
+              // Show confirmation dialog
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(model.t('dialog_duplicate_category_title')),
+                  content: Text(model.t('dialog_duplicate_category_msg')),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(model.t('btn_cancel')),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4F46E5),
+                      ),
+                      child: Text(model.t('btn_duplicate')),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                if (isExpense) {
+                  model.duplicatePaymentAccount(accountKey);
+                } else {
+                  model.duplicateReceiptAccount(accountKey);
+                }
+              }
+            },
+            child: Icon(
+              Icons.content_copy,
+              size: 18,
+              color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+            ),
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: () async {
+              // Show confirmation dialog
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(model.t('dialog_delete_category_title')),
+                  content: Text(model.t('dialog_delete_category_msg')),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(model.t('btn_cancel')),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      child: Text(model.t('btn_delete')),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                if (isExpense) {
+                  model.removePaymentAccount(accountKey);
+                } else {
+                  model.removeReceiptAccount(accountKey);
+                }
+              }
+            },
+            child: Icon(
+              Icons.close,
+              size: 18,
+              color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+            ),
+          ),
         ],
       ),
+      trailing: Consumer<AccountingModel>(
+        builder: (context, model, child) {
+          final total =
+              model.calculateAccountTotalByKey(accountKey, receipt: !isExpense);
+          return Text(
+            '${_getCurrencySymbol(model.currency)}${total.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          );
+        },
+      ),
+      content: _buildEntryBox(isDark, isExpense, accountKey),
     );
   }
 
@@ -5455,6 +5409,129 @@ class _AccountingFormState extends State<AccountingForm>
             child: Text(
               model.t('label_save'),
               style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ExpandableCategoryCard extends StatefulWidget {
+  final bool isDark;
+  final bool isExpanded;
+  final VoidCallback onTap;
+  final Widget content;
+  final Widget header;
+  final Widget? trailing;
+  final Color color;
+
+  const ExpandableCategoryCard({
+    super.key,
+    required this.isDark,
+    required this.isExpanded,
+    required this.onTap,
+    required this.content,
+    required this.header,
+    this.trailing,
+    required this.color,
+  });
+
+  @override
+  State<ExpandableCategoryCard> createState() => _ExpandableCategoryCardState();
+}
+
+class _ExpandableCategoryCardState extends State<ExpandableCategoryCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+      value: widget.isExpanded ? 1.0 : 0.0,
+    );
+  }
+
+  @override
+  void didUpdateWidget(ExpandableCategoryCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isExpanded != oldWidget.isExpanded) {
+      if (widget.isExpanded) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: widget.isDark
+            ? widget.color.withValues(alpha: 0.05)
+            : widget.color.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: widget.isDark ? Colors.white24 : Colors.grey.shade300,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: widget.onTap,
+            hoverColor: Colors.transparent,
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(child: widget.header),
+                Row(
+                  children: [
+                    if (widget.trailing != null) ...[
+                      widget.trailing!,
+                      const SizedBox(width: 8),
+                    ],
+                    RotationTransition(
+                      turns: Tween(begin: 0.0, end: 0.25).animate(
+                        CurvedAnimation(
+                          parent: _controller,
+                          curve: Curves.easeInOut,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.chevron_right,
+                        color: widget.color,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          SizeTransition(
+            sizeFactor: CurvedAnimation(
+              parent: _controller,
+              curve: Curves.easeInOut,
+            ),
+            axisAlignment: 0.0,
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                widget.content,
+              ],
             ),
           ),
         ],
