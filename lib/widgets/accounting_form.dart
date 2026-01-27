@@ -39,7 +39,8 @@ class AccountingForm extends StatefulWidget {
   State<AccountingForm> createState() => _AccountingFormState();
 }
 
-class _AccountingFormState extends State<AccountingForm> {
+class _AccountingFormState extends State<AccountingForm>
+    with SingleTickerProviderStateMixin {
   late AccountingModel model;
 
   // Services
@@ -50,12 +51,13 @@ class _AccountingFormState extends State<AccountingForm> {
   final TextEditingController _headerTitleController = TextEditingController();
   bool _headerLoaded = false;
 
-  bool isOpeningBalancesExpanded = true;
+  bool isOpeningBalancesExpanded = false;
   // Map to track expansion state for all categories dynamically
   Map<String, bool> categoryExpansionState = {};
   late TextEditingController periodController;
   late TextEditingController periodStartController;
   late TextEditingController periodEndController;
+  late AnimationController _openingBalanceController;
   bool _reportJustSaved = false;
 
   @override
@@ -66,9 +68,15 @@ class _AccountingFormState extends State<AccountingForm> {
 
     // If initial state is provided (Edit Mode), load it immediately
     if (widget.initialState != null) {
+      isOpeningBalancesExpanded = true;
       // Pass notify: false to prevent triggering a rebuild while building
       model.importState(widget.initialState!, notify: false);
     }
+
+    _openingBalanceController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 800),
+        value: isOpeningBalancesExpanded ? 1.0 : 0.0);
 
     // Initialize controller with model value if exists
     final key = widget.customPageId ?? widget.templateKey;
@@ -1745,6 +1753,7 @@ class _AccountingFormState extends State<AccountingForm> {
   // Helper: Calculate receipts without opening balances
   @override
   void dispose() {
+    _openingBalanceController.dispose();
     _headerTitleController.dispose();
     periodController.dispose();
     periodStartController.dispose();
@@ -2384,6 +2393,10 @@ class _AccountingFormState extends State<AccountingForm> {
         color:
             isDark ? Color.fromRGBO(17, 24, 39, 0.5) : const Color(0xFFF9FAFB),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.white24 : Colors.grey.shade300,
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
@@ -2391,6 +2404,11 @@ class _AccountingFormState extends State<AccountingForm> {
             onTap: () {
               setState(() {
                 isOpeningBalancesExpanded = !isOpeningBalancesExpanded;
+                if (isOpeningBalancesExpanded) {
+                  _openingBalanceController.forward();
+                } else {
+                  _openingBalanceController.reverse();
+                }
               });
             },
             child: Row(
@@ -2404,126 +2422,144 @@ class _AccountingFormState extends State<AccountingForm> {
                     color: AppTheme.receiptColor,
                   ),
                 ),
-                Icon(
-                  isOpeningBalancesExpanded
-                      ? Icons.expand_less
-                      : Icons.expand_more,
-                  color: isDark
-                      ? const Color(0xFF6B7280)
-                      : const Color(0xFF6B7280),
+                RotationTransition(
+                  turns: Tween(begin: 0.0, end: 0.25).animate(
+                    CurvedAnimation(
+                      parent: _openingBalanceController,
+                      curve: Curves.easeInOut,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.chevron_right,
+                    color: isDark
+                        ? const Color(0xFF9CA3AF)
+                        : const Color(0xFF6B7280),
+                  ),
                 ),
               ],
             ),
           ),
-          if (isOpeningBalancesExpanded) ...[
-            const SizedBox(height: 12),
-            // Default balance cards (non-deletable)
-            // Default balance cards (non-deletable)
-            _buildBalanceCard(
-                isDark,
-                'cash',
-                model.getBalanceCardTitle('cash',
-                    defaultValue: model.duration == DurationType.Daily
-                        ? "Yesterday's Cash (B/F)"
-                        : model.duration == DurationType.Weekly
-                            ? "Last Week's Cash (B/F)"
-                            : model.duration == DurationType.Monthly
-                                ? "Last Month's Cash (B/F)"
-                                : "Last Year's Cash (B/F)"),
-                model.getBalanceCardDescription('cash'),
-                false,
-                Icons.account_balance_wallet_outlined,
-                const Color(0xFF10B981), // Green
-                model.duration == DurationType.Daily
-                    ? "PREVIOUS DAY'S CLOSING"
-                    : model.duration == DurationType.Weekly
-                        ? "PREVIOUS WEEK'S CLOSING"
-                        : model.duration == DurationType.Monthly
-                            ? "PREVIOUS MONTH'S CLOSING"
-                            : "PREVIOUS YEAR'S CLOSING",
-                model.openingCash,
-                key: const ValueKey(
-                    'balance_cash')), // Static key prevents rebuild loop
-            const SizedBox(height: 12),
-            _buildBalanceCard(
-                isDark,
-                'bank',
-                model.getBalanceCardTitle('bank',
-                    defaultValue: model.duration == DurationType.Daily
-                        ? "Yesterday's Bank (B/F)"
-                        : model.duration == DurationType.Weekly
-                            ? "Last Week's Bank (B/F)"
-                            : model.duration == DurationType.Monthly
-                                ? "Last Month's Bank (B/F)"
-                                : "Last Year's Bank (B/F)"),
-                model.getBalanceCardDescription('bank'),
-                false,
-                Icons.account_balance_outlined,
-                const Color(0xFF3B82F6), // Blue
-                model.duration == DurationType.Daily
-                    ? "PREVIOUS DAY'S CLOSING"
-                    : model.duration == DurationType.Weekly
-                        ? "PREVIOUS WEEK'S CLOSING"
-                        : model.duration == DurationType.Monthly
-                            ? "PREVIOUS MONTH'S CLOSING"
-                            : "PREVIOUS YEAR'S CLOSING",
-                model.openingBank,
-                key: const ValueKey(
-                    'balance_bank')), // Static key prevents rebuild loop
-            const SizedBox(height: 12),
-            _buildBalanceCard(
-                isDark,
-                'other',
-                model.getBalanceCardTitle('other',
-                    defaultValue: model.duration == DurationType.Daily
-                        ? "Yesterday's Other Balance (B/F)"
-                        : model.duration == DurationType.Weekly
-                            ? "Last Week's Other Balance (B/F)"
-                            : model.duration == DurationType.Monthly
-                                ? "Last Month's Other Balance (B/F)"
-                                : "Last Year's Other Balance (B/F)"),
-                model.getBalanceCardDescription('other'),
-                false,
-                Icons.savings_outlined,
-                const Color(0xFFF59E0B), // Amber
-                model.duration == DurationType.Daily
-                    ? "PREVIOUS DAY'S CLOSING"
-                    : model.duration == DurationType.Weekly
-                        ? "PREVIOUS WEEK'S CLOSING"
-                        : model.duration == DurationType.Monthly
-                            ? "PREVIOUS MONTH'S CLOSING"
-                            : "PREVIOUS YEAR'S CLOSING",
-                model.openingOther,
-                key: const ValueKey(
-                    'balance_other')), // Static key prevents rebuild loop
-
-            // Custom balance cards (deletable)
-            ...model.customOpeningBalances.keys.map((key) {
-              return Padding(
-                padding: const EdgeInsets.only(top: 12.0),
-                child: _buildCustomBalanceCard(isDark, key),
-              );
-            }).toList(),
-
-            // Add Balance Box button
-            const SizedBox(height: 12),
-            SizedBox(
+          SizeTransition(
+            sizeFactor: CurvedAnimation(
+              parent: _openingBalanceController,
+              curve: Curves.easeInOut,
+            ),
+            axisAlignment: 0.0,
+            child: SizedBox(
               width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _addNewBalanceBox(),
-                icon: const Icon(Icons.add, size: 18),
-                label: Text(model.t('btn_add_balance_box')),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppTheme.receiptColor,
-                  side: const BorderSide(color: AppTheme.receiptColor),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 12),
+                  // Default balance cards (non-deletable)
+                  // Default balance cards (non-deletable)
+                  _buildBalanceCard(
+                      isDark,
+                      'cash',
+                      model.getBalanceCardTitle('cash',
+                          defaultValue: model.duration == DurationType.Daily
+                              ? "Yesterday's Cash (B/F)"
+                              : model.duration == DurationType.Weekly
+                                  ? "Last Week's Cash (B/F)"
+                                  : model.duration == DurationType.Monthly
+                                      ? "Last Month's Cash (B/F)"
+                                      : "Last Year's Cash (B/F)"),
+                      model.getBalanceCardDescription('cash'),
+                      false,
+                      Icons.account_balance_wallet_outlined,
+                      const Color(0xFF10B981), // Green
+                      model.duration == DurationType.Daily
+                          ? "PREVIOUS DAY'S CLOSING"
+                          : model.duration == DurationType.Weekly
+                              ? "PREVIOUS WEEK'S CLOSING"
+                              : model.duration == DurationType.Monthly
+                                  ? "PREVIOUS MONTH'S CLOSING"
+                                  : "PREVIOUS YEAR'S CLOSING",
+                      model.openingCash,
+                      key: const ValueKey(
+                          'balance_cash')), // Static key prevents rebuild loop
+                  const SizedBox(height: 12),
+                  _buildBalanceCard(
+                      isDark,
+                      'bank',
+                      model.getBalanceCardTitle('bank',
+                          defaultValue: model.duration == DurationType.Daily
+                              ? "Yesterday's Bank (B/F)"
+                              : model.duration == DurationType.Weekly
+                                  ? "Last Week's Bank (B/F)"
+                                  : model.duration == DurationType.Monthly
+                                      ? "Last Month's Bank (B/F)"
+                                      : "Last Year's Bank (B/F)"),
+                      model.getBalanceCardDescription('bank'),
+                      false,
+                      Icons.account_balance_outlined,
+                      const Color(0xFF3B82F6), // Blue
+                      model.duration == DurationType.Daily
+                          ? "PREVIOUS DAY'S CLOSING"
+                          : model.duration == DurationType.Weekly
+                              ? "PREVIOUS WEEK'S CLOSING"
+                              : model.duration == DurationType.Monthly
+                                  ? "PREVIOUS MONTH'S CLOSING"
+                                  : "PREVIOUS YEAR'S CLOSING",
+                      model.openingBank,
+                      key: const ValueKey(
+                          'balance_bank')), // Static key prevents rebuild loop
+                  const SizedBox(height: 12),
+                  _buildBalanceCard(
+                      isDark,
+                      'other',
+                      model.getBalanceCardTitle('other',
+                          defaultValue: model.duration == DurationType.Daily
+                              ? "Yesterday's Other Balance (B/F)"
+                              : model.duration == DurationType.Weekly
+                                  ? "Last Week's Other Balance (B/F)"
+                                  : model.duration == DurationType.Monthly
+                                      ? "Last Month's Other Balance (B/F)"
+                                      : "Last Year's Other Balance (B/F)"),
+                      model.getBalanceCardDescription('other'),
+                      false,
+                      Icons.savings_outlined,
+                      const Color(0xFFF59E0B), // Amber
+                      model.duration == DurationType.Daily
+                          ? "PREVIOUS DAY'S CLOSING"
+                          : model.duration == DurationType.Weekly
+                              ? "PREVIOUS WEEK'S CLOSING"
+                              : model.duration == DurationType.Monthly
+                                  ? "PREVIOUS MONTH'S CLOSING"
+                                  : "PREVIOUS YEAR'S CLOSING",
+                      model.openingOther,
+                      key: const ValueKey(
+                          'balance_other')), // Static key prevents rebuild loop
+
+                  // Custom balance cards (deletable)
+                  ...model.customOpeningBalances.keys.map((key) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 12.0),
+                      child: _buildCustomBalanceCard(isDark, key),
+                    );
+                  }).toList(),
+
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _addNewBalanceBox(),
+                      icon: const Icon(Icons.add, size: 18),
+                      label: Text(model.t('btn_add_balance_box')),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.receiptColor,
+                        side: const BorderSide(color: AppTheme.receiptColor),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-          ],
+          ),
         ],
       ),
     );
