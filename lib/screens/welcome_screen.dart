@@ -23,7 +23,7 @@ class WelcomeScreen extends StatelessWidget {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 450),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -32,8 +32,8 @@ class WelcomeScreen extends StatelessWidget {
                         // Logo Section
                         Center(
                           child: Container(
-                            width: 120,
-                            height: 120,
+                            width: 100,
+                            height: 100,
                             decoration: BoxDecoration(
                               color: const Color(
                                   0xFF6366F1), // Indigo/Blue color for circle
@@ -49,7 +49,7 @@ class WelcomeScreen extends StatelessWidget {
                             ),
                             child: const Icon(
                               Icons.account_balance_rounded,
-                              size: 60,
+                              size: 50,
                               color: Colors.white,
                             ),
                           ),
@@ -113,7 +113,7 @@ class WelcomeScreen extends StatelessWidget {
                             backgroundColor:
                                 const Color(0xFF6366F1), // Matching blue
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
+                            padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -143,7 +143,7 @@ class WelcomeScreen extends StatelessWidget {
                                 const Color(0xFFE0E7FF), // Light indigo/blue
                             foregroundColor:
                                 const Color(0xFF4338CA), // Darker indigo text
-                            padding: const EdgeInsets.symmetric(vertical: 18),
+                            padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
