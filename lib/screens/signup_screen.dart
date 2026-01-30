@@ -84,8 +84,13 @@ class _SignupScreenState extends State<SignupScreen>
       }
     } catch (e) {
       if (mounted) {
-        ToastUtils.showErrorToast(context, 'Failed to sign up: ${e.toString()}',
-            bottomPadding: 25.0);
+        String errorMessage = 'Failed to sign up: ${e.toString()}';
+        if (e.toString().contains('SocketException') ||
+            e.toString().contains('Failed host lookup')) {
+          errorMessage =
+              'No internet connection. Please check your network settings.';
+        }
+        ToastUtils.showErrorToast(context, errorMessage, bottomPadding: 25.0);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -1,7 +1,7 @@
 name: kaccha_pakka_khata
 description: A minimal Flutter project skeleton for Kaccha Pakka Khata.
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.0+3
 # Version of the app
 # Never Change it after Publishing, It will be treated as a unique identifier for your app.
 # But when you make a change in the app, you need to increment the version number.
