@@ -420,50 +420,55 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(width: 12),
             // Title and Subtitle
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Main Title: KAACHA PAKKA KHATA
-                  RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.outfit(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900, // Extra Bold
-                        height: 1.1,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Main Title: KAACHA PAKKA KHATA
+                    RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.outfit(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900, // Extra Bold
+                          height: 1.1,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: Provider.of<AccountingModel>(context)
+                                .t('app_title_1'),
+                            style: TextStyle(
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF0F172A),
+                            ),
+                          ),
+                          TextSpan(
+                            text: Provider.of<AccountingModel>(context)
+                                .t('app_title_2'),
+                            style: const TextStyle(
+                              color: Color(0xFF00C853), // Matching Green
+                            ),
+                          ),
+                        ],
                       ),
-                      children: [
-                        TextSpan(
-                          text: Provider.of<AccountingModel>(context)
-                              .t('app_title_1'),
-                          style: TextStyle(
-                            color:
-                                isDark ? Colors.white : const Color(0xFF0F172A),
-                          ),
-                        ),
-                        TextSpan(
-                          text: Provider.of<AccountingModel>(context)
-                              .t('app_title_2'),
-                          style: const TextStyle(
-                            color: Color(0xFF00C853), // Matching Green
-                          ),
-                        ),
-                      ],
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  // Subtitle: PREMIUM DIGITAL LEDGER
-                  Text(
-                    Provider.of<AccountingModel>(context).t('app_subtitle'),
-                    style: GoogleFonts.outfit(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF94A3B8), // Slate 400
-                      letterSpacing: 1.5, // Spaced out letters
+                    const SizedBox(height: 2),
+                    // Subtitle: PREMIUM DIGITAL LEDGER
+                    Text(
+                      Provider.of<AccountingModel>(context).t('app_subtitle'),
+                      style: GoogleFonts.outfit(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF94A3B8), // Slate 400
+                        letterSpacing: 1.5, // Spaced out letters
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
