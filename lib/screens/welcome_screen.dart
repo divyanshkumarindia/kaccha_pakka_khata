@@ -53,7 +53,7 @@ class WelcomeScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 50),
+                        const SizedBox(height: 25),
 
                         // Title
                         Text(
@@ -97,7 +97,7 @@ class WelcomeScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const Spacer(flex: 2),
+                        const Spacer(flex: 5),
 
                         // Create Account Button (Primary)
                         ElevatedButton(
