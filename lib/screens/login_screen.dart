@@ -156,6 +156,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              const SizedBox(height: 30),
                               // Icon
                               Center(
                                 child: Container(
@@ -196,11 +197,11 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   color: labelColor,
                                 ),
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 30),
 
                               // Email Label
                               _buildLabel(labelColor, 'EMAIL ADDRESS'),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 4),
                               _buildTextField(
                                 controller: _emailController,
                                 hintText: 'Enter your email',
@@ -210,11 +211,11 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                 textColor: textColor,
                                 keyboardType: TextInputType.emailAddress,
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 8),
 
                               // Password Label
                               _buildLabel(labelColor, 'PASSWORD'),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 4),
                               _buildTextField(
                                 controller: _passwordController,
                                 hintText: 'Enter your password',
@@ -266,7 +267,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                 onPressed: _isLoading ? null : _login,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
-                                      const Color(0xFF4F46E5), // Indigo
+                                      const Color(0xFF6366F1), // Indigo Primary
                                   foregroundColor: Colors.white,
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 12),
@@ -292,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                         ),
                                       ),
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 14),
 
                               // "Or log in with" Divider
                               Row(
@@ -312,7 +313,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   Expanded(child: Divider(color: borderColor)),
                                 ],
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 14),
 
                               // Continue with Google Button
                               OutlinedButton(
@@ -370,7 +371,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                         ],
                                       ),
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 24),
 
                               // Footer: Don't have an account? Sign Up
                               Center(
