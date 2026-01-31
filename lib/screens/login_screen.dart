@@ -453,6 +453,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
+      onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
       obscureText: isPassword && !isVisible,
       style: TextStyle(color: textColor),
       decoration: InputDecoration(

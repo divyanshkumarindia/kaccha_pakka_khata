@@ -50,6 +50,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      builder: (context, child) => GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: child,
+      ),
       home: StreamBuilder<AuthState>(
         stream: AuthService().authStateChanges,
         builder: (context, snapshot) {
@@ -61,7 +65,7 @@ class MyApp extends StatelessWidget {
             if (user != null) {
               return const MainScreen();
             }
-            return const WelcomeScreen(); 
+            return const WelcomeScreen();
           }
 
           final session = snapshot.data?.session;
