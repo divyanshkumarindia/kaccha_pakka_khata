@@ -23,7 +23,7 @@ class WelcomeScreen extends StatelessWidget {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 450),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -32,29 +32,28 @@ class WelcomeScreen extends StatelessWidget {
                         // Logo Section
                         Center(
                           child: Container(
-                            width: 100,
-                            height: 100,
                             decoration: BoxDecoration(
-                              color: const Color(
-                                  0xFF6366F1), // Indigo/Blue color for circle
-                              shape: BoxShape.circle,
+                              shape: BoxShape
+                                  .circle, // Circular glow behind the book
                               boxShadow: [
                                 BoxShadow(
                                   color: const Color(0xFF6366F1)
-                                      .withValues(alpha: 0.3),
-                                  blurRadius: 20,
-                                  spreadRadius: 5,
+                                      .withValues(alpha: 0.5),
+                                  blurRadius: 50,
+                                  spreadRadius: 10,
                                 ),
                               ],
                             ),
-                            child: const Icon(
-                              Icons.account_balance_rounded,
-                              size: 50,
-                              color: Colors.white,
+                            child: Image.asset(
+                              'assets/Logo Book.png',
+                              width:
+                                  180, // Increased size for the book to be bigger
+                              height: 180,
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 50),
 
                         // Title
                         Text(
@@ -98,7 +97,7 @@ class WelcomeScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const Spacer(),
+                        const Spacer(flex: 2),
 
                         // Create Account Button (Primary)
                         ElevatedButton(
@@ -113,7 +112,7 @@ class WelcomeScreen extends StatelessWidget {
                             backgroundColor:
                                 const Color(0xFF6366F1), // Matching blue
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -143,7 +142,7 @@ class WelcomeScreen extends StatelessWidget {
                                 const Color(0xFFE0E7FF), // Light indigo/blue
                             foregroundColor:
                                 const Color(0xFF4338CA), // Darker indigo text
-                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -157,7 +156,7 @@ class WelcomeScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 48),
+                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
