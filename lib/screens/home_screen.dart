@@ -392,7 +392,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        toolbarHeight: 90, // Increased height for three-line text
+        toolbarHeight: 85, // Increased height for three-line text
         title: Row(
           children: [
             Container(
@@ -431,9 +431,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       Provider.of<AccountingModel>(context).t('app_short_name'),
                       style: GoogleFonts.outfit(
-                        fontSize: 15, // Increased from 13
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: const Color.fromARGB(255, 255, 119, 0), // Vibrant Orange
+                        color: const Color.fromARGB(
+                            255, 255, 119, 0), // Vibrant Orange
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -458,7 +459,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontSize: 12,
                         fontWeight: FontWeight.w800, // Increased boldness
                         color: const Color.fromARGB(255, 0, 190, 79), // Green
-                        letterSpacing: 0.5, // Reduced spacing
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
@@ -510,8 +511,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-                12, 24, 12, 120), // Reduced side padding (was 20)
+            padding: const EdgeInsets.fromLTRB(12, 16, 12, 40),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -526,7 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Text(
                       greeting,
                       style: GoogleFonts.outfit(
-                        fontSize: 20, // Middle ground (was 24 -> 18 -> 20)
+                        fontSize: 20,
                         fontWeight: FontWeight.w600,
                         color: isDark
                             ? Colors.white
@@ -536,8 +536,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
-                const SizedBox(
-                    height: 16), // Balanced spacing (was 24 -> 10 -> 16)
+                const SizedBox(height: 14),
 
                 // Hero Section
                 Column(
@@ -547,7 +546,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     RichText(
                       text: TextSpan(
                         style: GoogleFonts.outfit(
-                          fontSize: 29, // Middle ground (was 33 -> 26 -> 29)
+                          fontSize: 29,
                           fontWeight: FontWeight.w800,
                           height: 1.1,
                           letterSpacing: -0.5,
@@ -572,17 +571,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12), // Balanced spacing
+                    const SizedBox(height: 12),
                     // Hero Description
                     Padding(
-                      padding: const EdgeInsets.only(
-                          right:
-                              30.0), // Balanced breathing room (40 -> 20 -> 30)
+                      padding: const EdgeInsets.only(right: 30.0),
                       child: Text(
                         Provider.of<AccountingModel>(context)
                             .t('hero_subtitle'),
                         style: GoogleFonts.outfit(
-                          fontSize: 15, // Middle ground (was 16 -> 14 -> 15)
+                          fontSize: 15,
                           fontWeight: FontWeight.w500,
                           color: isDark
                               ? const Color(0xFF94A3B8)
@@ -591,12 +588,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(
-                        height: 20), // Balanced spacing (24 -> 16 -> 20)
+                    const SizedBox(height: 20),
                     // Trust Badge (Placed below as requested)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 7), // Balanced padding
+                          horizontal: 14, vertical: 7),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE8F5E9), // Light Green bg
                         borderRadius: BorderRadius.circular(50),
@@ -626,12 +622,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
 
                 // Main Selection Card
                 PremiumCard(
-                  padding: const EdgeInsets.all(
-                      16), // Reduced internal padding (was 24)
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -645,7 +640,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
-                      const SizedBox(height: 12), // Reduced spacing (was 20)
+                      const SizedBox(height: 12),
 
                       // Use Case List with Builder to allow logic
                       Builder(
@@ -750,7 +745,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   borderRadius: BorderRadius.circular(24),
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 20),
+                                        horizontal: 20, vertical: 20), // Box height and width
                                     decoration: BoxDecoration(
                                       color: isDark
                                           ? const Color(0xFF1F2937)
@@ -778,7 +773,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       children: [
                                         // Leading Icon
                                         Container(
-                                          width: 45, // Reduced from 48
+                                          width: 45,
                                           height: 45,
                                           decoration: BoxDecoration(
                                             color: itemColor.withValues(
@@ -788,7 +783,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           child: Icon(
                                             item['icon'] as IconData,
                                             color: itemColor,
-                                            size: 22, // Reduced from 24
+                                            size: 22,
                                           ),
                                         ),
                                         const SizedBox(width: 16),
@@ -829,7 +824,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         const SizedBox(width: 12),
                                         // Trailing Arrow
                                         Container(
-                                          width: 38, // Reduced from 40
+                                          width: 38,
                                           height: 38,
                                           decoration: BoxDecoration(
                                             color: isAddNew
@@ -847,7 +842,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             color: isAddNew
                                                 ? itemColor
                                                 : Colors.white,
-                                            size: 19, // Reduced from 20
+                                            size: 19,
                                           ),
                                         ),
                                       ],
@@ -859,8 +854,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         },
                       ),
-
-                      const SizedBox(height: 12),
                     ],
                   ),
                 ),
@@ -977,7 +970,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 100), // Padding for floating nav bar
               ],
             ),
           ),
