@@ -427,38 +427,37 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Main Title: KAACHA PAKKA KHATA
-                    Text(
-                      Provider.of<AccountingModel>(context)
-                          .t('app_title_1')
-                          .trim(),
-                      style: GoogleFonts.outfit(
-                        fontSize: 18, // Reduced from 22
-                        fontWeight: FontWeight.w800, // Slightly less bold
-                        height: 1.1,
-                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                      ),
-                    ),
                     // Short Name: {KPK ACCOUNTING}
                     Text(
                       Provider.of<AccountingModel>(context).t('app_short_name'),
                       style: GoogleFonts.outfit(
                         fontSize: 15, // Increased from 13
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF00C853), // Matching Green
+                        color: const Color.fromARGB(255, 255, 119, 0), // Vibrant Orange
                         letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    // Main Title: KACCHA PAKKA KHATA
+                    Text(
+                      Provider.of<AccountingModel>(context)
+                          .t('app_title_1')
+                          .trim(),
+                      style: GoogleFonts.outfit(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        height: 1.1,
+                        color:
+                            const Color.fromARGB(255, 16, 32, 202), // Navy Blue
+                      ),
+                    ),
+                    const SizedBox(height: 3), // Increased minute distance
                     // Subtitle: PREMIUM DIGITAL LEDGER
                     Text(
                       Provider.of<AccountingModel>(context).t('app_subtitle'),
                       style: GoogleFonts.outfit(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF64748B), // Slate 500
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800, // Increased boldness
+                        color: const Color.fromARGB(255, 0, 190, 79), // Green
                         letterSpacing: 0.5, // Reduced spacing
                       ),
                     ),
