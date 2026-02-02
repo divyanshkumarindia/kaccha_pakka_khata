@@ -778,8 +778,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       children: [
                                         // Leading Icon
                                         Container(
-                                          width: 48,
-                                          height: 48,
+                                          width: 45, // Reduced from 48
+                                          height: 45,
                                           decoration: BoxDecoration(
                                             color: itemColor.withValues(
                                                 alpha: 0.1),
@@ -788,7 +788,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           child: Icon(
                                             item['icon'] as IconData,
                                             color: itemColor,
-                                            size: 24,
+                                            size: 22, // Reduced from 24
                                           ),
                                         ),
                                         const SizedBox(width: 16),
@@ -801,7 +801,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               Text(
                                                 item['title'] as String,
                                                 style: GoogleFonts.outfit(
-                                                  fontSize: 18,
+                                                  fontSize: 16,
                                                   fontWeight: FontWeight.bold,
                                                   color: isAddNew
                                                       ? itemColor
@@ -815,7 +815,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               Text(
                                                 item['subtitle'] as String,
                                                 style: GoogleFonts.outfit(
-                                                  fontSize: 11,
+                                                  fontSize: 10,
                                                   fontWeight: FontWeight.w600,
                                                   color: isDark
                                                       ? const Color(0xFF94A3B8)
@@ -829,8 +829,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         const SizedBox(width: 12),
                                         // Trailing Arrow
                                         Container(
-                                          width: 40,
-                                          height: 40,
+                                          width: 38, // Reduced from 40
+                                          height: 38,
                                           decoration: BoxDecoration(
                                             color: isAddNew
                                                 ? Colors.transparent
@@ -847,7 +847,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             color: isAddNew
                                                 ? itemColor
                                                 : Colors.white,
-                                            size: 20,
+                                            size: 19, // Reduced from 20
                                           ),
                                         ),
                                       ],
