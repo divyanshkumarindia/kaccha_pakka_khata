@@ -510,7 +510,8 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
+            padding: const EdgeInsets.fromLTRB(
+                12, 24, 12, 120), // Reduced side padding (was 20)
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -629,6 +630,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // Main Selection Card
                 PremiumCard(
+                  padding: const EdgeInsets.all(
+                      16), // Reduced internal padding (was 24)
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -642,7 +645,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12), // Reduced spacing (was 20)
 
                       // Use Case List with Builder to allow logic
                       Builder(
