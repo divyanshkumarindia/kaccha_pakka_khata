@@ -81,8 +81,8 @@ class _MainScreenState extends State<MainScreen> {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildNavItem(0, model.t('nav_home'),
-                        Icons.dashboard_outlined, Icons.dashboard_rounded),
+                    _buildNavItem(0, model.t('nav_home'), Icons.home_outlined,
+                        Icons.home_rounded),
                     _buildNavItem(1, model.t('title_saved_reports'),
                         Icons.bookmark_border, Icons.bookmark),
                     _buildNavItem(2, model.t('nav_settings'),
