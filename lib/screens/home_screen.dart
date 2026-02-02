@@ -392,13 +392,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        toolbarHeight: 70, // Increase height for two-line text
+        toolbarHeight: 90, // Increased height for three-line text
         title: Row(
           children: [
             // Logo Icon
             Container(
-              width: 44,
-              height: 44,
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
                 color: const Color(0xFF00C853), // Vivid Green
                 borderRadius: BorderRadius.circular(12),
@@ -414,7 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Icon(
                 Icons.menu_book_rounded,
                 color: Colors.white,
-                size: 24,
+                size: 28,
               ),
             ),
             const SizedBox(width: 12),
@@ -427,31 +427,25 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Main Title: KAACHA PAKKA KHATA
-                    RichText(
-                      text: TextSpan(
-                        style: GoogleFonts.outfit(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900, // Extra Bold
-                          height: 1.1,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: Provider.of<AccountingModel>(context)
-                                .t('app_title_1'),
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors.white
-                                  : const Color(0xFF0F172A),
-                            ),
-                          ),
-                          TextSpan(
-                            text: Provider.of<AccountingModel>(context)
-                                .t('app_title_2'),
-                            style: const TextStyle(
-                              color: Color(0xFF00C853), // Matching Green
-                            ),
-                          ),
-                        ],
+                    Text(
+                      Provider.of<AccountingModel>(context)
+                          .t('app_title_1')
+                          .trim(),
+                      style: GoogleFonts.outfit(
+                        fontSize: 18, // Reduced from 22
+                        fontWeight: FontWeight.w800, // Slightly less bold
+                        height: 1.1,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      ),
+                    ),
+                    // Short Name: {KPK ACCOUNTING}
+                    Text(
+                      Provider.of<AccountingModel>(context).t('app_short_name'),
+                      style: GoogleFonts.outfit(
+                        fontSize: 15, // Increased from 13
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF00C853), // Matching Green
+                        letterSpacing: 0.5,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -460,11 +454,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       Provider.of<AccountingModel>(context).t('app_subtitle'),
                       style: GoogleFonts.outfit(
                         fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         color: isDark
                             ? const Color(0xFF94A3B8)
-                            : const Color(0xFF94A3B8), // Slate 400
-                        letterSpacing: 1.5, // Spaced out letters
+                            : const Color(0xFF64748B), // Slate 500
+                        letterSpacing: 0.5, // Reduced spacing
                       ),
                     ),
                   ],
