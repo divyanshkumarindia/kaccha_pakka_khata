@@ -395,26 +395,27 @@ class _HomeScreenState extends State<HomeScreen> {
         toolbarHeight: 90, // Increased height for three-line text
         title: Row(
           children: [
-            // Logo Icon
             Container(
               width: 50,
               height: 50,
+              padding: const EdgeInsets.all(
+                  4), // Reduced padding to make logo bigger
               decoration: BoxDecoration(
-                color: const Color(0xFF00C853), // Vivid Green
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF00C853).withValues(alpha: 0.3),
+                    color: const Color(0xFFFF1616)
+                        .withValues(alpha: 0.3), // Red Glow
                     spreadRadius: 1,
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.menu_book_rounded,
-                color: Colors.white,
-                size: 28,
+              child: Image.asset(
+                'assets/Logo Book.png',
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(width: 12),
