@@ -206,7 +206,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                             MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            'Send OTP',
+                                            'Send Reset Link',
                                             style: GoogleFonts.outfit(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
