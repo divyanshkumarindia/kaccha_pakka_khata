@@ -525,7 +525,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Text(
                       greeting,
                       style: GoogleFonts.outfit(
-                        fontSize: 24,
+                        fontSize: 20, // Middle ground (was 24 -> 18 -> 20)
                         fontWeight: FontWeight.w600,
                         color: isDark
                             ? Colors.white
@@ -535,7 +535,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(
+                    height: 16), // Balanced spacing (was 24 -> 10 -> 16)
 
                 // Hero Section
                 Column(
@@ -545,7 +546,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     RichText(
                       text: TextSpan(
                         style: GoogleFonts.outfit(
-                          fontSize: 33, // Large Hero Title
+                          fontSize: 29, // Middle ground (was 33 -> 26 -> 29)
                           fontWeight: FontWeight.w800,
                           height: 1.1,
                           letterSpacing: -0.5,
@@ -570,16 +571,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12), // Balanced spacing
                     // Hero Description
                     Padding(
                       padding: const EdgeInsets.only(
-                          right: 40.0), // Give it some breathing room
+                          right:
+                              30.0), // Balanced breathing room (40 -> 20 -> 30)
                       child: Text(
                         Provider.of<AccountingModel>(context)
                             .t('hero_subtitle'),
                         style: GoogleFonts.outfit(
-                          fontSize: 16,
+                          fontSize: 15, // Middle ground (was 16 -> 14 -> 15)
                           fontWeight: FontWeight.w500,
                           color: isDark
                               ? const Color(0xFF94A3B8)
@@ -588,11 +590,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(
+                        height: 20), // Balanced spacing (24 -> 16 -> 20)
                     // Trust Badge (Placed below as requested)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                          horizontal: 14, vertical: 7), // Balanced padding
                       decoration: BoxDecoration(
                         color: const Color(0xFFE8F5E9), // Light Green bg
                         borderRadius: BorderRadius.circular(50),
@@ -602,15 +605,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           const Icon(
                             Icons.verified_user_outlined,
-                            size: 16,
+                            size: 15, // Balanced size
                             color: Color(0xFF00C853), // Eco Green Icon
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 7),
                           Text(
                             Provider.of<AccountingModel>(context)
                                 .t('badge_safe_secure'),
                             style: GoogleFonts.outfit(
-                              fontSize: 12,
+                              fontSize: 11.5, // Slight tweak
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF1B5E20), // Dark Green Text
                               letterSpacing: 0.5,
