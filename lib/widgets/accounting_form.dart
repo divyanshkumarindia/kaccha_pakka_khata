@@ -14,6 +14,7 @@ import 'package:kaccha_pakka_khata/state/app_state.dart';
 import '../utils/report_generator.dart';
 import 'package:kaccha_pakka_khata/services/report_service.dart';
 import 'package:kaccha_pakka_khata/services/user_config_service.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Shared accounting form widget extracted from the Family screen.
 /// Accepts a `templateKey` so templates can pass different labels/configs later.
@@ -1623,7 +1624,7 @@ class _AccountingFormState extends State<AccountingForm>
           child: Center(
             child: Text(
               title,
-              style: const TextStyle(
+              style: GoogleFonts.outfit(
                 color: Colors.white,
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -1673,7 +1674,7 @@ class _AccountingFormState extends State<AccountingForm>
             flex: 40,
             child: Text(
               cells[0],
-              style: TextStyle(
+              style: GoogleFonts.outfit(
                 fontSize: isHeader ? 12 : 13,
                 fontWeight:
                     isHeader || isBold ? FontWeight.bold : FontWeight.normal,
@@ -1689,7 +1690,7 @@ class _AccountingFormState extends State<AccountingForm>
             flex: 20,
             child: Text(
               cells[1],
-              style: TextStyle(
+              style: GoogleFonts.outfit(
                 fontSize: isHeader ? 12 : 13,
                 fontWeight:
                     isHeader || isBold ? FontWeight.bold : FontWeight.w500,
@@ -1703,7 +1704,7 @@ class _AccountingFormState extends State<AccountingForm>
             flex: 20,
             child: Text(
               cells[2],
-              style: TextStyle(
+              style: GoogleFonts.outfit(
                 fontSize: isHeader ? 12 : 13,
                 fontWeight:
                     isHeader || isBold ? FontWeight.bold : FontWeight.w500,
@@ -1717,7 +1718,7 @@ class _AccountingFormState extends State<AccountingForm>
             flex: 20,
             child: Text(
               cells[3],
-              style: TextStyle(
+              style: GoogleFonts.outfit(
                 fontSize: isHeader ? 12 : 13,
                 fontWeight:
                     isHeader || isBold ? FontWeight.bold : FontWeight.w500,
@@ -1780,7 +1781,7 @@ class _AccountingFormState extends State<AccountingForm>
                 child: SafeArea(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12), // Reduced from 16
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1801,13 +1802,12 @@ class _AccountingFormState extends State<AccountingForm>
                                 const SizedBox(width: 4),
                                 Text(
                                   model.t('link_back_dashboard'),
-                                  style: TextStyle(
+                                  style: GoogleFonts.outfit(
                                     fontSize: 14,
-                                    fontWeight: FontWeight
-                                        .w500, // Added slightly bolder weight for readability
+                                    fontWeight: FontWeight.w500,
                                     color: isDark
-                                        ? const Color(0xFF9CA3AF)
-                                        : Colors.black, // Changed to black
+                                        ? const Color(0xFF94A3B8) // Slate 400
+                                        : const Color(0xFF475569), // Slate 600
                                   ),
                                 ),
                               ],
@@ -1825,17 +1825,17 @@ class _AccountingFormState extends State<AccountingForm>
                                     _headerTitleController.text.isNotEmpty
                                         ? _headerTitleController.text
                                         : _getHeaderHint(widget.templateKey),
-                                    style: TextStyle(
-                                      fontSize: 28, // Bigger font size
-                                      fontWeight: FontWeight.bold,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 26, // Reduced from 28
+                                      fontWeight: FontWeight.w800, // Extra Bold
+                                      height: 1.1,
                                       color: _headerTitleController
                                               .text.isNotEmpty
-                                          ? const Color(0xFF4F46E5)
+                                          ? const Color(
+                                              0xFF0F172A) // Navy Blue (Home Title Color)
                                           : (isDark
-                                              ? Colors.green.shade800
-                                                  .withValues(alpha: 0.5)
-                                              : Colors.green
-                                                  .shade200), // Very light green ghost text
+                                              ? Colors.white.withOpacity(0.9)
+                                              : const Color(0xFF0F172A)),
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -1867,10 +1867,12 @@ class _AccountingFormState extends State<AccountingForm>
                                           model.pageTitle!.isNotEmpty
                                       ? model.pageTitle!
                                       : useCasePageTitle(model.userType),
-                                  style: const TextStyle(
+                                  style: GoogleFonts.outfit(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFF4F46E5),
+                                    color: isDark
+                                        ? const Color(0xFF00C853) // Green
+                                        : const Color(0xFF0F172A), // Navy Blue
                                   ),
                                 ),
                                 const SizedBox(width: 8),
