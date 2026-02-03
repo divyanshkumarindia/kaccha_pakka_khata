@@ -250,40 +250,85 @@ class _SavedReportsScreenState extends State<SavedReportsScreen> {
         child: Column(
           children: [
             // Custom Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    model.t('title_saved_reports'), // "Saved Reports"
-                    style: GoogleFonts.outfit(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? Colors.white : const Color(0xFF1E293B),
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'View your saved balance sheets and history for each specific account type.',
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      height: 1.5,
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.6)
-                          : const Color(0xFF64748B),
-                    ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.only(top: 24, bottom: 32),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1F2937) : Colors.white,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.2)
+                        : Colors.grey.withValues(alpha: 0.05),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
                   ),
                 ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            model.t('title_saved_reports'), // "Saved Reports"
+                            style: GoogleFonts.outfit(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF1E293B),
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'View your saved balance sheets and history for each specific account type.',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              height: 1.5,
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.6)
+                                  : const Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Decorative Icon
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.blue.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(
+                        Icons.snippet_folder_rounded,
+                        size: 32,
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.4)
+                            : Colors.blue.shade400,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
             // Grid Content
             Expanded(
               child: GridView.count(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
                 crossAxisCount: 2,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
@@ -370,7 +415,6 @@ class _PremiumCategoryCardState extends State<_PremiumCategoryCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  bool _isHovered = false;
 
   @override
   void initState() {
@@ -438,119 +482,114 @@ class _PremiumCategoryCardState extends State<_PremiumCategoryCard>
       );
     }
 
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTapDown: _onTapDown,
-        onTapUp: _onTapUp,
-        onTapCancel: _onTapCancel,
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: Container(
-            decoration: BoxDecoration(
-              color: widget.isAddNew ? widget.color : null,
-              gradient: gradient,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                if (shadow != null) shadow,
-                if (widget.isAddNew && isDark)
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-              ],
-              border: widget.isAddNew
-                  ? Border.all(
-                      color: isDark ? Colors.white10 : Colors.grey.shade300,
-                      width: 2,
-                      style: BorderStyle.solid,
-                    )
-                  : null,
-            ),
-            child: Stack(
-              children: [
-                // Decorative Circle in background (Glassy)
-                if (!widget.isAddNew)
-                  Positioned(
-                    top: -20,
-                    right: -20,
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.1),
-                      ),
+    return GestureDetector(
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
+          decoration: BoxDecoration(
+            color: widget.isAddNew ? widget.color : null,
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              if (shadow != null) shadow,
+              if (widget.isAddNew && isDark)
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+            ],
+            border: widget.isAddNew
+                ? Border.all(
+                    color: isDark ? Colors.white10 : Colors.grey.shade300,
+                    width: 2,
+                    style: BorderStyle.solid,
+                  )
+                : null,
+          ),
+          child: Stack(
+            children: [
+              // Decorative Circle in background (Glassy)
+              if (!widget.isAddNew)
+                Positioned(
+                  top: -20,
+                  right: -20,
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.1),
                     ),
-                  ),
-
-                // Content
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Icon Container
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: widget.isAddNew
-                              ? Colors.transparent
-                              : Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Icon(
-                          widget.icon,
-                          size: 28,
-                          color: iconColor,
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      // Title
-                      Text(
-                        widget.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: textColor,
-                          height: 1.1,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
 
-                // Active Dot
-                if (widget.isActive)
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+              // Content
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Icon Container
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: widget.isAddNew
+                            ? Colors.transparent
+                            : Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: widget.color,
-                          shape: BoxShape.circle,
-                        ),
+                      child: Icon(
+                        widget.icon,
+                        size: 28,
+                        color: iconColor,
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // Title
+                    Text(
+                      widget.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.outfit(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                        height: 1.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Active Dot
+              if (widget.isActive)
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: widget.color,
+                        shape: BoxShape.circle,
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ),

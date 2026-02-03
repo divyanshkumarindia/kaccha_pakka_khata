@@ -1834,7 +1834,8 @@ class _AccountingFormState extends State<AccountingForm>
                                           ? const Color(
                                               0xFF0F172A) // Navy Blue (Home Title Color)
                                           : (isDark
-                                              ? Colors.white.withOpacity(0.9)
+                                              ? Colors.white
+                                                  .withValues(alpha: 0.9)
                                               : const Color(0xFF0F172A)),
                                     ),
                                     textAlign: TextAlign.center,
