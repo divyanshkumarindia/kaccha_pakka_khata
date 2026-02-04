@@ -735,27 +735,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     isDark ? const Color(0xFF1F2937) : Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20)),
-                title: Text('Home Page Layout',
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 10),
+                contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                title: Column(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white10 : Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text('Home Page Layout',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.outfit(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              isDark ? Colors.white : const Color(0xFF1E293B),
+                        )),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Drag to reorder content',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: isDark ? Colors.white60 : Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
                 content: SizedBox(
                   width: double.maxFinite,
-                  height: 400, // Fixed height for scrolling
+                  height: 400,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Text(
-                          'Drag and drop to reorder sections on your home screen.',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color:
-                                isDark ? Colors.white70 : Colors.grey.shade600,
-                          ),
-                        ),
-                      ),
                       Expanded(
                         child: ReorderableListView(
+                          proxyDecorator: (child, index, animation) {
+                            return AnimatedBuilder(
+                              animation: animation,
+                              builder: (BuildContext context, Widget? child) {
+                                return Material(
+                                  elevation: 8,
+                                  shadowColor: Colors.black26,
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Transform.scale(
+                                    scale: 1.02,
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: child,
+                            );
+                          },
                           onReorder: (oldIndex, newIndex) {
                             setState(() {
                               if (oldIndex < newIndex) {
@@ -774,8 +810,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 margin: const EdgeInsets.only(bottom: 8),
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? const Color(0xFF374151)
-                                      : Colors.grey.shade100,
+                                      ? const Color(
+                                          0xFF374151) // Dark mode tile color
+                                      : Colors.grey
+                                          .shade100, // Light mode tile color
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: isDark
@@ -837,32 +875,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                 ),
+                actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                 actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      model.t('btn_cancel'),
-                      style: GoogleFonts.outfit(
-                        color: isDark ? Colors.white60 : Colors.grey.shade600,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
+                          ),
+                          child: Text(
+                            model.t('btn_cancel'),
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.w600,
+                              color: isDark
+                                  ? Colors.white60
+                                  : Colors.grey.shade600,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      final newOrder =
-                          allItems.map((item) => item['id'] as String).toList();
-                      model.setHomePageOrder(newOrder);
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3B82F6),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
-                    ),
-                    child:
-                        Text(model.t('btn_save'), style: GoogleFonts.outfit()),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            final newOrder = allItems
+                                .map((item) => item['id'] as String)
+                                .toList();
+                            model.setHomePageOrder(newOrder);
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2563EB),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            elevation: 4,
+                            shadowColor:
+                                const Color(0xFF2563EB).withValues(alpha: 0.4),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
+                          ),
+                          child: Text(
+                            model.t('btn_save'),
+                            style:
+                                GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               );
