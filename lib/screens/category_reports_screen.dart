@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:kaccha_pakka_khata/services/report_service.dart';
 import 'report_viewer_screen.dart';
 
@@ -33,8 +32,9 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
 
   final Set<String> _pendingDeleteIds = {};
   final Map<String, bool> _animatingOut = {};
-  Timer? _pendingDeleteTimer;
-  Map<String, dynamic>? _pendingDeleteReport;
+
+  // Track expanded months (default to expanded)
+  final Set<String> _collapsedMonths = {};
 
   @override
   void initState() {
@@ -46,7 +46,6 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
   void dispose() {
     _searchController.dispose();
     _debounce?.cancel();
-    _pendingDeleteTimer?.cancel();
     super.dispose();
   }
 
@@ -72,72 +71,6 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
     });
   }
 
-  void _deleteReport(Map<String, dynamic> report) {
-    final reportId = report['id'].toString();
-    _pendingDeleteTimer?.cancel();
-
-    setState(() {
-      _animatingOut[reportId] = true;
-    });
-
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted) {
-        setState(() {
-          _pendingDeleteReport = report;
-          _pendingDeleteIds.add(reportId);
-          _animatingOut.remove(reportId);
-        });
-      }
-    });
-
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Report Deleted'),
-        duration: const Duration(seconds: 4),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: _undoDelete,
-        ),
-      ),
-    );
-
-    _pendingDeleteTimer = Timer(const Duration(seconds: 4), () async {
-      if (mounted && _pendingDeleteIds.contains(reportId)) {
-        try {
-          await _reportService.deleteReport(reportId);
-          if (mounted) {
-            setState(() {
-              _pendingDeleteIds.remove(reportId);
-              if (_pendingDeleteReport == report) {
-                _pendingDeleteReport = null;
-              }
-            });
-          }
-        } catch (e) {
-          if (mounted) {
-            _undoDelete();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to delete report: $e')),
-            );
-          }
-        }
-      }
-    });
-  }
-
-  void _undoDelete() {
-    _pendingDeleteTimer?.cancel();
-    if (_pendingDeleteReport != null) {
-      final reportId = _pendingDeleteReport!['id'].toString();
-      setState(() {
-        _pendingDeleteIds.remove(reportId);
-        _pendingDeleteReport = null;
-      });
-    }
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  }
-
   Future<void> _confirmAndDelete(Map<String, dynamic> report) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -145,17 +78,35 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? const Color(0xFF1F2937)
             : Colors.white,
-        title: const Text('Delete Report?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange.shade400),
+            const SizedBox(width: 8),
+            const Text('Delete Report?'),
+          ],
+        ),
         content: const Text(
             'Are you sure you want to delete this report permanently? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: Text('Cancel',
+                style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white60
+                        : Colors.grey)),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade400,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -207,240 +158,625 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
     }
   }
 
+  // Helper to extract the actual "relevant" date for grouping
+  DateTime _getReportDate(Map<String, dynamic> report) {
+    if (report['report_data'] != null && report['report_data'] is Map) {
+      final data = report['report_data'];
+
+      // 1. Try Period Date (Daily Reports)
+      if (data['periodDate'] != null &&
+          data['periodDate'].toString().isNotEmpty) {
+        try {
+          // Try standard format first
+          return DateFormat('dd-MM-yyyy').parse(data['periodDate']);
+        } catch (_) {
+          try {
+            // Try display format
+            return DateFormat('dd MMM yyyy').parse(data['periodDate']);
+          } catch (__) {}
+        }
+      }
+
+      // 2. Try Period Start Date (Range Reports)
+      if (data['periodStartDate'] != null &&
+          data['periodStartDate'].toString().isNotEmpty) {
+        try {
+          return DateFormat('dd-MM-yyyy').parse(data['periodStartDate']);
+        } catch (_) {}
+      }
+
+      // 3. Fallback to saved_at (Metadata)
+      if (data['saved_at'] != null) {
+        try {
+          return DateTime.parse(data['saved_at']);
+        } catch (_) {}
+      }
+    }
+
+    // 4. Ultimate fallback to created_at (Cloud timestamp)
+    if (report['created_at'] != null) {
+      try {
+        return DateTime.parse(report['created_at'].toString());
+      } catch (_) {}
+    }
+
+    return DateTime.now(); // Should rarely happen
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor:
-          isDark ? const Color(0xFF111827) : const Color(0xFFF3F4F6),
-      appBar: AppBar(
-        title: Text(widget.categoryName),
-        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        foregroundColor: isDark ? Colors.white : Colors.black87,
-        elevation: 0,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _isDescending = !_isDescending;
-                _refreshReports();
-              });
-            },
-            icon: Icon(
-              _isDescending ? Icons.arrow_downward : Icons.arrow_upward,
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search within ${widget.categoryName}...',
-                hintStyle: GoogleFonts.outfit(
-                    color: isDark ? Colors.white30 : Colors.grey),
-                prefixIcon: Icon(Icons.search,
-                    color: isDark ? Colors.white70 : Colors.grey),
-                filled: true,
-                fillColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Custom Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.only(top: 16, bottom: 24),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1F2937) : Colors.white,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                      color: isDark
-                          ? const Color(0xFF374151)
-                          : const Color(0xFFE2E8F0)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: widget.categoryColor, width: 2),
-                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.2)
+                        : Colors.grey.withValues(alpha: 0.05),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-              onChanged: _onSearchChanged,
-            ),
-          ),
-          Expanded(
-            child: StreamBuilder<List<Map<String, dynamic>>>(
-              stream: _reportsStream,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return const Center(child: Text('Error loading reports'));
-                }
-
-                final reports = snapshot.data ?? [];
-                final displayReports = reports
-                    .where(
-                        (r) => !_pendingDeleteIds.contains(r['id'].toString()))
-                    .toList();
-
-                if (displayReports.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(
+                children: [
+                  // Top Row: Back + Title + Sort
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
                       children: [
-                        Icon(Icons.folder_open,
-                            size: 64,
-                            color: isDark ? Colors.white24 : Colors.grey[300]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No reports found in this category',
-                          style: TextStyle(
-                              color: isDark ? Colors.white54 : Colors.grey),
+                        // Back Button
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                              size: 20),
+                          color:
+                              isDark ? Colors.white70 : const Color(0xFF64748B),
+                          style: IconButton.styleFrom(
+                            backgroundColor: isDark
+                                ? Colors.white.withValues(alpha: 0.05)
+                                : Colors.grey.withValues(alpha: 0.05),
+                            padding: const EdgeInsets.all(12),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+
+                        // Title
+                        Expanded(
+                          child: Text(
+                            widget.categoryName,
+                            style: GoogleFonts.outfit(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF1E293B),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+
+                        // Sort Button (Clearer UI)
+                        IconButton(
+                          onPressed: () => _showSortOptions(context),
+                          icon: const Icon(Icons.sort_rounded, size: 24),
+                          color: isDark ? Colors.white70 : Colors.grey.shade700,
+                          tooltip: 'Sort Reports',
                         ),
                       ],
                     ),
-                  );
-                }
+                  ),
 
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: displayReports.length,
-                  itemBuilder: (context, index) {
-                    final report = displayReports[index];
-                    return _buildDismissibleReportCard(context, report, isDark);
-                  },
-                );
-              },
+                  const SizedBox(height: 24),
+
+                  // Search Bar
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF111827)
+                            : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? Colors.black.withValues(alpha: 0.1)
+                                : Colors.grey.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: isDark ? Colors.white10 : Colors.grey.shade200,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        style: GoogleFonts.inter(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Search reports...',
+                          hintStyle: GoogleFonts.inter(
+                            color:
+                                isDark ? Colors.white30 : Colors.grey.shade400,
+                            fontSize: 14,
+                          ),
+                          prefixIcon: Icon(Icons.search_rounded,
+                              size: 20,
+                              color: isDark
+                                  ? Colors.white30
+                                  : Colors.grey.shade400),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                        ),
+                        onChanged: _onSearchChanged,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
+
+            // Content
+            Expanded(
+              child: StreamBuilder<List<Map<String, dynamic>>>(
+                stream: _reportsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error loading reports',
+                        style: GoogleFonts.inter(color: Colors.red),
+                      ),
+                    );
+                  }
+
+                  final reports = snapshot.data ?? [];
+                  final displayReports = reports
+                      .where((r) =>
+                          !_pendingDeleteIds.contains(r['id'].toString()))
+                      .toList();
+
+                  if (displayReports.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.05)
+                                  : Colors.grey.shade100,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.folder_open_rounded,
+                                size: 48,
+                                color: isDark
+                                    ? Colors.white24
+                                    : Colors.grey.shade300),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No reports found',
+                            style: GoogleFonts.outfit(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: isDark
+                                  ? Colors.white54
+                                  : Colors.grey.shade400,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Create a new report to see it here.',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: isDark
+                                  ? Colors.white24
+                                  : Colors.grey.shade400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // GROUPING LOGIC
+                  // Map<MonthYear, List<Report>>
+                  final Map<String, List<Map<String, dynamic>>> groupedReports =
+                      {};
+
+                  // Sort by relevant date first
+                  displayReports.sort((a, b) {
+                    final dateA = _getReportDate(a);
+                    final dateB = _getReportDate(b);
+                    // Global sort order (User preference)
+                    return _isDescending
+                        ? dateB.compareTo(dateA)
+                        : dateA.compareTo(dateB);
+                  });
+
+                  for (var report in displayReports) {
+                    final date = _getReportDate(report);
+                    // Key format: "December 2025"
+                    final key = DateFormat('MMMM yyyy').format(date);
+                    if (!groupedReports.containsKey(key)) {
+                      groupedReports[key] = [];
+                    }
+                    groupedReports[key]!.add(report);
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(24, 8, 24, 100),
+                    itemCount: groupedReports.length,
+                    itemBuilder: (context, index) {
+                      final monthKey = groupedReports.keys.elementAt(index);
+                      final monthReports = groupedReports[monthKey]!;
+                      final isCollapsed = _collapsedMonths.contains(monthKey);
+
+                      return _buildMonthGroup(
+                          context, monthKey, monthReports, isDark, isCollapsed);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSortOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? const Color(0xFF1F2937)
+          : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+      ),
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Sort Reports',
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF1E293B),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildSortOption(
+                context,
+                title: 'Newest First',
+                isSelected: _isDescending,
+                onTap: () {
+                  setState(() {
+                    _isDescending = true;
+                    _refreshReports();
+                  });
+                  Navigator.pop(context);
+                },
+                isDark: isDark,
+              ),
+              _buildSortOption(
+                context,
+                title: 'Oldest First',
+                isSelected: !_isDescending,
+                onTap: () {
+                  setState(() {
+                    _isDescending = false;
+                    _refreshReports();
+                  });
+                  Navigator.pop(context);
+                },
+                isDark: isDark,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSortOption(BuildContext context,
+      {required String title,
+      required bool isSelected,
+      required VoidCallback onTap,
+      required bool isDark}) {
+    return ListTile(
+      onTap: onTap,
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        title,
+        style: GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected
+              ? widget.categoryColor
+              : (isDark ? Colors.white70 : Colors.grey.shade700),
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check_circle_rounded, color: widget.categoryColor)
+          : null,
+    );
+  }
+
+  Widget _buildMonthGroup(
+    BuildContext context,
+    String monthTitle,
+    List<Map<String, dynamic>> reports,
+    bool isDark,
+    bool isCollapsed,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Month Header (Clickable to toggle)
+          InkWell(
+            onTap: () {
+              setState(() {
+                if (isCollapsed) {
+                  _collapsedMonths.remove(monthTitle);
+                } else {
+                  _collapsedMonths.add(monthTitle);
+                }
+              });
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: widget.categoryColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    monthTitle,
+                    style: GoogleFonts.outfit(
+                      fontSize: 18, // Bigger font for visibility
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : const Color(0xFF1E293B),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '(${reports.length})',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: isDark ? Colors.white38 : Colors.grey.shade400,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    isCollapsed
+                        ? Icons.keyboard_arrow_down_rounded
+                        : Icons.keyboard_arrow_up_rounded,
+                    size: 24,
+                    color: isDark ? Colors.white38 : Colors.grey.shade400,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Reports List (Animated collapse)
+          AnimatedCrossFade(
+            firstChild: Container(), // Collapsed state
+            secondChild: Column(
+              children: reports
+                  .map((report) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildPremiumReportCard(context, report, isDark),
+                      ))
+                  .toList(),
+            ),
+            crossFadeState: isCollapsed
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
+            duration: const Duration(milliseconds: 300),
+            sizeCurve: Curves.easeInOut,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDismissibleReportCard(
+  Widget _buildPremiumReportCard(
       BuildContext context, Map<String, dynamic> report, bool isDark) {
     final reportId = report['id'].toString();
     final isAnimatingOut = _animatingOut[reportId] ?? false;
 
-    return AnimatedSlide(
-      offset: isAnimatingOut ? const Offset(-1.0, 0.0) : Offset.zero,
-      duration: const Duration(milliseconds: 300),
-      child: Slidable(
-        key: Key(reportId),
-        endActionPane: ActionPane(
-          motion: const ScrollMotion(),
-          extentRatio: 0.25,
-          children: [
-            SlidableAction(
-              onPressed: (_) => _deleteReport(report),
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              icon: Icons.delete,
-              label: 'Delete',
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ],
-        ),
-        child: _buildReportCard(context, report, isDark),
-      ),
-    );
-  }
-
-  Widget _buildReportCard(
-      BuildContext context, Map<String, dynamic> report, bool isDark) {
-    DateTime? reportDate;
-    String displayDate = 'Unknown Date';
-
-    // Prioritize 'saved_at' inside report_data (Snapshot Time), then created_at (Server Time)
-    var rawDate = report['created_at'];
-
-    // Check if report_data exists and has saved_at
-    if (report['report_data'] != null && report['report_data'] is Map) {
-      final data = report['report_data'];
-      if (data['saved_at'] != null) {
-        rawDate = data['saved_at'];
-      }
-    }
-
-    rawDate ??= report['report_date'] ?? report['date'];
-
-    if (rawDate != null) {
-      reportDate = DateTime.tryParse(rawDate.toString());
-      if (reportDate != null) {
-        displayDate =
-            DateFormat('dd MMM yyyy, hh:mm a').format(reportDate.toLocal());
-      } else {
-        displayDate = rawDate.toString();
-      }
-    }
+    // Use refined date logic
+    final reportDate = _getReportDate(report);
+    final displayDate = DateFormat('dd MMM yyyy').format(reportDate);
+    final displayTime = DateFormat('hh:mm a').format(reportDate);
 
     String title = report['report_data']?['pageTitle'] ?? 'View Balance Report';
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: isDark ? const Color(0xFF1F2937) : Colors.white,
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
+    // Card Style Logic
+    final mainColor = widget.categoryColor;
+
+    return AnimatedSlide(
+      offset: isAnimatingOut ? const Offset(1.0, 0.0) : Offset.zero,
+      duration: const Duration(milliseconds: 300),
+      child: AnimatedOpacity(
+        opacity: isAnimatingOut ? 0.0 : 1.0,
+        duration: const Duration(milliseconds: 300),
+        child: Container(
           decoration: BoxDecoration(
-            color: widget.categoryColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(Icons.analytics_outlined, color: widget.categoryColor),
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black87,
-          ),
-        ),
-        subtitle: Text(
-          displayDate,
-          style: TextStyle(
-              fontSize: 12, color: isDark ? Colors.white54 : Colors.black54),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Delete Button
-            IconButton(
-              onPressed: () => _confirmAndDelete(report),
-              icon: const Icon(Icons.delete_outline, size: 20),
-              color: isDark ? Colors.grey[400] : Colors.grey[700],
-              style: IconButton.styleFrom(
-                backgroundColor: isDark
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.grey
-                        .withValues(alpha: 0.15), // Always visible background
-                hoverColor: Colors.red.withValues(alpha: 0.15),
-                highlightColor: Colors.red.withValues(alpha: 0.1),
+            color: isDark ? const Color(0xFF1F2937) : Colors.white,
+            borderRadius: BorderRadius.circular(20), // Slightly smaller radius
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.2)
+                    : mainColor.withValues(alpha: 0.05), // Softer shadow
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-              tooltip: 'Delete Permanently',
+            ],
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.withValues(alpha: 0.1),
             ),
-            const SizedBox(width: 16),
-            // Chevron
-            IconButton(
-              onPressed: () => _openReport(report, reportDate),
-              icon: const Icon(Icons.chevron_right, size: 22),
-              color: isDark ? Colors.grey[400] : Colors.grey[700],
-              style: IconButton.styleFrom(
-                backgroundColor: isDark
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.grey
-                        .withValues(alpha: 0.15), // Always visible background
-                hoverColor: isDark
-                    ? Colors.white.withValues(alpha: 0.2)
-                    : Colors.black.withValues(alpha: 0.1),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _openReport(report, reportDate),
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.all(12), // Reduced padding (was 20)
+                child: Row(
+                  children: [
+                    // Premium Icon Box (Smaller)
+                    Container(
+                      width: 44, // Reduced from 56
+                      height: 44,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            mainColor.withValues(alpha: 0.1),
+                            mainColor.withValues(alpha: 0.2),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: mainColor.withValues(alpha: 0.2),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.analytics_rounded,
+                        color: mainColor,
+                        size: 22, // Reduced from 26
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Texts
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: GoogleFonts.outfit(
+                              fontSize: 15, // Slightly smaller font
+                              fontWeight: FontWeight.w600,
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF1E293B),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Text(
+                                displayDate,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? Colors.white54
+                                      : Colors.grey.shade500,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                width: 3,
+                                height: 3,
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? Colors.white24
+                                      : Colors.grey.shade300,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                displayTime,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? Colors.white38
+                                      : Colors.grey.shade400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Action Buttons
+                    const SizedBox(width: 4),
+                    // Delete Button
+                    IconButton(
+                      onPressed: () => _confirmAndDelete(report),
+                      icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                      color: Colors.red.shade300,
+                      style: IconButton.styleFrom(
+                        padding: const EdgeInsets.all(6), // Reduced padding
+                        backgroundColor: Colors.transparent,
+                      ),
+                      tooltip: 'Delete',
+                    ),
+                  ],
+                ),
               ),
-              tooltip: 'View Report',
             ),
-          ],
+          ),
         ),
-        onTap: () => _openReport(report, reportDate),
       ),
     );
   }
