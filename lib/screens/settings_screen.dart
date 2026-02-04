@@ -807,52 +807,80 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 index++)
                               Container(
                                 key: ValueKey(allItems[index]['id']),
-                                margin: const EdgeInsets.only(bottom: 8),
+                                margin: const EdgeInsets.only(bottom: 12),
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? const Color(
-                                          0xFF374151) // Dark mode tile color
-                                      : Colors.grey
-                                          .shade100, // Light mode tile color
-                                  borderRadius: BorderRadius.circular(12),
+                                      ? const Color(0xFF374151)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: isDark
+                                          ? Colors.black26
+                                          : Colors.grey.shade200,
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                   border: Border.all(
                                     color: isDark
                                         ? Colors.white10
-                                        : Colors.grey.shade300,
+                                        : Colors
+                                            .transparent, // No visible border in light mode
                                     width: 1,
                                   ),
                                 ),
                                 child: ListTile(
                                   contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
+                                      horizontal: 16, vertical: 4),
                                   shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12)),
+                                      borderRadius: BorderRadius.circular(16)),
                                   leading: Container(
-                                    padding: const EdgeInsets.all(8),
+                                    width: 42,
+                                    height: 42,
                                     decoration: BoxDecoration(
-                                      color:
-                                          (allItems[index]['isCustom'] as bool)
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: (allItems[index]['isCustom']
+                                                as bool)
+                                            ? [
+                                                const Color(
+                                                    0xFF6366F1), // Indigo
+                                                const Color(0xFF818CF8),
+                                              ]
+                                            : [
+                                                const Color(0xFF3B82F6), // Blue
+                                                const Color(0xFF60A5FA),
+                                              ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: (allItems[index]['isCustom']
+                                                  as bool)
                                               ? const Color(0xFF6366F1)
-                                                  .withValues(alpha: 0.1)
+                                                  .withValues(alpha: 0.3)
                                               : const Color(0xFF3B82F6)
-                                                  .withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(8),
+                                                  .withValues(alpha: 0.3),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
                                     ),
                                     child: Icon(
                                       (allItems[index]['isCustom'] as bool)
                                           ? Icons.star_rounded
-                                          : Icons.category_rounded,
-                                      size: 20,
-                                      color:
-                                          (allItems[index]['isCustom'] as bool)
-                                              ? const Color(0xFF6366F1)
-                                              : const Color(0xFF3B82F6),
+                                          : Icons.grid_view_rounded,
+                                      size: 22,
+                                      color: Colors.white,
                                     ),
                                   ),
                                   title: Text(
                                     allItems[index]['display'] as String,
-                                    style: GoogleFonts.inter(
-                                      fontWeight: FontWeight.w500,
+                                    style: GoogleFonts.outfit(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
                                       color: isDark
                                           ? Colors.white
                                           : const Color(0xFF1E293B),
@@ -860,11 +888,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                   trailing: ReorderableDragStartListener(
                                     index: index,
-                                    child: Icon(
-                                      Icons.drag_indicator_rounded,
-                                      color: isDark
-                                          ? Colors.white24
-                                          : Colors.grey.shade400,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? Colors.white
+                                                .withValues(alpha: 0.05)
+                                            : Colors.grey.shade50,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(
+                                        Icons.drag_indicator_rounded,
+                                        color: isDark
+                                            ? Colors.white24
+                                            : Colors.grey.shade400,
+                                        size: 20,
+                                      ),
                                     ),
                                   ),
                                 ),
