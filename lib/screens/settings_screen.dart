@@ -368,6 +368,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1F2937) : Colors.white,
         borderRadius: BorderRadius.circular(20), // Premium Radius
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.grey.shade200,
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: isDark
@@ -376,14 +382,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
-          // Subtle border for definition
-          BoxShadow(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.transparent,
-            spreadRadius: 1,
-            blurRadius: 0,
-          )
         ],
       ),
       child: Column(children: children),
@@ -578,8 +576,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       height: 1,
       thickness: 1,
       color: isDark
-          ? Colors.white.withValues(alpha: 0.05)
-          : Colors.grey.withValues(alpha: 0.1),
+          ? Colors.white.withValues(alpha: 0.1)
+          : Colors.grey.withValues(alpha: 0.2), // Increased visibility
       indent: 64, // Align with text start (Icon size + padding)
     );
   }
