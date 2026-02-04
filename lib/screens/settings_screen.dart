@@ -521,7 +521,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.white,
+            activeThumbColor: Colors.white,
             activeTrackColor: iconColor,
             inactiveThumbColor: isDark ? Colors.grey.shade400 : Colors.white,
             inactiveTrackColor:
@@ -702,7 +702,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final valueText = option['value'] as String;
               final isSelected = (model.defaultPageType ?? 'None') == valueText;
 
-              return RadioListTile<String>(
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                onTap: () {
+                  if (valueText == 'None') {
+                    model.setDefaultPageType('');
+                  } else {
+                    model.setDefaultPageType(valueText);
+                  }
+                  Navigator.pop(context);
+                },
+                leading: Radio<String>(
+                  value: valueText,
+                  // ignore: deprecated_member_use
+                  groupValue: model.defaultPageType ?? 'None',
+                  // ignore: deprecated_member_use
+                  onChanged: (value) {
+                    if (value == 'None') {
+                      model.setDefaultPageType('');
+                    } else {
+                      model.setDefaultPageType(value!);
+                    }
+                    Navigator.pop(context);
+                  },
+                  activeColor: const Color(0xFF8B5CF6),
+                ),
                 title: Row(
                   children: [
                     if (isCustom) ...[
@@ -732,17 +756,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ],
                 ),
-                value: valueText,
-                groupValue: model.defaultPageType ?? 'None',
-                activeColor: const Color(0xFF8B5CF6),
-                onChanged: (value) {
-                  if (value == 'None') {
-                    model.setDefaultPageType('');
-                  } else {
-                    model.setDefaultPageType(value!);
-                  }
-                  Navigator.pop(context);
-                },
               );
             }).toList(),
           ),
@@ -765,15 +778,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: formats.map((format) {
-            return RadioListTile<String>(
-              title: Text(format, style: GoogleFonts.inter()),
-              value: format,
-              groupValue: model.defaultReportFormat ?? 'Basic',
-              activeColor: const Color(0xFFF97316),
-              onChanged: (value) {
-                model.setDefaultReportFormat(value!);
+            return ListTile(
+              contentPadding: EdgeInsets.zero,
+              onTap: () {
+                model.setDefaultReportFormat(format);
                 Navigator.pop(context);
               },
+              leading: Radio<String>(
+                value: format,
+                // ignore: deprecated_member_use
+                groupValue: model.defaultReportFormat ?? 'Basic',
+                // ignore: deprecated_member_use
+                onChanged: (value) {
+                  model.setDefaultReportFormat(value!);
+                  Navigator.pop(context);
+                },
+                activeColor: const Color(0xFFF97316),
+              ),
+              title: Text(format, style: GoogleFonts.inter()),
             );
           }).toList(),
         ),
