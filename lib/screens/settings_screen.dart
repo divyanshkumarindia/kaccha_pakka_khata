@@ -820,11 +820,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                           : const Color(0xFF1E293B),
                                     ),
                                   ),
-                                  trailing: Icon(
-                                    Icons.drag_indicator_rounded,
-                                    color: isDark
-                                        ? Colors.white24
-                                        : Colors.grey.shade400,
+                                  trailing: ReorderableDragStartListener(
+                                    index: index,
+                                    child: Icon(
+                                      Icons.drag_indicator_rounded,
+                                      color: isDark
+                                          ? Colors.white24
+                                          : Colors.grey.shade400,
+                                    ),
                                   ),
                                 ),
                               ),

@@ -649,73 +649,95 @@ class _HomeScreenState extends State<HomeScreen> {
                           // Prepare list of items
                           final List<Map<String, dynamic>> items = [];
 
-                          // Add standard types
-                          for (var ut in UserType.values) {
-                            IconData icon;
-                            Color color;
-                            String subtitle;
-                            String title;
-
-                            switch (ut) {
-                              case UserType.personal:
-                                icon =
-                                    Icons.groups_rounded; // Family group icon
-                                color = const Color(0xFF00C853); // Green
-                                subtitle = model.t('subtitle_personal');
-                                title = model.t('card_personal');
-                                break;
-                              case UserType.business:
-                                icon = Icons.store_rounded;
-                                color = const Color(0xFF2563EB); // Blue
-                                subtitle = model.t('subtitle_business');
-                                title = model.t('card_business');
-                                break;
-                              case UserType.institute:
-                                icon = Icons.school_rounded;
-                                color = const Color(0xFF7C3AED); // Purple
-                                subtitle = model.t('subtitle_institute');
-                                title = model.t('card_institute');
-                                break;
-                              case UserType.other:
-                                icon = Icons.category_rounded;
-                                color = const Color(0xFFF59E0B); // Amber
-                                subtitle = model.t('subtitle_other');
-                                title = model.t('card_other');
-                                break;
+                          // 1. Get ordered Ids (or default if empty)
+                          List<String> orderedIds = model.homePageOrder;
+                          if (orderedIds.isEmpty) {
+                            // Default order: Standard types then Custom types
+                            for (var ut in UserType.values) {
+                              String val = ut.toString().split('.').last;
+                              String typeVal =
+                                  val[0].toUpperCase() + val.substring(1);
+                              orderedIds.add(typeVal);
                             }
-                            items.add({
-                              'id': 'standard_${ut.toString().split('.').last}',
-                              'title': title,
-                              'subtitle': subtitle,
-                              'icon': icon,
-                              'type': 'standard',
-                              'userType': ut,
-                              'color': color,
-                            });
+                            orderedIds.addAll(customPages.keys);
                           }
 
-                          // Palette for custom pages to ensure variety
-                          final palette = [
-                            const Color(0xFFEF4444), // Red
-                            const Color(0xFF0891B2), // Cyan
-                            const Color(0xFFDB2777), // Pink
-                            const Color(0xFFEA580C), // Orange
-                          ];
-
-                          // Add custom pages
-                          int customIndex = 0;
-                          customPages.forEach((key, value) {
-                            final colorIndex = customIndex % palette.length;
-                            items.add({
-                              'id': key,
-                              'title': value,
-                              'subtitle': 'CUSTOM TRACKING',
-                              'icon': Icons.star_rounded,
-                              'type': 'custom',
-                              'color': palette[colorIndex],
+                          // 2. Build items based on order
+                          for (var id in orderedIds) {
+                            // Check if standard type
+                            final stdTypeIndex =
+                                UserType.values.indexWhere((ut) {
+                              String val = ut.toString().split('.').last;
+                              String typeVal =
+                                  val[0].toUpperCase() + val.substring(1);
+                              return typeVal == id;
                             });
-                            customIndex++;
-                          });
+
+                            if (stdTypeIndex != -1) {
+                              // It's a standard type
+                              final ut = UserType.values[stdTypeIndex];
+                              IconData icon;
+                              Color color;
+                              String subtitle;
+                              String title;
+
+                              switch (ut) {
+                                case UserType.personal:
+                                  icon = Icons.groups_rounded;
+                                  color = const Color(0xFF00C853);
+                                  subtitle = model.t('subtitle_personal');
+                                  title = model.t('card_personal');
+                                  break;
+                                case UserType.business:
+                                  icon = Icons.store_rounded;
+                                  color = const Color(0xFF2563EB);
+                                  subtitle = model.t('subtitle_business');
+                                  title = model.t('card_business');
+                                  break;
+                                case UserType.institute:
+                                  icon = Icons.school_rounded;
+                                  color = const Color(0xFF7C3AED);
+                                  subtitle = model.t('subtitle_institute');
+                                  title = model.t('card_institute');
+                                  break;
+                                case UserType.other:
+                                  icon = Icons.category_rounded;
+                                  color = const Color(0xFFF59E0B);
+                                  subtitle = model.t('subtitle_other');
+                                  title = model.t('card_other');
+                                  break;
+                              }
+                              items.add({
+                                'id': id,
+                                'title': title,
+                                'subtitle': subtitle,
+                                'icon': icon,
+                                'type': 'standard',
+                                'userType': ut,
+                                'color': color,
+                              });
+                            } else if (customPages.containsKey(id)) {
+                              // It's a custom page
+                              // Use a consistent color palette hashing based on ID hash
+                              final palette = [
+                                const Color(0xFFEF4444), // Red
+                                const Color(0xFF0891B2), // Cyan
+                                const Color(0xFFDB2777), // Pink
+                                const Color(0xFFEA580C), // Orange
+                              ];
+                              final colorIndex =
+                                  id.hashCode.abs() % palette.length;
+
+                              items.add({
+                                'id': id,
+                                'title': customPages[id],
+                                'subtitle': 'CUSTOM TRACKING',
+                                'icon': Icons.star_rounded,
+                                'type': 'custom',
+                                'color': palette[colorIndex],
+                              });
+                            }
+                          }
 
                           // Add "Add New" card
                           items.add({
@@ -745,7 +767,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   borderRadius: BorderRadius.circular(24),
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 20), // Box height and width
+                                        horizontal: 20,
+                                        vertical: 20), // Box height and width
                                     decoration: BoxDecoration(
                                       color: isDark
                                           ? const Color(0xFF1F2937)
