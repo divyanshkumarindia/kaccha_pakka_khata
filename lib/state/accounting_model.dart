@@ -34,6 +34,9 @@ class AccountingModel extends ChangeNotifier {
   Map<String, String> balanceCardTitles = {};
   Map<String, String> balanceCardDescriptions = {};
 
+  List<String> _homePageOrder = [];
+  List<String> get homePageOrder => _homePageOrder;
+
   Timer? _saveDebounceTimer;
 
   AccountingModel({required this.userType, bool shouldLoadFromStorage = true})
@@ -237,8 +240,11 @@ class AccountingModel extends ChangeNotifier {
         if (pt != null && pt.isNotEmpty) pageTitle = pt;
       } catch (_) {}
     } catch (e) {
-      // ignore parse errors
+      print('Error parsing prefs: $e');
     }
+
+    // Load home page order
+    _homePageOrder = prefs.getStringList('home_page_order') ?? [];
   }
 
   /// Static helper to read a saved page title for a given user type.
@@ -1001,6 +1007,13 @@ class AccountingModel extends ChangeNotifier {
         .then((p) => p.setString('business_name', name));
   }
 
+  void setHomePageOrder(List<String> order) {
+    _homePageOrder = order;
+    notifyListeners();
+    SharedPreferences.getInstance()
+        .then((p) => p.setStringList('home_page_order', order));
+  }
+
   void setDefaultPageType(String type) {
     _defaultPageType = type;
     notifyListeners();
@@ -1067,6 +1080,7 @@ class AccountingModel extends ChangeNotifier {
       _defaultReportFormat = 'Basic';
       _userName = null;
       _hasSkippedNameSetup = false;
+      _homePageOrder = []; // Reset order
 
       // Reset accounting data
       openingCash = 0.0;

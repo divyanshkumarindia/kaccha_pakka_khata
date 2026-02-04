@@ -165,11 +165,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _buildDivider(isDark),
                       _buildSettingTile(
                         context,
-                        model.t('label_default_page'),
-                        _getDefaultPageTypeLabel(model.defaultPageType),
-                        Icons.category_rounded,
+                        'Home Page Layout',
+                        'Reorder use cases on home screen',
+                        Icons.dashboard_customize_rounded,
                         const Color(0xFF8B5CF6), // Purple
-                        () => _showPageTypeDialog(context, model),
+                        () => _showHomePageLayoutDialog(context, model),
                         isDark,
                       ),
                     ],
@@ -658,142 +658,216 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   // Dialog Functions
-  void _showPageTypeDialog(BuildContext context, AccountingModel model) async {
+  void _showHomePageLayoutDialog(
+      BuildContext context, AccountingModel model) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Reload custom pages to ensure we have the latest list
     await _loadCustomPages();
 
-    // Add "None" option first
-    final noneOption = {
-      'display': 'None',
-      'value': 'None',
-      'isCustom': false,
-      'isNone': true,
-    };
+    // Combine standard and custom pages into a single list
+    List<Map<String, dynamic>> allItems = [];
 
-    // Build dynamic list of page types with their custom names
-    final pageTypeOptions = UserType.values.map((userType) {
-      String displayName =
-          displayTitles[userType] ?? userTypeConfigs[userType]!.name;
-      String value = userType.toString().split('.').last;
-      // Convert to proper case (personal -> Personal)
+    // 1. Get current order from model or fallback to default
+    List<String> currentOrder = List.from(model.homePageOrder);
+
+    // 2. Identify all available page IDs
+    List<String> availableIds = [];
+    UserType.values.forEach((ut) {
+      String value = ut.toString().split('.').last;
       String typeValue = value[0].toUpperCase() + value.substring(1);
+      availableIds.add(typeValue);
+    });
+    availableIds.addAll(customPages.keys);
 
-      return {
+    // 3. Sync: If order is empty or missing items, re-initialize
+    if (currentOrder.isEmpty) {
+      currentOrder = List.from(availableIds);
+    } else {
+      // Add any new items that aren't in the saved order
+      for (var id in availableIds) {
+        if (!currentOrder.contains(id)) {
+          currentOrder.add(id);
+        }
+      }
+      // Remove any items that no longer exist (e.g. deleted custom pages)
+      currentOrder.removeWhere((id) => !availableIds.contains(id));
+    }
+
+    // 4. Build the display list based on the final order
+    for (var id in currentOrder) {
+      String displayName = '';
+      bool isCustom = false;
+
+      // Check if it's a standard type
+      final stdTypeIndex = UserType.values.indexWhere((ut) {
+        String val = ut.toString().split('.').last;
+        String typeVal = val[0].toUpperCase() + val.substring(1);
+        return typeVal == id;
+      });
+
+      if (stdTypeIndex != -1) {
+        final userType = UserType.values[stdTypeIndex];
+        displayName =
+            displayTitles[userType] ?? userTypeConfigs[userType]!.name;
+      } else if (customPages.containsKey(id)) {
+        displayName = customPages[id]!;
+        isCustom = true;
+      } else {
+        continue; // Skip if unknown
+      }
+
+      allItems.add({
+        'id': id,
         'display': displayName,
-        'value': typeValue,
-        'isCustom': false,
-        'isNone': false,
-      };
-    }).toList();
+        'isCustom': isCustom,
+      });
+    }
 
-    // Add custom pages
-    final customPageOptions = customPages.entries.map((entry) {
-      return {
-        'display': entry.value,
-        'value': entry.key,
-        'isCustom': true,
-        'isNone': false,
-      };
-    }).toList();
-
-    final allOptions = [noneOption, ...pageTypeOptions, ...customPageOptions];
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Default Page Type',
-            style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: allOptions.map((option) {
-              final isCustom = option['isCustom'] == true;
-              final isNone = option['isNone'] == true;
-              final displayText = option['display'] as String;
-              final valueText = option['value'] as String;
-              final isSelected = (model.defaultPageType ?? 'None') == valueText;
-
-              return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                decoration: BoxDecoration(
-                  color:
-                      isDark ? const Color(0xFF374151) : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF8B5CF6)
-                        : (isDark ? Colors.white10 : Colors.grey.shade300),
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  onTap: () {
-                    if (valueText == 'None') {
-                      model.setDefaultPageType('');
-                    } else {
-                      model.setDefaultPageType(valueText);
-                    }
-                    Navigator.pop(context);
-                  },
-                  leading: Radio<String>(
-                    value: valueText,
-                    // ignore: deprecated_member_use
-                    groupValue: model.defaultPageType ?? 'None',
-                    // ignore: deprecated_member_use
-                    onChanged: (value) {
-                      if (value == 'None') {
-                        model.setDefaultPageType('');
-                      } else {
-                        model.setDefaultPageType(value!);
-                      }
-                      Navigator.pop(context);
-                    },
-                    activeColor: const Color(0xFF8B5CF6),
-                  ),
-                  title: Row(
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                backgroundColor:
+                    isDark ? const Color(0xFF1F2937) : Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                title: Text('Home Page Layout',
+                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  height: 400, // Fixed height for scrolling
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (isCustom) ...[
-                        const Icon(
-                          Icons.star_rounded,
-                          size: 18,
-                          color: Color(0xFF6366F1),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                      if (isNone) ...[
-                        Icon(
-                          Icons.block_rounded,
-                          size: 18,
-                          color: isDark ? Colors.white38 : Colors.grey.shade400,
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                      Expanded(
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
                         child: Text(
-                          displayText,
+                          'Drag and drop to reorder sections on your home screen.',
                           style: GoogleFonts.inter(
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.normal,
+                            fontSize: 14,
+                            color:
+                                isDark ? Colors.white70 : Colors.grey.shade600,
                           ),
+                        ),
+                      ),
+                      Expanded(
+                        child: ReorderableListView(
+                          onReorder: (oldIndex, newIndex) {
+                            setState(() {
+                              if (oldIndex < newIndex) {
+                                newIndex -= 1;
+                              }
+                              final item = allItems.removeAt(oldIndex);
+                              allItems.insert(newIndex, item);
+                            });
+                          },
+                          children: [
+                            for (int index = 0;
+                                index < allItems.length;
+                                index++)
+                              Container(
+                                key: ValueKey(allItems[index]['id']),
+                                margin: const EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF374151)
+                                      : Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? Colors.white10
+                                        : Colors.grey.shade300,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                  leading: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          (allItems[index]['isCustom'] as bool)
+                                              ? const Color(0xFF6366F1)
+                                                  .withValues(alpha: 0.1)
+                                              : const Color(0xFF3B82F6)
+                                                  .withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      (allItems[index]['isCustom'] as bool)
+                                          ? Icons.star_rounded
+                                          : Icons.category_rounded,
+                                      size: 20,
+                                      color:
+                                          (allItems[index]['isCustom'] as bool)
+                                              ? const Color(0xFF6366F1)
+                                              : const Color(0xFF3B82F6),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    allItems[index]['display'] as String,
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w500,
+                                      color: isDark
+                                          ? Colors.white
+                                          : const Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                  trailing: Icon(
+                                    Icons.drag_indicator_rounded,
+                                    color: isDark
+                                        ? Colors.white24
+                                        : Colors.grey.shade400,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      model.t('btn_cancel'),
+                      style: GoogleFonts.outfit(
+                        color: isDark ? Colors.white60 : Colors.grey.shade600,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      final newOrder =
+                          allItems.map((item) => item['id'] as String).toList();
+                      model.setHomePageOrder(newOrder);
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF3B82F6),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child:
+                        Text(model.t('btn_save'), style: GoogleFonts.outfit()),
+                  ),
+                ],
               );
-            }).toList(),
-          ),
-        ),
-      ),
-    );
+            },
+          );
+        },
+      );
+    }
   }
 
   void _showReportFormatDialog(BuildContext context, AccountingModel model) {
@@ -1197,10 +1271,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
-  }
-
-  String _getDefaultPageTypeLabel(String? type) {
-    if (type == null || type.isEmpty) return 'None';
-    return type;
   }
 }
