@@ -606,10 +606,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
             hintStyle: GoogleFonts.inter(
                 color: isDark ? Colors.white38 : Colors.black38),
             filled: true,
-            fillColor: isDark ? const Color(0xFF374151) : Colors.grey.shade50,
+            fillColor: isDark ? const Color(0xFF374151) : Colors.grey.shade100,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(
+                color: isDark ? Colors.white10 : Colors.grey.shade300,
+                width: 1,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: isDark ? Colors.white10 : Colors.grey.shade300,
+                width: 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFF3B82F6),
+                width: 2,
+              ),
             ),
           ),
         ),
