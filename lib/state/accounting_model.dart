@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'dart:async';
 import '../models/accounting.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +34,8 @@ class AccountingModel extends ChangeNotifier {
   Map<String, String> balanceCardTitles = {};
   Map<String, String> balanceCardDescriptions = {};
 
+  Timer? _saveDebounceTimer;
+
   AccountingModel({required this.userType, bool shouldLoadFromStorage = true})
       : firmName = userTypeConfigs[userType]!.firmNamePlaceholder,
         currency = 'INR',
@@ -43,6 +46,7 @@ class AccountingModel extends ChangeNotifier {
     _initializeAccounts();
     if (shouldLoadFromStorage) {
       loadSettings();
+      loadFromPrefs(); // Load local data immediately for offline support
       _migrateRemoveSavedReports(); // Clean up old saved reports data
       loadFromCloud(); // Try to sync from cloud on startup
     }
@@ -85,7 +89,8 @@ class AccountingModel extends ChangeNotifier {
       // Don't save opening balances or entry data - they should reset each time
     };
 
-    final jsonData = jsonEncode(data);
+    // Offload JSON encoding to a background isolate to prevent UI jank
+    final jsonData = await compute(jsonEncode, data);
     await prefs.setString('accounting_data_v1', jsonData);
 
     // Also save specific header titles to a dedicated key for robustness
@@ -167,7 +172,8 @@ class AccountingModel extends ChangeNotifier {
     final s = prefs.getString('accounting_data_v1');
     if (s == null) return;
     try {
-      final data = jsonDecode(s) as Map<String, dynamic>;
+      // Offload JSON decoding to a background isolate
+      final data = await compute(jsonDecode, s) as Map<String, dynamic>;
       // firmName & currency
       // load pageTitle if present inside the JSON blob
       pageTitle = data['pageTitle'] ?? pageTitle;
@@ -329,9 +335,12 @@ class AccountingModel extends ChangeNotifier {
     } catch (_) {}
   }
 
-  // helper to call save without awaiting
+  // helper to call save with debounce
   void _persist() {
-    saveToPrefs();
+    if (_saveDebounceTimer?.isActive ?? false) _saveDebounceTimer!.cancel();
+    _saveDebounceTimer = Timer(const Duration(seconds: 2), () {
+      saveToPrefs();
+    });
   }
 
   void _initializeAccounts() {
