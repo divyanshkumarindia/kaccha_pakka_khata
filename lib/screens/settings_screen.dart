@@ -719,59 +719,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final valueText = option['value'] as String;
               final isSelected = (model.defaultPageType ?? 'None') == valueText;
 
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                onTap: () {
-                  if (valueText == 'None') {
-                    model.setDefaultPageType('');
-                  } else {
-                    model.setDefaultPageType(valueText);
-                  }
-                  Navigator.pop(context);
-                },
-                leading: Radio<String>(
-                  value: valueText,
-                  // ignore: deprecated_member_use
-                  groupValue: model.defaultPageType ?? 'None',
-                  // ignore: deprecated_member_use
-                  onChanged: (value) {
-                    if (value == 'None') {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color:
+                      isDark ? const Color(0xFF374151) : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF8B5CF6)
+                        : (isDark ? Colors.white10 : Colors.grey.shade300),
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  onTap: () {
+                    if (valueText == 'None') {
                       model.setDefaultPageType('');
                     } else {
-                      model.setDefaultPageType(value!);
+                      model.setDefaultPageType(valueText);
                     }
                     Navigator.pop(context);
                   },
-                  activeColor: const Color(0xFF8B5CF6),
-                ),
-                title: Row(
-                  children: [
-                    if (isCustom) ...[
-                      const Icon(
-                        Icons.star_rounded,
-                        size: 18,
-                        color: Color(0xFF6366F1),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    if (isNone) ...[
-                      Icon(
-                        Icons.block_rounded,
-                        size: 18,
-                        color: isDark ? Colors.white38 : Colors.grey.shade400,
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Expanded(
-                      child: Text(
-                        displayText,
-                        style: GoogleFonts.inter(
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.normal,
+                  leading: Radio<String>(
+                    value: valueText,
+                    // ignore: deprecated_member_use
+                    groupValue: model.defaultPageType ?? 'None',
+                    // ignore: deprecated_member_use
+                    onChanged: (value) {
+                      if (value == 'None') {
+                        model.setDefaultPageType('');
+                      } else {
+                        model.setDefaultPageType(value!);
+                      }
+                      Navigator.pop(context);
+                    },
+                    activeColor: const Color(0xFF8B5CF6),
+                  ),
+                  title: Row(
+                    children: [
+                      if (isCustom) ...[
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 18,
+                          color: Color(0xFF6366F1),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      if (isNone) ...[
+                        Icon(
+                          Icons.block_rounded,
+                          size: 18,
+                          color: isDark ? Colors.white38 : Colors.grey.shade400,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Expanded(
+                        child: Text(
+                          displayText,
+                          style: GoogleFonts.inter(
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             }).toList(),
@@ -795,24 +812,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: formats.map((format) {
-            return ListTile(
-              contentPadding: EdgeInsets.zero,
-              onTap: () {
-                model.setDefaultReportFormat(format);
-                Navigator.pop(context);
-              },
-              leading: Radio<String>(
-                value: format,
-                // ignore: deprecated_member_use
-                groupValue: model.defaultReportFormat ?? 'Basic',
-                // ignore: deprecated_member_use
-                onChanged: (value) {
-                  model.setDefaultReportFormat(value!);
+            final isSelected = (model.defaultReportFormat ?? 'Basic') == format;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF374151) : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFFF97316)
+                      : (isDark ? Colors.white10 : Colors.grey.shade300),
+                  width: isSelected ? 2 : 1,
+                ),
+              ),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                onTap: () {
+                  model.setDefaultReportFormat(format);
                   Navigator.pop(context);
                 },
-                activeColor: const Color(0xFFF97316),
+                leading: Radio<String>(
+                  value: format,
+                  // ignore: deprecated_member_use
+                  groupValue: model.defaultReportFormat ?? 'Basic',
+                  // ignore: deprecated_member_use
+                  onChanged: (value) {
+                    model.setDefaultReportFormat(value!);
+                    Navigator.pop(context);
+                  },
+                  activeColor: const Color(0xFFF97316),
+                ),
+                title: Text(format,
+                    style: GoogleFonts.inter(
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.normal)),
               ),
-              title: Text(format, style: GoogleFonts.inter()),
             );
           }).toList(),
         ),
@@ -1138,14 +1174,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildThemeOption(BuildContext context, String title, String value,
       String current, Function(String) onTap) {
     final isSelected = value == current;
-    return ListTile(
-      title: Text(title,
-          style: GoogleFonts.inter(
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal)),
-      trailing: isSelected
-          ? const Icon(Icons.check_circle_rounded, color: Color(0xFFF59E0B))
-          : null,
-      onTap: () => onTap(value),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF374151) : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isSelected
+              ? const Color(0xFFF59E0B)
+              : (isDark ? Colors.white10 : Colors.grey.shade300),
+          width: isSelected ? 2 : 1,
+        ),
+      ),
+      child: ListTile(
+        title: Text(title,
+            style: GoogleFonts.inter(
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal)),
+        trailing: isSelected
+            ? const Icon(Icons.check_circle_rounded, color: Color(0xFFF59E0B))
+            : null,
+        onTap: () => onTap(value),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
