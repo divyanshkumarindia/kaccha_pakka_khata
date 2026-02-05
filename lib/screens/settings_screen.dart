@@ -825,8 +825,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   border: Border.all(
                                     color: isDark
                                         ? Colors.white10
-                                        : Colors
-                                            .transparent, // No visible border in light mode
+                                        : const Color.fromARGB(
+                                            255, 233, 232, 232),
                                     width: 1,
                                   ),
                                 ),
@@ -872,7 +872,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       (allItems[index]['isCustom'] as bool)
                                           ? Icons.star_rounded
                                           : Icons.grid_view_rounded,
-                                      size: 22,
+                                      size: 21,
                                       color: Colors.white,
                                     ),
                                   ),
@@ -880,7 +880,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     allItems[index]['display'] as String,
                                     style: GoogleFonts.outfit(
                                       fontWeight: FontWeight.w600,
-                                      fontSize: 16,
+                                      fontSize: 15,
                                       color: isDark
                                           ? Colors.white
                                           : const Color(0xFF1E293B),
@@ -894,7 +894,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         color: isDark
                                             ? Colors.white
                                                 .withValues(alpha: 0.05)
-                                            : Colors.grey.shade50,
+                                            : const Color(0xFFF8F8F8),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Icon(
