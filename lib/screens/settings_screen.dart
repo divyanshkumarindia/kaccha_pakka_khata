@@ -876,11 +876,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       color: Colors.white,
                                     ),
                                   ),
+                                  horizontalTitleGap: 11,
                                   title: Text(
                                     allItems[index]['display'] as String,
                                     style: GoogleFonts.outfit(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 15,
+                                      height: 1.25,
                                       color: isDark
                                           ? Colors.white
                                           : const Color(0xFF1E293B),
