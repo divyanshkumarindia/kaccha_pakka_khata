@@ -1781,7 +1781,7 @@ class _AccountingFormState extends State<AccountingForm>
                 child: SafeArea(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.all(12), // Reduced from 16
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1806,8 +1806,8 @@ class _AccountingFormState extends State<AccountingForm>
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: isDark
-                                        ? const Color(0xFF94A3B8) // Slate 400
-                                        : const Color(0xFF475569), // Slate 600
+                                        ? const Color(0xFF9CA3AF)
+                                        : Colors.black,
                                   ),
                                 ),
                               ],
@@ -1826,17 +1826,15 @@ class _AccountingFormState extends State<AccountingForm>
                                         ? _headerTitleController.text
                                         : _getHeaderHint(widget.templateKey),
                                     style: GoogleFonts.outfit(
-                                      fontSize: 26, // Reduced from 28
-                                      fontWeight: FontWeight.w800, // Extra Bold
-                                      height: 1.1,
+                                      fontSize: 28, // Bigger font size
+                                      fontWeight: FontWeight.bold,
                                       color: _headerTitleController
                                               .text.isNotEmpty
                                           ? const Color(
                                               0xFF0F172A) // Navy Blue (Home Title Color)
                                           : (isDark
-                                              ? Colors.white
-                                                  .withValues(alpha: 0.9)
-                                              : const Color(0xFF0F172A)),
+                                              ? Colors.green.shade800.withValues(alpha: 0.5)
+                                              : Colors.green.shade200), // Very light green ghost text
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -1871,9 +1869,7 @@ class _AccountingFormState extends State<AccountingForm>
                                   style: GoogleFonts.outfit(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark
-                                        ? const Color(0xFF00C853) // Green
-                                        : const Color(0xFF0F172A), // Navy Blue
+                                    color: Color(0xFF4F46E5),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
