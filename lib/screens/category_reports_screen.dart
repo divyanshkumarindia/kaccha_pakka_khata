@@ -719,9 +719,11 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
     final isAnimatingOut = _animatingOut[reportId] ?? false;
 
     // Use refined date logic
+    // Use refined date logic for sorting/grouping if needed, but for "Saved:", use actual timestamp
     final reportDate = _getReportDate(report);
-    final displayDate = DateFormat('dd MMM yyyy').format(reportDate);
-    final displayTime = DateFormat('hh:mm a').format(reportDate);
+    final savedDate = _getSavedTimestamp(report);
+    final displayDate = DateFormat('dd MMM yyyy').format(savedDate);
+    final displayTime = DateFormat('hh:mm a').format(savedDate);
 
     String title = report['report_data']?['pageTitle'] ?? 'View Balance Report';
 
@@ -955,5 +957,26 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
       } catch (_) {}
     }
     return '';
+  }
+
+  DateTime _getSavedTimestamp(Map<String, dynamic> report) {
+    // 1. Try saved_at from report_data (client-side timestamp when saved)
+    if (report['report_data'] != null && report['report_data'] is Map) {
+      final data = report['report_data'];
+      if (data['saved_at'] != null) {
+        try {
+          return DateTime.parse(data['saved_at']);
+        } catch (_) {}
+      }
+    }
+
+    // 2. Try created_at from Supabase metadata
+    if (report['created_at'] != null) {
+      try {
+        return DateTime.parse(report['created_at'].toString());
+      } catch (_) {}
+    }
+
+    return DateTime.now();
   }
 }
