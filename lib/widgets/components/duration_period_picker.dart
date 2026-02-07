@@ -170,12 +170,12 @@ class DurationPeriodPicker extends StatelessWidget {
                             model.setPeriodRange('', '');
                             break;
                           case DurationType.Yearly:
-                            // Yearly uses the year-only periodController
+                            // Yearly now uses range (same as Weekly)
+                            periodController.clear();
+                            model.setPeriodDate('');
                             periodStartController.clear();
                             periodEndController.clear();
                             model.setPeriodRange('', '');
-                            periodController.clear();
-                            model.setPeriodDate('');
                             break;
                         }
                       }
@@ -563,116 +563,9 @@ class DurationPeriodPicker extends StatelessWidget {
         );
       }
 
-      // yearlyPeriod returns only the compact year field (no header).
-      Widget yearlyPeriod() {
-        return Container(
-          height: 42,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF374151) : Colors.white,
-            border: Border.all(
-              color: isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB),
-            ),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () => pickYear(
-                      context, periodController, (s) => model.setPeriodDate(s)),
-                  child: Container(
-                    height: double.infinity,
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      periodController.text.isEmpty
-                          ? model.t('hint_year_format')
-                          : periodController.text,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: periodController.text.isEmpty
-                            ? (isDark
-                                ? const Color(0xFF6B7280)
-                                : const Color(0xFF9CA3AF))
-                            : (isDark
-                                ? const Color(0xFFF9FAFB)
-                                : const Color(0xFF111827)),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: () => pickYear(
-                    context, periodController, (s) => model.setPeriodDate(s)),
-                child: Icon(
-                  Icons.calendar_today,
-                  size: 16,
-                  color: isDark
-                      ? const Color(0xFF6B7280)
-                      : const Color(0xFF9CA3AF),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-
       if (model.duration != DurationType.Daily) {
         // For Yearly we want the compact year box on the right side
         // beside the Report Duration dropdown (same as Daily layout).
-        if (model.duration == DurationType.Yearly) {
-          return Row(
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 360),
-                curve: Curves.easeInOut,
-                width: half,
-                child: durationDropdown(half),
-              ),
-              const SizedBox(width: gap),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          model.t('label_select_period'),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDark
-                                ? const Color(0xFFD1D5DB)
-                                : const Color(0xFF374151),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: Icon(Icons.clear,
-                              size: 18,
-                              color: isDark
-                                  ? const Color(0xFF9CA3AF)
-                                  : const Color(0xFF6B7280)),
-                          tooltip: model.t('tooltip_clear_year'),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          onPressed: () {
-                            periodController.clear();
-                            model.setPeriodDate('');
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    yearlyPeriod(),
-                  ],
-                ),
-              ),
-            ],
-          );
-        }
 
         // Other non-daily durations stay stacked under the dropdown
         return Column(
@@ -685,7 +578,8 @@ class DurationPeriodPicker extends StatelessWidget {
               child: durationDropdown(full),
             ),
             const SizedBox(height: 12),
-            model.duration == DurationType.Weekly
+            model.duration == DurationType.Weekly ||
+                    model.duration == DurationType.Yearly
                 ? weeklyPeriod()
                 : model.duration == DurationType.Monthly
                     ? monthlyPeriod()

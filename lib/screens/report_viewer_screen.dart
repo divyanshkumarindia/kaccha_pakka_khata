@@ -1265,7 +1265,11 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
       case DurationType.Monthly:
         return 'Monthly Report - ${_model.periodDate.isEmpty ? "No month selected" : _model.periodDate}';
       case DurationType.Yearly:
-        return 'Yearly Report - ${_model.periodDate.isEmpty ? "No year selected" : _model.periodDate}';
+        if (_model.periodStartDate.isEmpty || _model.periodEndDate.isEmpty) {
+          // Fallback for old yearly reports with single date
+          return 'Yearly Report - ${_model.periodDate.isEmpty ? "No year selected" : _model.periodDate}';
+        }
+        return 'Yearly Report - ${_model.periodStartDate} to ${_model.periodEndDate}';
       default:
         return 'Report';
     }

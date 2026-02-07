@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kaccha_pakka_khata/services/report_service.dart';
+import '../models/accounting.dart';
 import 'report_viewer_screen.dart';
 
 class CategoryReportsScreen extends StatefulWidget {
@@ -29,6 +30,7 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
   Timer? _debounce;
   bool _isDescending = true;
   String _searchQuery = '';
+  DurationType? _selectedDurationFilter; // null means "All"
 
   final Set<String> _pendingDeleteIds = {};
   final Map<String, bool> _animatingOut = {};
@@ -283,7 +285,7 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // Search Bar
                   Padding(
@@ -333,6 +335,30 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 16),
+
+                  // Filter Chips
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Row(
+                      children: [
+                        _buildFilterChip(context, 'All', null),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(context, 'Daily', DurationType.Daily),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                            context, 'Weekly', DurationType.Weekly),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                            context, 'Monthly', DurationType.Monthly),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                            context, 'Yearly', DurationType.Yearly),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -355,10 +381,21 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
                   }
 
                   final reports = snapshot.data ?? [];
-                  final displayReports = reports
+                  var displayReports = reports
                       .where((r) =>
                           !_pendingDeleteIds.contains(r['id'].toString()))
                       .toList();
+
+                  // Apply Duration Filter
+                  if (_selectedDurationFilter != null) {
+                    displayReports = displayReports.where((report) {
+                      final data = report['report_data'];
+                      if (data == null || data['duration'] == null)
+                        return false;
+                      // 'duration' is stored as index in JSON
+                      return data['duration'] == _selectedDurationFilter!.index;
+                    }).toList();
+                  }
 
                   if (displayReports.isEmpty) {
                     return Center(
@@ -381,7 +418,9 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No reports found',
+                            _selectedDurationFilter != null
+                                ? 'No ${_selectedDurationFilter!.name} reports found'
+                                : 'No reports found',
                             style: GoogleFonts.outfit(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
@@ -392,7 +431,7 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Create a new report to see it here.',
+                            'Try changing the filter or create a new one.',
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               color: isDark
@@ -446,6 +485,55 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(
+      BuildContext context, String label, DurationType? durationType) {
+    final isSelected = _selectedDurationFilter == durationType;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedDurationFilter = durationType;
+        });
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? widget.categoryColor
+              : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? widget.categoryColor
+                : (isDark ? Colors.white10 : Colors.grey.shade300),
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: widget.categoryColor.withValues(alpha: 0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  )
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected
+                ? Colors.white
+                : (isDark ? Colors.white70 : Colors.grey.shade600),
+          ),
         ),
       ),
     );
@@ -637,6 +725,8 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
 
     String title = report['report_data']?['pageTitle'] ?? 'View Balance Report';
 
+    String durationText = _getDurationText(report);
+
     // Card Style Logic
     final mainColor = widget.categoryColor;
 
@@ -719,34 +809,64 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
+                          // Duration and Period Row
                           Row(
                             children: [
-                              Text(
-                                displayDate,
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  color: isDark
-                                      ? Colors.white54
-                                      : Colors.grey.shade500,
-                                  fontWeight: FontWeight.w500,
+                              // Duration Tag
+                              if (durationText != 'Report') ...[
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? Colors.white.withValues(alpha: 0.1)
+                                        : Colors.grey.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    durationText,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              // Period Details
+                              Expanded(
+                                child: Text(
+                                  _getReportPeriodDetails(report),
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF334155),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const SizedBox(width: 6),
-                              Container(
-                                width: 3,
-                                height: 3,
-                                decoration: BoxDecoration(
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          // Saved Date Row (Smaller)
+                          Row(
+                            children: [
+                              Icon(Icons.access_time_rounded,
+                                  size: 12,
                                   color: isDark
-                                      ? Colors.white24
-                                      : Colors.grey.shade300,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
+                                      ? Colors.white38
+                                      : Colors.grey.shade400),
+                              const SizedBox(width: 4),
                               Text(
-                                displayTime,
+                                'Saved: $displayDate • $displayTime',
                                 style: GoogleFonts.inter(
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   color: isDark
                                       ? Colors.white38
                                       : Colors.grey.shade400,
@@ -779,5 +899,61 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
         ),
       ),
     );
+  }
+
+  String _getDurationText(Map<String, dynamic> report) {
+    if (report['report_data'] != null &&
+        report['report_data']['duration'] != null) {
+      try {
+        final durationIndex = report['report_data']['duration'] as int;
+        if (durationIndex >= 0 && durationIndex < DurationType.values.length) {
+          final type = DurationType.values[durationIndex];
+          switch (type) {
+            case DurationType.Daily:
+              return 'Daily';
+            case DurationType.Weekly:
+              return 'Weekly';
+            case DurationType.Monthly:
+              return 'Monthly';
+            case DurationType.Yearly:
+              return 'Yearly';
+          }
+        }
+      } catch (_) {}
+    }
+    return 'Report';
+  }
+
+  String _getReportPeriodDetails(Map<String, dynamic> report) {
+    if (report['report_data'] == null) return '';
+    final data = report['report_data'];
+
+    if (data['duration'] != null) {
+      try {
+        final durationIndex = data['duration'] as int;
+        if (durationIndex >= 0 && durationIndex < DurationType.values.length) {
+          final type = DurationType.values[durationIndex];
+          switch (type) {
+            case DurationType.Daily:
+              return data['periodDate'] ?? '';
+            case DurationType.Weekly:
+              final start = data['periodStartDate'] ?? '';
+              final end = data['periodEndDate'] ?? '';
+              if (start.isEmpty || end.isEmpty) return 'No range selected';
+              return '$start - $end';
+            case DurationType.Monthly:
+              return data['periodDate'] ?? '';
+            case DurationType.Yearly:
+              final start = data['periodStartDate'] ?? '';
+              final end = data['periodEndDate'] ?? '';
+              if (start.isNotEmpty && end.isNotEmpty) {
+                return '$start - $end';
+              }
+              return data['periodDate'] ?? '';
+          }
+        }
+      } catch (_) {}
+    }
+    return '';
   }
 }
