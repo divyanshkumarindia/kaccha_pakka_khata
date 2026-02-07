@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:flutter/foundation.dart';
+import 'dart:io';
 
 class AuthService {
   // Singleton Pattern
@@ -49,7 +50,9 @@ class AuthService {
             }
           } catch (e) {
             // Silently ignore or log error (e.g., duplicated concurrent insert)
-            print("Error syncing user_data: $e");
+            if (kDebugMode && e is! SocketException) {
+              debugPrint("Error syncing user_data: $e");
+            }
           }
         }
       }
@@ -111,7 +114,7 @@ class AuthService {
 
       return result;
     } catch (e) {
-      print("Supabase Google Sign-In Error: $e");
+      if (kDebugMode) debugPrint("Supabase Google Sign-In Error: $e");
       rethrow;
     }
   }

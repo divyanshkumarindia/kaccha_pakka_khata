@@ -32,6 +32,7 @@ void main() async {
         ChangeNotifierProvider(
             create: (_) => AccountingModel(userType: UserType.personal)),
         ChangeNotifierProvider(create: (_) => AppState()),
+        Provider<AuthService>(create: (_) => AuthService()),
       ],
       child: const MyApp(),
     ),

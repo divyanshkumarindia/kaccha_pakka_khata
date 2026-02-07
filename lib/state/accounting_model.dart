@@ -4,6 +4,7 @@ import '../models/accounting.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'dart:io';
 import '../services/report_service.dart';
 
 import '../utils/translations.dart';
@@ -115,7 +116,9 @@ class AccountingModel extends ChangeNotifier {
         'updated_at': DateTime.now().toIso8601String(),
       }, onConflict: 'user_id');
     } catch (e) {
-      if (kDebugMode) print('Cloud Sync Error: $e');
+      if (kDebugMode && e is! SocketException) {
+        debugPrint('Cloud Sync Error: $e');
+      }
     }
   }
 
@@ -156,7 +159,9 @@ class AccountingModel extends ChangeNotifier {
         await loadFromPrefs();
       }
     } catch (e) {
-      if (kDebugMode) print('Cloud Load Error: $e');
+      if (kDebugMode && e is! SocketException) {
+        debugPrint('Cloud Load Error: $e');
+      }
     }
   }
 
@@ -896,7 +901,7 @@ class AccountingModel extends ChangeNotifier {
 
       if (notify) notifyListeners();
     } catch (e) {
-      if (kDebugMode) print('Error importing state: $e');
+      if (kDebugMode) debugPrint('Error importing state: $e');
       rethrow; // Allow UI to handle error
     }
   }
