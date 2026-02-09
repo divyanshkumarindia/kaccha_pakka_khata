@@ -55,6 +55,8 @@
 			<array>
 				<!-- Google Sign-In Reversed Client ID -->
 				<string>com.googleusercontent.apps.524174187471-hkk0s53v63qobin5p72p9m9tmkvrfpn9</string>
+				<!-- Supabase Redirect Scheme -->
+				<string>io.supabase.flutter</string>
 			</array>
 		</dict>
 	</array>

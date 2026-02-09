@@ -102,6 +102,7 @@ class AuthService {
       // This handles both Web and Mobile (via deep link)
       final bool result = await _supabase.auth.signInWithOAuth(
         OAuthProvider.google,
+        redirectTo: kIsWeb ? null : 'io.supabase.flutter://callback',
         authScreenLaunchMode: kIsWeb
             ? LaunchMode.platformDefault
             : LaunchMode.externalApplication,
