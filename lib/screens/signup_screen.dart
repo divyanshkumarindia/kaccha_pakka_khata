@@ -115,7 +115,7 @@ class _SignupScreenState extends State<SignupScreen>
     if (user != null) {
       Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     } else {
-      if (_isLoading) {
+      if (mounted && _isLoading) {
         setState(() => _isLoading = false);
       }
     }
@@ -237,9 +237,11 @@ class _SignupScreenState extends State<SignupScreen>
                                 isPassword: true,
                                 isVisible: _isPasswordVisible,
                                 onVisibilityChanged: () {
-                                  setState(() {
-                                    _isPasswordVisible = !_isPasswordVisible;
-                                  });
+                                  if (mounted) {
+                                    setState(() {
+                                      _isPasswordVisible = !_isPasswordVisible;
+                                    });
+                                  }
                                 },
                               ),
                               const SizedBox(height: 20),
