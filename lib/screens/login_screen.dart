@@ -18,7 +18,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
-  bool _isLoading = false;
+  bool _isEmailLoading = false;
+  bool _isGoogleLoading = false;
   bool _isPasswordVisible = false;
 
   @override
@@ -37,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() => _isEmailLoading = true);
 
     try {
       await _authService.signIn(email: email, password: password);
@@ -64,12 +65,12 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
         ToastUtils.showErrorToast(context, errorMessage, bottomPadding: 25.0);
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isEmailLoading = false);
     }
   }
 
   Future<void> _googleSignIn() async {
-    setState(() => _isLoading = true);
+    setState(() => _isGoogleLoading = true);
     try {
       // 1. Initiate OAuth Flow (launches browser)
       await _authService.signInWithGoogle();
@@ -84,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
         ToastUtils.showErrorToast(
             context, 'Google Sign-In failed: ${e.toString()}',
             bottomPadding: 25.0);
-        setState(() => _isLoading = false);
+        setState(() => _isGoogleLoading = false);
       }
     }
     // Note: We don't turn off loading immediately if successful,
@@ -110,8 +111,8 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
       Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     } else {
       // User cancelled or failed
-      if (_isLoading) {
-        setState(() => _isLoading = false);
+      if (_isGoogleLoading) {
+        setState(() => _isGoogleLoading = false);
       }
     }
   }
@@ -264,7 +265,9 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
 
                               // Login Button
                               ElevatedButton(
-                                onPressed: _isLoading ? null : _login,
+                                onPressed: (_isEmailLoading || _isGoogleLoading)
+                                    ? null
+                                    : _login,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
                                       const Color(0xFF6366F1), // Indigo Primary
@@ -276,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   ),
                                   elevation: 0,
                                 ),
-                                child: _isLoading
+                                child: _isEmailLoading
                                     ? const SizedBox(
                                         width: 20,
                                         height: 20,
@@ -317,7 +320,9 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
 
                               // Continue with Google Button
                               OutlinedButton(
-                                onPressed: _isLoading ? null : _googleSignIn,
+                                onPressed: (_isEmailLoading || _isGoogleLoading)
+                                    ? null
+                                    : _googleSignIn,
                                 style: OutlinedButton.styleFrom(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 12),
@@ -327,7 +332,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                   ),
                                   backgroundColor: isDark ? null : Colors.white,
                                 ),
-                                child: _isLoading
+                                child: _isGoogleLoading
                                     ? const SizedBox(
                                         width: 20,
                                         height: 20,
