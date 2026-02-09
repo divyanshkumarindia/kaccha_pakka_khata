@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
 import '../utils/toast_utils.dart';
 import '../widgets/premium_back_button.dart';
+import 'verify_otp_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -57,28 +59,14 @@ class _SignupScreenState extends State<SignupScreen>
       );
 
       if (mounted) {
-        // Show Confirmation Dialog
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            title: const Text('Check your inbox'),
-            content: Text(
-                'We have sent a confirmation link to $email.\n\nPlease click the link in the email to activate your account, then log in.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  // Navigate to Login Screen
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const LoginScreen()),
-                    (route) => false,
-                  );
-                },
-                child: const Text('Go to Login'),
-              ),
-            ],
+        // Navigate to OTP Verification Screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VerifyOtpScreen(
+              email: email,
+              type: OtpType.signup,
+            ),
           ),
         );
       }

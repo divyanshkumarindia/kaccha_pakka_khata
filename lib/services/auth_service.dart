@@ -138,9 +138,12 @@ class AuthService {
   }
 
   // Resend OTP
-  Future<void> resendOTP({required String email}) async {
+  Future<void> resendOTP({
+    required String email,
+    required OtpType type,
+  }) async {
     await _supabase.auth.resend(
-      type: OtpType.signup,
+      type: type,
       email: email,
     );
   }

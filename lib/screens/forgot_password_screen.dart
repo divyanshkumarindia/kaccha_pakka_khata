@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'verify_otp_screen.dart';
 import '../services/auth_service.dart'; // Added
 import '../utils/toast_utils.dart';
 import '../widgets/premium_back_button.dart';
@@ -34,15 +36,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     try {
       // Trigger Supabase Password Reset Email
-      final authService = AuthService(); // Using locally or via provider
+      final authService = AuthService();
       await authService.resetPassword(email: email);
 
       if (mounted) {
-        ToastUtils.showSuccessToast(context, 'Reset link sent to $email',
+        ToastUtils.showSuccessToast(context, 'Verification code sent to $email',
             bottomPadding: 25.0);
 
-        // OTP Flow is archived. Just pop or show info.
-        Navigator.pop(context);
+        // Navigate to OTP Verification Screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VerifyOtpScreen(
+              email: email,
+              type: OtpType.recovery,
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
