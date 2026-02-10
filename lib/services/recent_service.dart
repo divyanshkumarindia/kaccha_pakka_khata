@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RecentPage {
   final String id; // timestamp-based id
@@ -33,12 +34,18 @@ class RecentPage {
 }
 
 class RecentService {
-  static const _key = 'recent_pages';
+  static const _baseKey = 'recent_pages';
   static const int maxItems = 20;
+
+  static String _uk() {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return _baseKey;
+    return 'u_${user.id}_$_baseKey';
+  }
 
   static Future<List<RecentPage>> listRecent() async {
     final sp = await SharedPreferences.getInstance();
-    final raw = sp.getString(_key);
+    final raw = sp.getString(_uk());
     if (raw == null || raw.isEmpty) return [];
     try {
       final List<dynamic> arr = json.decode(raw);
@@ -62,18 +69,20 @@ class RecentService {
       if (list.length > maxItems) list.removeRange(maxItems, list.length);
     }
     final sp = await SharedPreferences.getInstance();
-    await sp.setString(_key, json.encode(list.map((e) => e.toJson()).toList()));
+    await sp.setString(
+        _uk(), json.encode(list.map((e) => e.toJson()).toList()));
   }
 
   static Future<void> deleteRecent(String id) async {
     final list = await listRecent();
     list.removeWhere((e) => e.id == id);
     final sp = await SharedPreferences.getInstance();
-    await sp.setString(_key, json.encode(list.map((e) => e.toJson()).toList()));
+    await sp.setString(
+        _uk(), json.encode(list.map((e) => e.toJson()).toList()));
   }
 
   static Future<void> clearAll() async {
     final sp = await SharedPreferences.getInstance();
-    await sp.remove(_key);
+    await sp.remove(_uk());
   }
 }

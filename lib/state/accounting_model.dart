@@ -60,10 +60,27 @@ class AccountingModel extends ChangeNotifier {
   Future<void> _migrateRemoveSavedReports() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('saved_reports');
+      await prefs.remove(_uk('saved_reports'));
     } catch (e) {
       // Ignore errors
     }
+  }
+
+  /// Helper to generate a user-specific key for SharedPreferences.
+  /// Prefixes the key with the current Supabase user's ID.
+  String _uk(String key) {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null)
+      return key; // Fallback to global if not logged in (should not happen in main flow)
+    return 'u_${user.id}_$key';
+  }
+
+  /// Public method to refresh all user-specific settings.
+  /// Should be called after login or account switch.
+  Future<void> refreshForUser() async {
+    await loadSettings();
+    await loadFromPrefs();
+    notifyListeners();
   }
 
   /// Helper to get translated string
@@ -95,10 +112,11 @@ class AccountingModel extends ChangeNotifier {
 
     // Offload JSON encoding to a background isolate to prevent UI jank
     final jsonData = await compute(jsonEncode, data);
-    await prefs.setString('accounting_data_v1', jsonData);
+    await prefs.setString(_uk('accounting_data_v1'), jsonData);
 
     // Also save specific header titles to a dedicated key for robustness
-    await prefs.setString('page_header_titles', jsonEncode(pageHeaderTitles));
+    await prefs.setString(
+        _uk('page_header_titles'), jsonEncode(pageHeaderTitles));
 
     // CLOUD SYNC: Push to Supabase if logged in
     await _syncToCloud(data);
@@ -153,7 +171,7 @@ class AccountingModel extends ChangeNotifier {
         final data = response['data'] as Map<String, dynamic>;
         // Save to local prefs to trigger the normal load flow
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accounting_data_v1', jsonEncode(data));
+        await prefs.setString(_uk('accounting_data_v1'), jsonEncode(data));
 
         // Load into memory
         await loadFromPrefs();
@@ -170,15 +188,24 @@ class AccountingModel extends ChangeNotifier {
 
     // Load header titles first
     try {
-      final headers = prefs.getString('page_header_titles');
+      final headers = prefs.getString(_uk('page_header_titles'));
       if (headers != null) {
         final decoded = jsonDecode(headers) as Map<String, dynamic>;
         pageHeaderTitles = decoded.map((k, v) => MapEntry(k, v.toString()));
+      } else {
+        pageHeaderTitles = {}; // Reset if no user data
       }
-    } catch (_) {}
+    } catch (_) {
+      pageHeaderTitles = {};
+    }
 
-    final s = prefs.getString('accounting_data_v1');
-    if (s == null) return;
+    final s = prefs.getString(_uk('accounting_data_v1'));
+    if (s == null) {
+      // Reset to defaults if no user-specific data is found
+      _initializeAccounts();
+      notifyListeners();
+      return;
+    }
     try {
       // Offload JSON decoding to a background isolate
       final data = await compute(jsonDecode, s) as Map<String, dynamic>;
@@ -249,14 +276,16 @@ class AccountingModel extends ChangeNotifier {
     }
 
     // Load home page order
-    _homePageOrder = prefs.getStringList('home_page_order') ?? [];
+    _homePageOrder = prefs.getStringList(_uk('home_page_order')) ?? [];
   }
 
   /// Static helper to read a saved page title for a given user type.
   static Future<String?> loadSavedPageTitle(UserType type) async {
     try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) return null;
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getString('page_title_${type.toString()}');
+      return prefs.getString('u_${user.id}_page_title_${type.toString()}');
     } catch (_) {
       return null;
     }
@@ -269,7 +298,8 @@ class AccountingModel extends ChangeNotifier {
     _persist();
     // persist per-userType receipt labels so edits are isolated per template/userType
     SharedPreferences.getInstance().then((p) => p.setString(
-        'receipt_labels_${userType.toString()}', jsonEncode(receiptLabels)));
+        _uk('receipt_labels_${userType.toString()}'),
+        jsonEncode(receiptLabels)));
   }
 
   void setPaymentLabel(String key, String label) {
@@ -278,7 +308,8 @@ class AccountingModel extends ChangeNotifier {
     _persist();
     // persist per-userType payment labels so edits are isolated per template/userType
     SharedPreferences.getInstance().then((p) => p.setString(
-        'payment_labels_${userType.toString()}', jsonEncode(paymentLabels)));
+        _uk('payment_labels_${userType.toString()}'),
+        jsonEncode(paymentLabels)));
   }
 
   void setPageHeaderTitle(String key, String title) {
@@ -330,7 +361,7 @@ class AccountingModel extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
-          'balance_${cardType}_title_${userType.toString()}', title);
+          _uk('balance_${cardType}_title_${userType.toString()}'), title);
       notifyListeners();
     } catch (_) {}
   }
@@ -341,7 +372,7 @@ class AccountingModel extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
-          'balance_${cardType}_desc_${userType.toString()}', description);
+          _uk('balance_${cardType}_desc_${userType.toString()}'), description);
       notifyListeners();
     } catch (_) {}
   }
@@ -753,8 +784,8 @@ class AccountingModel extends ChangeNotifier {
     notifyListeners();
     // persist both in the main JSON and a quick key
     _persist();
-    SharedPreferences.getInstance()
-        .then((p) => p.setString('page_title_${userType.toString()}', title));
+    SharedPreferences.getInstance().then(
+        (p) => p.setString(_uk('page_title_${userType.toString()}'), title));
   }
 
   void setDuration(DurationType d) {
@@ -941,25 +972,25 @@ class AccountingModel extends ChangeNotifier {
   Future<void> loadSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      _selectedCurrency = prefs.getString('selected_currency') ?? 'INR';
-      _themeMode = prefs.getString('theme_mode') ?? 'light';
-      _themeColor = prefs.getString('theme_color') ?? 'blue';
-      _isDarkMode = prefs.getBool('dark_mode') ?? false;
-      _autoSaveReports = prefs.getBool('auto_save_reports') ?? false;
-      _businessName = prefs.getString('business_name');
+      _selectedCurrency = prefs.getString(_uk('selected_currency')) ?? 'INR';
+      _themeMode = prefs.getString(_uk('theme_mode')) ?? 'light';
+      _themeColor = prefs.getString(_uk('theme_color')) ?? 'blue';
+      _isDarkMode = prefs.getBool(_uk('dark_mode')) ?? false;
+      _autoSaveReports = prefs.getBool(_uk('auto_save_reports')) ?? false;
+      _businessName = prefs.getString(_uk('business_name'));
       _defaultPageType =
-          prefs.getString('default_page_type'); // Default to null (None)
+          prefs.getString(_uk('default_page_type')); // Default to null (None)
       _defaultReportFormat =
-          prefs.getString('default_report_format') ?? 'Basic';
-      _userName = prefs.getString('user_name');
-      _hasSkippedNameSetup = prefs.getBool('skipped_name_setup') ?? false;
+          prefs.getString(_uk('default_report_format')) ?? 'Basic';
+      _userName = prefs.getString(_uk('user_name'));
+      _hasSkippedNameSetup = prefs.getBool(_uk('skipped_name_setup')) ?? false;
 
       // Load opening balance titles and descriptions
       for (String type in ['cash', 'bank', 'other']) {
-        final title =
-            prefs.getString('balance_${type}_title_${userType.toString()}');
+        final title = prefs
+            .getString(_uk('balance_${type}_title_${userType.toString()}'));
         final desc =
-            prefs.getString('balance_${type}_desc_${userType.toString()}');
+            prefs.getString(_uk('balance_${type}_desc_${userType.toString()}'));
         if (title != null) balanceCardTitles[type] = title;
         if (desc != null) balanceCardDescriptions[type] = desc;
       }
@@ -974,75 +1005,75 @@ class AccountingModel extends ChangeNotifier {
     _selectedCurrency = currency;
     notifyListeners();
     SharedPreferences.getInstance()
-        .then((p) => p.setString('selected_currency', currency));
+        .then((p) => p.setString(_uk('selected_currency'), currency));
   }
 
   void setThemeMode(String mode) {
     _themeMode = mode;
     notifyListeners();
     SharedPreferences.getInstance()
-        .then((p) => p.setString('theme_mode', mode));
+        .then((p) => p.setString(_uk('theme_mode'), mode));
   }
 
   void setThemeColor(String color) {
     _themeColor = color;
     notifyListeners();
     SharedPreferences.getInstance()
-        .then((p) => p.setString('theme_color', color));
+        .then((p) => p.setString(_uk('theme_color'), color));
   }
 
   void toggleDarkMode() {
     _isDarkMode = !_isDarkMode;
     notifyListeners();
     SharedPreferences.getInstance()
-        .then((p) => p.setBool('dark_mode', _isDarkMode));
+        .then((p) => p.setBool(_uk('dark_mode'), _isDarkMode));
   }
 
   void toggleAutoSaveReports() {
     _autoSaveReports = !_autoSaveReports;
     notifyListeners();
     SharedPreferences.getInstance()
-        .then((p) => p.setBool('auto_save_reports', _autoSaveReports));
+        .then((p) => p.setBool(_uk('auto_save_reports'), _autoSaveReports));
   }
 
   void setBusinessName(String name) {
     _businessName = name;
     notifyListeners();
     SharedPreferences.getInstance()
-        .then((p) => p.setString('business_name', name));
+        .then((p) => p.setString(_uk('business_name'), name));
   }
 
   void setHomePageOrder(List<String> order) {
     _homePageOrder = order;
     notifyListeners();
     SharedPreferences.getInstance()
-        .then((p) => p.setStringList('home_page_order', order));
+        .then((p) => p.setStringList(_uk('home_page_order'), order));
   }
 
   void setDefaultPageType(String type) {
     _defaultPageType = type;
     notifyListeners();
     SharedPreferences.getInstance()
-        .then((p) => p.setString('default_page_type', type));
+        .then((p) => p.setString(_uk('default_page_type'), type));
   }
 
   void setDefaultReportFormat(String format) {
     _defaultReportFormat = format;
     notifyListeners();
     SharedPreferences.getInstance()
-        .then((p) => p.setString('default_report_format', format));
+        .then((p) => p.setString(_uk('default_report_format'), format));
   }
 
   void setUserName(String name) {
     if (name.trim().isEmpty) {
       _userName = null;
       notifyListeners();
-      SharedPreferences.getInstance().then((p) => p.remove('user_name'));
+      SharedPreferences.getInstance().then((p) => p.remove(_uk('user_name')));
     } else {
       _userName = name;
       notifyListeners();
       SharedPreferences.getInstance()
-          .then((p) => p.setString('user_name', name));
+          .then((p) => p.setString(_uk('user_name'), name));
     }
   }
 
@@ -1050,7 +1081,7 @@ class AccountingModel extends ChangeNotifier {
     _hasSkippedNameSetup = skipped;
     notifyListeners();
     SharedPreferences.getInstance()
-        .then((p) => p.setBool('skipped_name_setup', skipped));
+        .then((p) => p.setBool(_uk('skipped_name_setup'), skipped));
   }
 
   Future<void> backupData() async {
@@ -1071,9 +1102,17 @@ class AccountingModel extends ChangeNotifier {
       final reportService = ReportService();
       await reportService.deleteAllUserReports();
 
-      // 2. Clear Local Preferences
+      // 2. Clear Local Preferences (only for THIS user)
       final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        final userPrefix = 'u_${user.id}_';
+        final keysToRemove =
+            prefs.getKeys().where((k) => k.startsWith(userPrefix)).toList();
+        for (final k in keysToRemove) {
+          await prefs.remove(k);
+        }
+      }
 
       // Reset all data
 

@@ -25,7 +25,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     // CRITICAL SECURITY CHECK
     // Ensure user is actually authenticated. If not, kick them out immediately.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final user = AuthService().currentUser;
       if (user == null) {
         if (mounted) {
@@ -34,6 +34,10 @@ class _MainScreenState extends State<MainScreen> {
             (route) => false,
           );
         }
+      } else {
+        // If authenticated, ensure the correct user data is loaded
+        final model = Provider.of<AccountingModel>(context, listen: false);
+        await model.refreshForUser();
       }
     });
   }
