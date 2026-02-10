@@ -84,123 +84,134 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     return Scaffold(
       backgroundColor: cardColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 450),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0, vertical: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const PremiumBackButton(),
-                    const SizedBox(height: 10),
-                    Center(
-                      child: Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEEF2FF), // Light Indigo
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: const Icon(
-                          Icons.lock_open_rounded,
-                          color: Color(0xFF6366F1), // Indigo
-                          size: 40,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    Text(
-                      'Reset Password',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        color: textColor,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        'Almost there! Set a new strong password for your account.',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          color: labelColor,
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    _buildLabel(labelColor, 'NEW PASSWORD'),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _passwordController,
-                      hintText: 'Minimum 6 characters',
-                      isDark: isDark,
-                      fillColor: inputFillColor,
-                      borderColor: borderColor,
-                      textColor: textColor,
-                      isPassword: true,
-                      isVisible: _isPasswordVisible,
-                      onVisibilityChanged: () => setState(
-                          () => _isPasswordVisible = !_isPasswordVisible),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildLabel(labelColor, 'CONFIRM PASSWORD'),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _confirmPasswordController,
-                      hintText: 'Confirm your new password',
-                      isDark: isDark,
-                      fillColor: inputFillColor,
-                      borderColor: borderColor,
-                      textColor: textColor,
-                      isPassword: true,
-                      isVisible: _isConfirmPasswordVisible,
-                      onVisibilityChanged: () => setState(() =>
-                          _isConfirmPasswordVisible =
-                              !_isConfirmPasswordVisible),
-                    ),
-                    const SizedBox(height: 40),
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _updatePassword,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6366F1),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              'Update Password',
-                              style: GoogleFonts.outfit(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
+        child: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 450),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: 30),
+                            // Logo/Icon
+                            Center(
+                              child: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                      0xFFE0E7FF), // Light Blue/Indigo
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.lock_open_rounded,
+                                  color: Color(0xFF4F46E5), // Indigo
+                                  size: 24,
+                                ),
                               ),
                             ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Reset Password',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.outfit(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Almost there! Set a new strong password for your account.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.outfit(
+                                fontSize: 14,
+                                color: labelColor,
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            _buildLabel(labelColor, 'NEW PASSWORD'),
+                            const SizedBox(height: 4),
+                            _buildTextField(
+                              controller: _passwordController,
+                              hintText: 'Minimum 6 characters',
+                              isDark: isDark,
+                              fillColor: inputFillColor,
+                              borderColor: borderColor,
+                              textColor: textColor,
+                              isPassword: true,
+                              isVisible: _isPasswordVisible,
+                              onVisibilityChanged: () => setState(() =>
+                                  _isPasswordVisible = !_isPasswordVisible),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildLabel(labelColor, 'CONFIRM PASSWORD'),
+                            const SizedBox(height: 4),
+                            _buildTextField(
+                              controller: _confirmPasswordController,
+                              hintText: 'Confirm your new password',
+                              isDark: isDark,
+                              fillColor: inputFillColor,
+                              borderColor: borderColor,
+                              textColor: textColor,
+                              isPassword: true,
+                              isVisible: _isConfirmPasswordVisible,
+                              onVisibilityChanged: () => setState(() =>
+                                  _isConfirmPasswordVisible =
+                                      !_isConfirmPasswordVisible),
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              onPressed: _isLoading ? null : _updatePassword,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF6366F1),
+                                foregroundColor: Colors.white,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Update Password',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                            ),
+                            const SizedBox(height: 30),
+                          ],
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 32),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ),
+            const Positioned(
+              top: 10,
+              left: 20,
+              child: PremiumBackButton(),
+            ),
+          ],
         ),
       ),
     );
@@ -230,6 +241,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }) {
     return TextField(
       controller: controller,
+      onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
       obscureText: isPassword && !isVisible,
       style: TextStyle(color: textColor),
       decoration: InputDecoration(
@@ -238,17 +250,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         filled: true,
         fillColor: fillColor,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: borderColor),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: borderColor),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
         ),
         suffixIcon: isPassword
