@@ -1786,7 +1786,8 @@ class _AccountingFormState extends State<AccountingForm>
                 child: SafeArea(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 24), // Increased padding
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1798,17 +1799,17 @@ class _AccountingFormState extends State<AccountingForm>
                               children: [
                                 Icon(
                                   Icons.arrow_back_ios_new,
-                                  size: 14,
+                                  size: 18, // Increased size
                                   color: isDark
                                       ? const Color(0xFF9CA3AF)
                                       : Colors
                                           .black, // Changed to black for better visibility
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: 8), // Increased spacing
                                 Text(
                                   model.t('link_back_dashboard'),
                                   style: GoogleFonts.outfit(
-                                    fontSize: 14,
+                                    fontSize: 16, // Increased font size
                                     fontWeight: FontWeight.w500,
                                     color: isDark
                                         ? const Color(0xFF9CA3AF)
@@ -1818,7 +1819,7 @@ class _AccountingFormState extends State<AccountingForm>
                               ],
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 24), // Increased spacing
 
                           // Customizable Header Title (Replaces Logo)
                           Center(
@@ -1861,7 +1862,7 @@ class _AccountingFormState extends State<AccountingForm>
                               ],
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 24), // Increased spacing
 
                           // Title (editable page title or fallback)
                           Center(
@@ -1874,9 +1875,9 @@ class _AccountingFormState extends State<AccountingForm>
                                       ? model.pageTitle!
                                       : useCasePageTitle(model.userType),
                                   style: GoogleFonts.outfit(
-                                    fontSize: 20,
+                                    fontSize: 24, // Bigger Page Title
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFF4F46E5),
+                                    color: const Color(0xFF4F46E5),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
