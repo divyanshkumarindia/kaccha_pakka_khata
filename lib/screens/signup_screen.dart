@@ -20,7 +20,8 @@ class _SignupScreenState extends State<SignupScreen>
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
-  bool _isLoading = false;
+  bool _isLoading = false; // Email Signup loading
+  bool _isGoogleLoading = false;
   bool _isPasswordVisible = false;
 
   @override
@@ -86,7 +87,7 @@ class _SignupScreenState extends State<SignupScreen>
   }
 
   Future<void> _googleSignIn() async {
-    setState(() => _isLoading = true);
+    setState(() => _isGoogleLoading = true);
     try {
       await _authService.signInWithGoogle();
       if (mounted) {
@@ -101,7 +102,7 @@ class _SignupScreenState extends State<SignupScreen>
               context, 'Google Sign-In failed: ${e.toString()}',
               bottomPadding: 25.0);
         }
-        setState(() => _isLoading = false);
+        setState(() => _isGoogleLoading = false);
       }
     }
   }
@@ -121,8 +122,11 @@ class _SignupScreenState extends State<SignupScreen>
     if (user != null) {
       Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     } else {
-      if (mounted && _isLoading) {
-        setState(() => _isLoading = false);
+      if (mounted && (_isLoading || _isGoogleLoading)) {
+        setState(() {
+          _isLoading = false;
+          _isGoogleLoading = false;
+        });
       }
     }
   }
@@ -254,7 +258,9 @@ class _SignupScreenState extends State<SignupScreen>
 
                               // Create Account Button
                               ElevatedButton(
-                                onPressed: _isLoading ? null : _signUp,
+                                onPressed: (_isLoading || _isGoogleLoading)
+                                    ? null
+                                    : _signUp,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
                                       const Color(0xFF6366F1), // Indigo Primary
@@ -308,7 +314,9 @@ class _SignupScreenState extends State<SignupScreen>
 
                               // Continue with Google Button
                               OutlinedButton(
-                                onPressed: _isLoading ? null : _googleSignIn,
+                                onPressed: (_isLoading || _isGoogleLoading)
+                                    ? null
+                                    : _googleSignIn,
                                 style: OutlinedButton.styleFrom(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 12),
@@ -318,7 +326,7 @@ class _SignupScreenState extends State<SignupScreen>
                                   ),
                                   backgroundColor: isDark ? null : Colors.white,
                                 ),
-                                child: _isLoading
+                                child: _isGoogleLoading
                                     ? const SizedBox(
                                         width: 20,
                                         height: 20,
