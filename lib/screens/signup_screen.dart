@@ -89,12 +89,18 @@ class _SignupScreenState extends State<SignupScreen>
     setState(() => _isLoading = true);
     try {
       await _authService.signInWithGoogle();
-      // Navigation handled by lifecycle observer
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      }
     } catch (e) {
       if (mounted) {
-        ToastUtils.showErrorToast(
-            context, 'Google Sign-In failed: ${e.toString()}',
-            bottomPadding: 25.0);
+        if (e.toString().contains('cancelled')) {
+          // Silent on cancel
+        } else {
+          ToastUtils.showErrorToast(
+              context, 'Google Sign-In failed: ${e.toString()}',
+              bottomPadding: 25.0);
+        }
         setState(() => _isLoading = false);
       }
     }

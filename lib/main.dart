@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'services/auth_service.dart';
+import 'services/auth_service.dart'; 
 import 'state/accounting_model.dart';
 import 'state/app_state.dart';
 import 'models/accounting.dart';

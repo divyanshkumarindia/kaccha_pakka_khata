@@ -72,25 +72,22 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
   Future<void> _googleSignIn() async {
     setState(() => _isGoogleLoading = true);
     try {
-      // 1. Initiate OAuth Flow (launches browser)
       await _authService.signInWithGoogle();
-
-      // 2. Wait for App Resume (User returns from browser)
-      // We rely on the WidgetsBindingObserver to detect when the app resumes.
-      // Ideally, the deep link triggers the auth state change.
-      // However, to satisfy the requirement of "Strictly Login Screen if Back",
-      // we do NOT auto-navigate here blindly.
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      }
     } catch (e) {
       if (mounted) {
-        ToastUtils.showErrorToast(
-            context, 'Google Sign-In failed: ${e.toString()}',
-            bottomPadding: 25.0);
+        if (e.toString().contains('cancelled')) {
+          // Silent on cancel
+        } else {
+          ToastUtils.showErrorToast(
+              context, 'Google Sign-In failed: ${e.toString()}',
+              bottomPadding: 25.0);
+        }
         setState(() => _isGoogleLoading = false);
       }
     }
-    // Note: We don't turn off loading immediately if successful,
-    // because we are waiting for the lifecycle or stream to kick in.
-    // But if we returned from browser via BACK button, we need to reset loading.
   }
 
   @override

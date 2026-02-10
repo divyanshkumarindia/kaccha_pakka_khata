@@ -18,6 +18,24 @@ class AuthService {
 
   AuthService._internal() {
     _initializeAuthListener();
+    _initializeGoogleSignIn();
+  }
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+
+  Future<void> _initializeGoogleSignIn() async {
+    try {
+      await _googleSignIn.initialize(
+        clientId: kIsWeb
+            ? (dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '')
+            : (defaultTargetPlatform == TargetPlatform.iOS
+                ? (dotenv.env['GOOGLE_IOS_CLIENT_ID'] ?? '')
+                : null),
+        serverClientId: dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '',
+      );
+    } catch (e) {
+      if (kDebugMode) debugPrint("Google Sign-In Initialization Error: $e");
+    }
   }
 
   void _initializeAuthListener() {
@@ -96,23 +114,30 @@ class AuthService {
   static String get kIosClientId => dotenv.env['GOOGLE_IOS_CLIENT_ID'] ?? '';
 
   // Sign In with Google
-  Future<bool> signInWithGoogle() async {
+  Future<AuthResponse> signInWithGoogle() async {
     try {
-      // Use Supabase OAuth Flow (Web-based)
-      // This handles both Web and Mobile (via deep link)
-      final bool result = await _supabase.auth.signInWithOAuth(
-        OAuthProvider.google,
-        authScreenLaunchMode: kIsWeb
-            ? LaunchMode.platformDefault
-            : LaunchMode.externalApplication,
-        queryParams: {
-          'access_type': 'offline',
-          'prompt': 'select_account',
-          if (kIsWeb) 'client_id': kWebClientId,
-        },
-      );
+      // 1. Trigger native Sign-In (v7.x authenticate() replaces signIn())
+      final googleUser = await _googleSignIn.authenticate();
 
-      return result;
+      // 2. Get authentication tokens (v7.x: tokens are separate)
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        throw 'No ID Token found from Google Sign-In.';
+      }
+
+      // Access tokens are now obtained via authorizationClient
+      final authorization =
+          await googleUser.authorizationClient.authorizeScopes([]);
+      final accessToken = authorization.accessToken;
+
+      // 3. Authenticate with Supabase using tokens
+      return await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
     } catch (e) {
       if (kDebugMode) debugPrint("Supabase Google Sign-In Error: $e");
       rethrow;
@@ -158,7 +183,7 @@ class AuthService {
   // Sign Out
   Future<void> signOut() async {
     try {
-      await GoogleSignIn.instance.signOut();
+      await _googleSignIn.signOut();
     } catch (_) {}
     await _supabase.auth.signOut();
   }
