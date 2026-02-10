@@ -340,6 +340,9 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
                                         height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Color(0xFF6366F1)),
                                         ),
                                       )
                                     : Row(
