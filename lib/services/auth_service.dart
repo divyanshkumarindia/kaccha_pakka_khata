@@ -91,7 +91,7 @@ class AuthService {
     return await _supabase.auth.signUp(
       email: email,
       password: password,
-      data: fullName != null ? {'full_name': fullName} : null,
+      data: fullName != null ? {'display_name': fullName} : null,
     );
   }
 
