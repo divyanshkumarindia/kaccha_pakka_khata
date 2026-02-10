@@ -476,43 +476,50 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
-          Consumer<AccountingModel>(
-            builder: (context, model, child) {
-              return PopupMenuButton<String>(
-                icon: Row(
-                  children: [
-                    Icon(Icons.language,
-                        color: isDark ? const Color(0xFF94A3B8) : Colors.grey),
-                    const SizedBox(width: 4),
-                    Text(
-                      model.language.toUpperCase(),
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? const Color(0xFF94A3B8) : Colors.grey,
+          Padding(
+            padding: const EdgeInsets.only(
+                bottom: 34.0), // Lift button closer to top
+            child: Consumer<AccountingModel>(
+              builder: (context, model, child) {
+                return PopupMenuButton<String>(
+                  icon: Row(
+                    children: [
+                      Icon(Icons.language,
+                          size: 18, // Smaller icon
+                          color:
+                              isDark ? const Color(0xFF94A3B8) : Colors.grey),
+                      const SizedBox(width: 4),
+                      Text(
+                        model.language == 'en' ? 'ENG' : 'HIN',
+                        style: GoogleFonts.outfit(
+                          fontSize: 13, // Smaller text
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? const Color(0xFF94A3B8) : Colors.grey,
+                        ),
                       ),
+                    ],
+                  ),
+                  onSelected: (value) {
+                    model.setLanguage(value);
+                    ToastUtils.showSuccessToast(context,
+                        'Language switched to ${value == 'en' ? 'English' : 'Hindi'}',
+                        bottomPadding: 110.0);
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'en',
+                      child: Text('English'),
+                    ),
+                    const PopupMenuItem(
+                      value: 'hi',
+                      child: Text('Hindi'),
                     ),
                   ],
-                ),
-                onSelected: (value) {
-                  model.setLanguage(value);
-                  ToastUtils.showSuccessToast(context,
-                      'Language switched to ${value == 'en' ? 'English' : 'Hindi'}',
-                      bottomPadding: 110.0);
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'en',
-                    child: Text('English'),
-                  ),
-                  const PopupMenuItem(
-                    value: 'hi',
-                    child: Text('Hindi'),
-                  ),
-                ],
-              );
-            },
+                );
+              },
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6), // Increased spacing from right edge
         ],
       ),
       body: SafeArea(
