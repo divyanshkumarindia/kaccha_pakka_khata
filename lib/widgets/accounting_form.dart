@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
@@ -563,13 +564,17 @@ class _AccountingFormState extends State<AccountingForm>
 
     if (confirmed == true && widget.customPageId != null) {
       try {
+        final user = Supabase.instance.client.auth.currentUser;
+        final userPrefix = user != null ? 'u_${user.id}_' : '';
+        final customPagesKey = '${userPrefix}custom_pages';
+
         // Delete from SharedPreferences
         final prefs = await SharedPreferences.getInstance();
-        final savedPages = prefs.getString('custom_pages');
+        final savedPages = prefs.getString(customPagesKey);
         if (savedPages != null) {
           final decoded = jsonDecode(savedPages) as Map<String, dynamic>;
           decoded.remove(widget.customPageId);
-          await prefs.setString('custom_pages', jsonEncode(decoded));
+          await prefs.setString(customPagesKey, jsonEncode(decoded));
         }
 
         // Navigate back and signal deletion occurred
@@ -1833,8 +1838,10 @@ class _AccountingFormState extends State<AccountingForm>
                                           ? const Color(
                                               0xFF0F172A) // Navy Blue (Home Title Color)
                                           : (isDark
-                                              ? Colors.green.shade800.withValues(alpha: 0.5)
-                                              : Colors.green.shade200), // Very light green ghost text
+                                              ? Colors.green.shade800
+                                                  .withValues(alpha: 0.5)
+                                              : Colors.green
+                                                  .shade200), // Very light green ghost text
                                     ),
                                     textAlign: TextAlign.center,
                                   ),

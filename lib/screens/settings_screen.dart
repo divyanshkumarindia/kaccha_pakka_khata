@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
@@ -26,6 +27,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadCustomPages();
   }
 
+  /// Get user-keyed storage key
+  String _uk(String key) {
+    final user = Supabase.instance.client.auth.currentUser;
+    return user != null ? 'u_${user.id}_$key' : key;
+  }
+
   Future<void> _loadPageTitles() async {
     // Initialize with defaults
     for (var ut in UserType.values) {
@@ -43,7 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadCustomPages() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedPages = prefs.getString('custom_pages');
+    final savedPages = prefs.getString(_uk('custom_pages'));
     if (savedPages != null) {
       final decoded = jsonDecode(savedPages) as Map<String, dynamic>;
       if (mounted) {

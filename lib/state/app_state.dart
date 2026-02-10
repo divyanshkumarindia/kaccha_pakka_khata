@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/accounting.dart';
 
 /// Global app state to track the active use case across screens
@@ -26,6 +27,12 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  /// Get user-keyed storage key
+  String _uk(String key) {
+    final user = Supabase.instance.client.auth.currentUser;
+    return user != null ? 'u_${user.id}_$key' : key;
+  }
+
   /// Set the active use case and persist it
   Future<void> setActiveUseCase(UserType? useCase) async {
     _activeUseCase = useCase;
@@ -36,7 +43,7 @@ class AppState extends ChangeNotifier {
   /// Load the active use case from SharedPreferences
   Future<void> loadActiveUseCase() async {
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString(_activeUseCaseKey);
+    final saved = prefs.getString(_uk(_activeUseCaseKey));
 
     if (saved != null) {
       switch (saved) {
@@ -69,10 +76,11 @@ class AppState extends ChangeNotifier {
   /// Save to SharedPreferences
   Future<void> _saveToPrefs() async {
     final prefs = await SharedPreferences.getInstance();
+    final key = _uk(_activeUseCaseKey);
     if (_activeUseCase == null) {
-      await prefs.remove(_activeUseCaseKey);
+      await prefs.remove(key);
     } else {
-      await prefs.setString(_activeUseCaseKey, activeUseCaseString!);
+      await prefs.setString(key, activeUseCaseString!);
     }
   }
 

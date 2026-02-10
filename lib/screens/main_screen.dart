@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart'; // Added import
 import '../state/accounting_model.dart';
+import '../state/app_state.dart';
 import 'home_screen.dart';
 import 'saved_reports_screen.dart';
 import 'settings_screen.dart';
@@ -38,6 +39,11 @@ class _MainScreenState extends State<MainScreen> {
         // If authenticated, ensure the correct user data is loaded
         final model = Provider.of<AccountingModel>(context, listen: false);
         await model.refreshForUser();
+
+        if (mounted) {
+          final appState = Provider.of<AppState>(context, listen: false);
+          await appState.loadActiveUseCase();
+        }
       }
     });
   }

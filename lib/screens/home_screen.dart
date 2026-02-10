@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import '../state/accounting_model.dart';
@@ -56,6 +57,12 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  /// Get user-keyed storage key
+  String _uk(String key) {
+    final user = Supabase.instance.client.auth.currentUser;
+    return user != null ? 'u_${user.id}_$key' : key;
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -67,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadCustomPages() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedPages = prefs.getString('custom_pages');
+    final savedPages = prefs.getString(_uk('custom_pages'));
     if (savedPages != null) {
       final decoded = jsonDecode(savedPages) as Map<String, dynamic>;
       if (mounted) {
@@ -80,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _saveCustomPages() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('custom_pages', jsonEncode(customPages));
+    await prefs.setString(_uk('custom_pages'), jsonEncode(customPages));
   }
 
   Future<void> _loadDefaultPageType() async {
