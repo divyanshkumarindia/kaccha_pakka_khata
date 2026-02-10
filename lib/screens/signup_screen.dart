@@ -30,12 +30,20 @@ class _SignupScreenState extends State<SignupScreen>
     WidgetsBinding.instance.addObserver(this);
   }
 
+  String _formatName(String name) {
+    if (name.trim().isEmpty) return "";
+    String cleaned = name.trim();
+    if (cleaned.length < 2) return cleaned.toUpperCase();
+    return cleaned[0].toUpperCase() + cleaned.substring(1).toLowerCase();
+  }
+
   Future<void> _signUp() async {
-    final name = _nameController.text.trim();
+    final rawName = _nameController.text.trim();
+    final name = _formatName(rawName);
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+    if (rawName.isEmpty || email.isEmpty || password.isEmpty) {
       ToastUtils.showErrorToast(
           context, 'Please fill in name, email, and password.',
           bottomPadding: 25.0);
