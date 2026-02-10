@@ -180,6 +180,15 @@ class AuthService {
     );
   }
 
+  // Update Profile (Metadata)
+  Future<UserResponse> updateProfile({String? fullName}) async {
+    return await _supabase.auth.updateUser(
+      UserAttributes(
+        data: fullName != null ? {'display_name': fullName} : null,
+      ),
+    );
+  }
+
   // Sign Out
   Future<void> signOut() async {
     try {

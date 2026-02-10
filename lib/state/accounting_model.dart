@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:io';
 import '../services/report_service.dart';
+import '../services/auth_service.dart';
 
 import '../utils/translations.dart';
 
@@ -1074,6 +1075,14 @@ class AccountingModel extends ChangeNotifier {
       notifyListeners();
       SharedPreferences.getInstance()
           .then((p) => p.setString(_uk('user_name'), name));
+
+      // Update Supabase Metadata (Fire and forget)
+      try {
+        final authService = AuthService();
+        if (authService.currentUser != null) {
+          authService.updateProfile(fullName: name);
+        }
+      } catch (_) {}
     }
   }
 
