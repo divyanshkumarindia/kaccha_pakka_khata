@@ -585,7 +585,41 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
+                    // Premium Tagline
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (bounds) => const LinearGradient(
+                            colors: [
+                              Color(0xFF7C3AED), // Violet
+                              Color(0xFF2563EB), // Blue
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ).createShader(bounds),
+                          child: Text(
+                            'Be your own accountant.',
+                            style: GoogleFonts.outfit(
+                              fontSize: 19,
+                              fontWeight: FontWeight.bold,
+                              color: Colors
+                                  .white, // Required for ShaderMask effect
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Text(
+                          '✨',
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 7),
                     // Hero Description
                     Padding(
                       padding: const EdgeInsets.only(right: 30.0),

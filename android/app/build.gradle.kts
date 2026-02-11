@@ -39,6 +39,32 @@ android {
         keystoreProperties.load(FileInputStream(keystorePropertiesFile))
     }
 
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(FileInputStream(localPropertiesFile))
+    }
+
+    // Try to get from local.properties first, then fallback to .env
+    var googleWebClientId = localProperties.getProperty("flutter.googleWebClientId")
+    
+    if (googleWebClientId == null) {
+        val envFile = rootProject.file("../.env")
+        if (envFile.exists()) {
+            envFile.forEachLine { line ->
+                if (line.trim().startsWith("GOOGLE_WEB_CLIENT_ID=")) {
+                    googleWebClientId = line.trim().substringAfter("GOOGLE_WEB_CLIENT_ID=")
+                }
+            }
+        }
+    }
+
+    if (googleWebClientId != null) {
+        defaultConfig {
+            resValue("string", "default_web_client_id", googleWebClientId)
+        }
+    }
+
     signingConfigs {
         create("release") {
             keyAlias = keystoreProperties.getProperty("keyAlias")

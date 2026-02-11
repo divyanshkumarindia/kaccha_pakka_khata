@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'services/auth_service.dart'; 
+import 'services/auth_service.dart';
 import 'state/accounting_model.dart';
 import 'state/app_state.dart';
 import 'models/accounting.dart';
@@ -18,13 +18,19 @@ void main() async {
   await dotenv.load(fileName: ".env");
 
   // Initialize Supabase
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL'] ?? '',
-    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
-    authOptions: const FlutterAuthClientOptions(
-      authFlowType: AuthFlowType.pkce,
-    ),
-  );
+  try {
+    await Supabase.initialize(
+      url: dotenv.env['SUPABASE_URL'] ?? '',
+      anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+      authOptions: const FlutterAuthClientOptions(
+        authFlowType: AuthFlowType.pkce,
+      ),
+    );
+  } catch (e) {
+    // If initialization fails (e.g., corrupted storage/session), log it and continue.
+    // The app will likely start in a logged-out state, which is better than crashing.
+    debugPrint('Supabase initialization error: $e');
+  }
 
   runApp(
     MultiProvider(
