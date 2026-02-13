@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'services/auth_service.dart';
 import 'state/accounting_model.dart';
 import 'state/app_state.dart';
@@ -46,7 +45,10 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) {
           debugPrint('🏗️ Creating AccountingModel');
-          return AccountingModel(userType: UserType.personal);
+          return AccountingModel(
+            userType: UserType.personal,
+            shouldLoadFromStorage: false, // Wait for MainScreen to load
+          );
         }),
         ChangeNotifierProvider(create: (_) => AppState()),
         Provider<AuthService>(create: (_) {
