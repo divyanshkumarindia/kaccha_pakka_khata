@@ -156,7 +156,8 @@ class AccountingModel extends ChangeNotifier {
           // Extract first name
           final firstName = fullName.trim().split(' ').first;
           // Set as username (this will save to prefs too via setUserName)
-          setUserName(firstName);
+          // Don't sync back to cloud (prevent circular loop and stale token usage)
+          setUserName(firstName, syncToCloud: false);
         }
       }
     }
@@ -1065,7 +1066,7 @@ class AccountingModel extends ChangeNotifier {
         .then((p) => p.setString(_uk('default_report_format'), format));
   }
 
-  void setUserName(String name) {
+  void setUserName(String name, {bool syncToCloud = true}) {
     if (name.trim().isEmpty) {
       _userName = null;
       notifyListeners();
@@ -1077,12 +1078,18 @@ class AccountingModel extends ChangeNotifier {
           .then((p) => p.setString(_uk('user_name'), name));
 
       // Update Supabase Metadata (Fire and forget)
-      try {
+      if (syncToCloud) {
         final authService = AuthService();
         if (authService.currentUser != null) {
-          authService.updateProfile(fullName: name);
+          () async {
+            try {
+              await authService.updateProfile(fullName: name);
+            } catch (e) {
+              if (kDebugMode) debugPrint("Error updating profile: $e");
+            }
+          }();
         }
-      } catch (_) {}
+      }
     }
   }
 

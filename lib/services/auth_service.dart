@@ -34,6 +34,7 @@ class AuthService {
         serverClientId: dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '',
       );
     } catch (e) {
+      // Log the error but don't crash the app
       if (kDebugMode) debugPrint("Google Sign-In Initialization Error: $e");
     }
   }

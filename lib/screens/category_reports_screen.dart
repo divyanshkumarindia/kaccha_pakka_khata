@@ -495,6 +495,17 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
     final isSelected = _selectedDurationFilter == durationType;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // Get color for this specific duration type
+    // For "All" (null), we use the category color or a default
+    // But per requirements, we want distinct colors for the types.
+    // Let's use the helper!
+    Color typeColor;
+    if (durationType == null) {
+      typeColor = widget.categoryColor; // Keep "All" matching the category
+    } else {
+      typeColor = _getDurationColor(durationType);
+    }
+
     return InkWell(
       onTap: () {
         setState(() {
@@ -506,19 +517,33 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
+          // Gradient for selected, plain for unselected
+          gradient: isSelected
+              ? LinearGradient(
+                  colors: [
+                    typeColor.withValues(alpha: 0.8),
+                    typeColor,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
           color: isSelected
-              ? widget.categoryColor
+              ? null
               : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? widget.categoryColor
-                : (isDark ? Colors.white10 : Colors.grey.shade300),
+                ? Colors.transparent
+                : (isDark
+                    ? typeColor.withValues(alpha: 0.5)
+                    : typeColor.withValues(alpha: 0.3)),
+            width: isSelected ? 0 : 1.5,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: widget.categoryColor.withValues(alpha: 0.4),
+                    color: typeColor.withValues(alpha: 0.4),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   )
@@ -532,7 +557,10 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             color: isSelected
                 ? Colors.white
-                : (isDark ? Colors.white70 : Colors.grey.shade600),
+                : (isDark
+                    ? Colors.white70
+                    : typeColor.withValues(
+                        alpha: 0.8)), // Colored text when unselected
           ),
         ),
       ),
@@ -816,26 +844,43 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
                             children: [
                               // Duration Tag
                               if (durationText != 'Report') ...[
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: isDark
-                                        ? Colors.white.withValues(alpha: 0.1)
-                                        : Colors.grey.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    durationText,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
+                                Builder(builder: (context) {
+                                  // Determine type for color
+                                  DurationType? type;
+                                  if (durationText == 'Daily')
+                                    type = DurationType.Daily;
+                                  if (durationText == 'Weekly')
+                                    type = DurationType.Weekly;
+                                  if (durationText == 'Monthly')
+                                    type = DurationType.Monthly;
+                                  if (durationText == 'Yearly')
+                                    type = DurationType.Yearly;
+
+                                  final typeColor = _getDurationColor(type);
+
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
                                       color: isDark
-                                          ? Colors.white70
-                                          : Colors.grey.shade600,
+                                          ? typeColor.withValues(alpha: 0.15)
+                                          : typeColor.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: typeColor.withValues(alpha: 0.3),
+                                        width: 1,
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                    child: Text(
+                                      durationText,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: typeColor, // Colored text
+                                      ),
+                                    ),
+                                  );
+                                }),
                                 const SizedBox(width: 8),
                               ],
                               // Period Details
@@ -846,7 +891,7 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
                                     color: isDark
-                                        ? Colors.white
+                                        ? Colors.white70
                                         : const Color(0xFF334155),
                                   ),
                                   maxLines: 1,
@@ -901,6 +946,20 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
         ),
       ),
     );
+  }
+
+  Color _getDurationColor(DurationType? type) {
+    if (type == null) return const Color(0xFF64748B); // Slate (All)
+    switch (type) {
+      case DurationType.Daily:
+        return const Color(0xFF3B82F6); // Blue
+      case DurationType.Weekly:
+        return const Color(0xFF8B5CF6); // Violet
+      case DurationType.Monthly:
+        return const Color(0xFFF59E0B); // Amber
+      case DurationType.Yearly:
+        return const Color(0xFFEC4899); // Pink
+    }
   }
 
   String _getDurationText(Map<String, dynamic> report) {

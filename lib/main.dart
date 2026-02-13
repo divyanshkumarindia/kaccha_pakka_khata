@@ -14,11 +14,20 @@ import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 
 void main() async {
+  debugPrint('🚀 App Launching...');
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  debugPrint('✅ WidgetsInitialized');
+
+  try {
+    await dotenv.load(fileName: ".env");
+    debugPrint('✅ DotEnv Loaded');
+  } catch (e) {
+    debugPrint('❌ DotEnv Failed: $e');
+  }
 
   // Initialize Supabase
   try {
+    debugPrint('⏳ Initializing Supabase...');
     await Supabase.initialize(
       url: dotenv.env['SUPABASE_URL'] ?? '',
       anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
@@ -26,19 +35,24 @@ void main() async {
         authFlowType: AuthFlowType.pkce,
       ),
     );
+    debugPrint('✅ Supabase Initialized');
   } catch (e) {
-    // If initialization fails (e.g., corrupted storage/session), log it and continue.
-    // The app will likely start in a logged-out state, which is better than crashing.
-    debugPrint('Supabase initialization error: $e');
+    debugPrint('❌ Supabase initialization error: $e');
   }
 
+  debugPrint('🚀 Calling runApp...');
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-            create: (_) => AccountingModel(userType: UserType.personal)),
+        ChangeNotifierProvider(create: (_) {
+          debugPrint('🏗️ Creating AccountingModel');
+          return AccountingModel(userType: UserType.personal);
+        }),
         ChangeNotifierProvider(create: (_) => AppState()),
-        Provider<AuthService>(create: (_) => AuthService()),
+        Provider<AuthService>(create: (_) {
+          debugPrint('🏗️ Creating AuthService');
+          return AuthService();
+        }),
       ],
       child: const MyApp(),
     ),

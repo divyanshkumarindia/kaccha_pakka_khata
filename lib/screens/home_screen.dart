@@ -600,9 +600,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             end: Alignment.bottomRight,
                           ).createShader(bounds),
                           child: Text(
-                            'Be your own accountant.',
+                            'Be Your Own Accountant.',
                             style: GoogleFonts.outfit(
-                              fontSize: 19,
+                              fontSize: 21,
                               fontWeight: FontWeight.bold,
                               color: Colors
                                   .white, // Required for ShaderMask effect
@@ -610,7 +610,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 5),
                         const Text(
                           '✨',
                           style: TextStyle(
