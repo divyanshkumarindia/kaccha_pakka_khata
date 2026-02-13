@@ -343,6 +343,7 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         _buildFilterChip(context, 'All', null),
                         const SizedBox(width: 8),
@@ -496,9 +497,6 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Get color for this specific duration type
-    // For "All" (null), we use the category color or a default
-    // But per requirements, we want distinct colors for the types.
-    // Let's use the helper!
     Color typeColor;
     if (durationType == null) {
       typeColor = widget.categoryColor; // Keep "All" matching the category
@@ -512,10 +510,12 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
           _selectedDurationFilter = durationType;
         });
       },
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(16), // Slightly tighter radius
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+            horizontal: 12, vertical: 8), // Compact padding // Sizing of the selector box
+        margin: const EdgeInsets.only(bottom: 0), // Keep shadow space
         decoration: BoxDecoration(
           // Gradient for selected, plain for unselected
           gradient: isSelected
@@ -531,7 +531,7 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
           color: isSelected
               ? null
               : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? Colors.transparent
@@ -543,9 +543,10 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: typeColor.withValues(alpha: 0.4),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    color: typeColor.withValues(
+                        alpha: 0.5), // Stronger shadow opacity
+                    blurRadius: 10, // Slightly reduced blur
+                    offset: const Offset(0, 4), // Compact shadow
                   )
                 ]
               : null,
@@ -553,7 +554,7 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
         child: Text(
           label,
           style: GoogleFonts.inter(
-            fontSize: 13,
+            fontSize: 12.5, // Compact font
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             color: isSelected
                 ? Colors.white
