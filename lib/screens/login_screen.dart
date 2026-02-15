@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Added using correct package
 import '../services/auth_service.dart';
@@ -77,9 +78,11 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
         Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       }
     } catch (e) {
+      if (kDebugMode) debugPrint("Google Sign-In caught error: $e");
       if (mounted) {
-        if (e.toString().contains('cancelled')) {
+        if (e.toString().toLowerCase().contains('cancelled')) {
           // Silent on cancel
+          if (kDebugMode) debugPrint("Google Sign-In cancelled by user");
         } else {
           ToastUtils.showErrorToast(
               context, 'Google Sign-In failed: ${e.toString()}',

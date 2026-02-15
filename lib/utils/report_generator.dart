@@ -226,6 +226,7 @@ class ReportGenerator {
           name: fileName,
         );
 
+        // ignore: deprecated_member_use
         final result = await Share.shareXFiles(
           [xFile],
           subject: 'Financial Report - $dateStr',

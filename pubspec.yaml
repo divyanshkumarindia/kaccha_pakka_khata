@@ -20,13 +20,13 @@ dependencies:
   shared_preferences: ^2.1.1
   pdf: ^3.11.0
   printing: ^5.12.0
-  google_fonts: ^7.0.2
+  google_fonts: ^8.0.1
   intl: ^0.20.2
-  flutter_slidable: ^3.1.0
+  flutter_slidable: ^4.0.3
   supabase_flutter: ^2.12.0
   flutter_dotenv: ^6.0.0
   google_sign_in: ^7.2.0
-  share_plus: ^7.2.1
+  share_plus: ^12.0.1
   universal_html: ^2.2.4
 
 dev_dependencies:

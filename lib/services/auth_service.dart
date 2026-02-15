@@ -117,27 +117,26 @@ class AuthService {
   // Sign In with Google
   Future<AuthResponse> signInWithGoogle() async {
     try {
-      // 1. Trigger native Sign-In (v7.x authenticate() replaces signIn())
+      // 1. Trigger native Sign-In
       final googleUser = await _googleSignIn.authenticate();
 
-      // 2. Get authentication tokens (v7.x: tokens are separate)
+      // 2. Get authentication tokens
       final googleAuth = await googleUser.authentication;
       final idToken = googleAuth.idToken;
+      // Note: accessToken is removed in v7 and authorizeScopes causes hangs.
+      // We proceed with just idToken.
 
       if (idToken == null) {
         throw 'No ID Token found from Google Sign-In.';
       }
 
-      // Access tokens are now obtained via authorizationClient
-      final authorization =
-          await googleUser.authorizationClient.authorizeScopes([]);
-      final accessToken = authorization.accessToken;
-
       // 3. Authenticate with Supabase using tokens
+      // Note: accessToken is optional for Google in Supabase depending on config,
+      // but usually idToken is enough for identity.
       return await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
-        accessToken: accessToken,
+        accessToken: null,
       );
     } catch (e) {
       if (kDebugMode) debugPrint("Supabase Google Sign-In Error: $e");
