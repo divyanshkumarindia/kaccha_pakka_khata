@@ -53,8 +53,8 @@ android {
         val envFile = rootProject.file("../.env")
         if (envFile.exists()) {
             envFile.forEachLine { line ->
-                if (line.trim().startsWith("GOOGLE_WEB_CLIENT_ID=")) {
-                    googleWebClientId = line.trim().substringAfter("GOOGLE_WEB_CLIENT_ID=")
+                if (line.trim().startsWith("WEB_CLIENT=")) {
+                    googleWebClientId = line.trim().substringAfter("WEB_CLIENT=")
                 }
             }
         }
