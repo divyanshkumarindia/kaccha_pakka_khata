@@ -1692,7 +1692,7 @@ class _AccountingFormState extends State<AccountingForm>
             flex: 40,
             child: Text(
               cells[0],
-              style: GoogleFonts.outfit(
+              style: TextStyle(
                 fontSize: isHeader ? 12 : 13,
                 fontWeight:
                     isHeader || isBold ? FontWeight.bold : FontWeight.normal,
@@ -1703,12 +1703,11 @@ class _AccountingFormState extends State<AccountingForm>
               ),
             ),
           ),
-          // Cash (20%)
           Expanded(
             flex: 20,
             child: Text(
               cells[1],
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.inter(
                 fontSize: isHeader ? 12 : 13,
                 fontWeight:
                     isHeader || isBold ? FontWeight.bold : FontWeight.w500,
@@ -1717,12 +1716,11 @@ class _AccountingFormState extends State<AccountingForm>
               textAlign: TextAlign.right,
             ),
           ),
-          // Bank (20%)
           Expanded(
             flex: 20,
             child: Text(
               cells[2],
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.inter(
                 fontSize: isHeader ? 12 : 13,
                 fontWeight:
                     isHeader || isBold ? FontWeight.bold : FontWeight.w500,
@@ -1731,12 +1729,11 @@ class _AccountingFormState extends State<AccountingForm>
               textAlign: TextAlign.right,
             ),
           ),
-          // Total (20%)
           Expanded(
             flex: 20,
             child: Text(
               cells[3],
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.inter(
                 fontSize: isHeader ? 12 : 13,
                 fontWeight:
                     isHeader || isBold ? FontWeight.bold : FontWeight.w500,
