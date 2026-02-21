@@ -1832,214 +1832,294 @@ class _AccountingFormState extends State<AccountingForm>
                               ],
                             ),
                           ),
-                          const SizedBox(height: 24), // Increased spacing
+                          const SizedBox(height: 20),
 
-                          // Customizable Header Title (Replaces Logo)
-                          Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    _headerTitleController.text.isNotEmpty
-                                        ? _headerTitleController.text
-                                        : _getHeaderHint(widget.templateKey),
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 28, // Bigger font size
-                                      fontWeight: FontWeight.bold,
-                                      color: _headerTitleController
-                                              .text.isNotEmpty
-                                          ? const Color(
-                                              0xFF0F172A) // Navy Blue (Home Title Color)
-                                          : (isDark
-                                              ? Colors.green.shade800
-                                                  .withValues(alpha: 0.5)
-                                              : Colors.green
-                                                  .shade200), // Very light green ghost text
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  onPressed: () =>
-                                      _showHeadingEditDialog(context, isDark),
-                                  icon: const Icon(Icons.edit_outlined,
-                                      size: 24), // Bigger icon
-                                  color: isDark
-                                      ? const Color(0xFF9CA3AF)
-                                      : const Color(
-                                          0xFF6B7280), // Gray like other pencil
-                                  tooltip: model.t('tooltip_edit_heading'),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24), // Increased spacing
-
-                          // Title (editable page title or fallback)
-                          Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  model.pageTitle != null &&
-                                          model.pageTitle!.isNotEmpty
-                                      ? model.pageTitle!
-                                      : useCasePageTitle(model.userType),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 24, // Bigger Page Title
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF4F46E5),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () async {
-                                    final current = model.pageTitle != null &&
-                                            model.pageTitle!.isNotEmpty
-                                        ? model.pageTitle!
-                                        : useCasePageTitle(model.userType);
-                                    final controller =
-                                        TextEditingController(text: current);
-                                    final res = await showDialog<String>(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        backgroundColor: isDark
-                                            ? const Color(0xFF1F2937)
-                                            : Colors.white,
-                                        title: Text(
-                                          model.t('dialog_edit_page_title'),
-                                          style: TextStyle(
-                                            color: isDark
-                                                ? Colors.white
-                                                : Colors.black87,
-                                          ),
-                                        ),
-                                        content: TextField(
-                                          controller: controller,
-                                          autofocus: true,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: isDark
-                                                ? Colors.white
-                                                : Colors.black87,
-                                          ),
-                                          decoration: InputDecoration(
-                                            hintText:
-                                                model.t('hint_page_title'),
-                                            hintStyle: TextStyle(
-                                              color: isDark
-                                                  ? const Color(0xFF6B7280)
-                                                  : const Color(0xFF9CA3AF),
-                                            ),
-                                            filled: true,
-                                            fillColor: isDark
-                                                ? const Color(0xFF374151)
-                                                : const Color(0xFFF9FAFB),
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              borderSide: BorderSide(
-                                                color: isDark
-                                                    ? const Color(0xFF4B5563)
-                                                    : const Color(0xFFD1D5DB),
-                                                width: 1.5,
-                                              ),
-                                            ),
-                                            enabledBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              borderSide: BorderSide(
-                                                color: isDark
-                                                    ? const Color(0xFF4B5563)
-                                                    : const Color(0xFFD1D5DB),
-                                                width: 1.5,
-                                              ),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              borderSide: const BorderSide(
-                                                color: AppTheme.primaryColor,
-                                                width: 2,
-                                              ),
-                                            ),
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 16,
-                                                    vertical: 12),
-                                          ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context),
-                                            child: Text(
-                                              model.t('btn_cancel'),
-                                              style: TextStyle(
-                                                color: isDark
-                                                    ? const Color(0xFF9CA3AF)
-                                                    : const Color(0xFF6B7280),
-                                              ),
-                                            ),
-                                          ),
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  AppTheme.primaryColor,
-                                              foregroundColor: Colors.white,
-                                            ),
-                                            onPressed: () => Navigator.pop(
-                                                context,
-                                                controller.text.trim()),
-                                            child: Text(model.t('btn_save')),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                    if (res != null && res.isNotEmpty) {
-                                      model.setPageTitle(res);
-                                    }
-                                  },
-                                  child: Icon(
-                                    Icons.edit_outlined,
-                                    size: 18,
-                                    color: isDark
-                                        ? const Color(0xFF9CA3AF)
-                                        : const Color(0xFF6B7280),
-                                  ),
-                                ),
-                                // Show delete button for custom pages
-                                if (widget.customPageId != null) ...[
-                                  const SizedBox(width: 8),
-                                  GestureDetector(
-                                    onTap: () => _showDeletePageDialog(context),
-                                    child: Icon(
-                                      Icons.delete_outline,
-                                      size: 18,
-                                      color: Colors.red.shade400,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-
-                          // Subtitle
-                          Center(
-                            child: Text(
-                              model.t('subtitle_track_income_expenses'),
-                              style: TextStyle(
-                                fontSize: 12,
+                          // ── IDENTITY CARD ──────────────────────────────────
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 18),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFF8FAFF),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
                                 color: isDark
-                                    ? const Color(0xFF9CA3AF)
-                                    : const Color(0xFF6B7280),
+                                    ? const Color(0xFF334155)
+                                    : const Color(0xFFE0E7FF),
+                                width: 1.5,
                               ),
                             ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Firm / Account Name row
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        _headerTitleController.text.isNotEmpty
+                                            ? _headerTitleController.text
+                                            : _getHeaderHint(
+                                                widget.templateKey),
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 26,
+                                          fontWeight: FontWeight.bold,
+                                          color: _headerTitleController
+                                                  .text.isNotEmpty
+                                              ? const Color(0xFF0F172A)
+                                              : (isDark
+                                                  ? Colors.green.shade800
+                                                      .withValues(alpha: 0.5)
+                                                  : Colors.green.shade200),
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    GestureDetector(
+                                      onTap: () => _showHeadingEditDialog(
+                                          context, isDark),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? const Color(0xFF374151)
+                                              : const Color(0xFFEEF2FF),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          Icons.edit_outlined,
+                                          size: 16,
+                                          color: isDark
+                                              ? const Color(0xFF9CA3AF)
+                                              : const Color(0xFF4F46E5),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+
+                                // Divider
+                                Container(
+                                  height: 1,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.transparent,
+                                        isDark
+                                            ? const Color(0xFF334155)
+                                            : const Color(0xFFD1D5DB),
+                                        Colors.transparent,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+
+                                // Page type + subtitle row
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        model.pageTitle != null &&
+                                                model.pageTitle!.isNotEmpty
+                                            ? model.pageTitle!
+                                            : useCasePageTitle(model.userType),
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w700,
+                                          color: const Color(0xFF4F46E5),
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        final current = model.pageTitle !=
+                                                    null &&
+                                                model.pageTitle!.isNotEmpty
+                                            ? model.pageTitle!
+                                            : useCasePageTitle(model.userType);
+                                        final controller =
+                                            TextEditingController(
+                                                text: current);
+                                        final res = await showDialog<String>(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            backgroundColor: isDark
+                                                ? const Color(0xFF1F2937)
+                                                : Colors.white,
+                                            title: Text(
+                                              model.t('dialog_edit_page_title'),
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : Colors.black87,
+                                              ),
+                                            ),
+                                            content: TextField(
+                                              controller: controller,
+                                              autofocus: true,
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : Colors.black87,
+                                              ),
+                                              decoration: InputDecoration(
+                                                hintText:
+                                                    model.t('hint_page_title'),
+                                                hintStyle: TextStyle(
+                                                  color: isDark
+                                                      ? const Color(0xFF6B7280)
+                                                      : const Color(0xFF9CA3AF),
+                                                ),
+                                                filled: true,
+                                                fillColor: isDark
+                                                    ? const Color(0xFF374151)
+                                                    : const Color(0xFFF9FAFB),
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  borderSide: BorderSide(
+                                                    color: isDark
+                                                        ? const Color(
+                                                            0xFF4B5563)
+                                                        : const Color(
+                                                            0xFFD1D5DB),
+                                                    width: 1.5,
+                                                  ),
+                                                ),
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  borderSide: BorderSide(
+                                                    color: isDark
+                                                        ? const Color(
+                                                            0xFF4B5563)
+                                                        : const Color(
+                                                            0xFFD1D5DB),
+                                                    width: 1.5,
+                                                  ),
+                                                ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  borderSide: const BorderSide(
+                                                    color:
+                                                        AppTheme.primaryColor,
+                                                    width: 2,
+                                                  ),
+                                                ),
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 16,
+                                                        vertical: 12),
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                child: Text(
+                                                  model.t('btn_cancel'),
+                                                  style: TextStyle(
+                                                    color: isDark
+                                                        ? const Color(
+                                                            0xFF9CA3AF)
+                                                        : const Color(
+                                                            0xFF6B7280),
+                                                  ),
+                                                ),
+                                              ),
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      AppTheme.primaryColor,
+                                                  foregroundColor: Colors.white,
+                                                ),
+                                                onPressed: () => Navigator.pop(
+                                                    context,
+                                                    controller.text.trim()),
+                                                child:
+                                                    Text(model.t('btn_save')),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                        if (res != null && res.isNotEmpty) {
+                                          model.setPageTitle(res);
+                                        }
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? const Color(0xFF374151)
+                                              : const Color(0xFFEEF2FF),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          Icons.edit_outlined,
+                                          size: 14,
+                                          color: isDark
+                                              ? const Color(0xFF9CA3AF)
+                                              : const Color(0xFF4F46E5),
+                                        ),
+                                      ),
+                                    ),
+                                    // Delete button for custom pages
+                                    if (widget.customPageId != null) ...[
+                                      const SizedBox(width: 8),
+                                      GestureDetector(
+                                        onTap: () =>
+                                            _showDeletePageDialog(context),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(
+                                            color: isDark
+                                                ? Colors.red.shade900
+                                                    .withValues(alpha: 0.3)
+                                                : Colors.red.shade50,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Icon(
+                                            Icons.delete_outline,
+                                            size: 14,
+                                            color: Colors.red.shade400,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  model.t('subtitle_track_income_expenses'),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark
+                                        ? const Color(0xFF6B7280)
+                                        : const Color(0xFF9CA3AF),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 16),
+
+                          const SizedBox(height: 20),
 
                           // Currency Dropdown
                           Center(
@@ -2188,158 +2268,137 @@ class _AccountingFormState extends State<AccountingForm>
                               ),
                             ),
                           ),
-                          const SizedBox(height: 24),
 
-                          // Report Duration and Select Period
+                          const SizedBox(height: 16),
+
+                          // Duration + Period in a row
                           _buildDurationAndPeriod(isDark, model),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
 
-                          // Save Edited Button (only in edit mode)
-                          if (widget.initialState != null)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  onPressed: () async {
-                                    try {
-                                      // Export current state
-                                      final reportData = model.exportState();
-
-                                      // Add saved_at timestamp
-                                      reportData['saved_at'] =
-                                          DateTime.now().toIso8601String();
-
-                                      // Get report type and use case type
-                                      String reportType = 'Detailed';
-                                      String useCaseType =
-                                          model.userType.name[0].toUpperCase() +
-                                              model.userType.name.substring(1);
-
-                                      // Save or Update the report
-                                      if (widget.reportId != null) {
-                                        await _reportService.updateReport(
-                                          widget.reportId!,
-                                          reportData: reportData,
-                                          reportType: reportType,
-                                        );
-                                      } else {
-                                        await _reportService.saveReport(
-                                          reportType,
-                                          reportData,
-                                          useCaseType: useCaseType,
-                                        );
-                                      }
-
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Row(
-                                              children: [
-                                                Icon(Icons.check_circle,
-                                                    color: Colors.white),
-                                                SizedBox(width: 12),
-                                                Text(
-                                                    'Changes saved successfully!'),
-                                              ],
-                                            ),
-                                            backgroundColor: Color(0xFF10B981),
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
-
-                                        // Go back after successful save and pass data back
-                                        Navigator.pop(context, reportData);
-                                      }
-                                    } catch (e) {
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Row(
-                                              children: [
-                                                const Icon(Icons.error,
-                                                    color: Colors.white),
-                                                const SizedBox(width: 12),
-                                                Expanded(
-                                                    child: Text(
-                                                        'Failed to save: $e')),
-                                              ],
-                                            ),
-                                            backgroundColor:
-                                                AppTheme.paymentColor,
-                                            duration:
-                                                const Duration(seconds: 3),
-                                          ),
-                                        );
-                                      }
-                                    }
-                                  },
-                                  icon: const Icon(Icons.save, size: 20),
-                                  label: const Text(
-                                    'Save Edited Report',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF10B981),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                      vertical: 16,
-                                    ),
-                                    elevation: 2,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                          if (widget.initialState != null)
-                            const SizedBox(height: 16),
-
-                          // Generate Report Button (positioned after Save Edited Report)
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: SizedBox(
+                          // ── GENERATE REPORT BUTTON ──────────────────────
+                          if (widget.initialState != null) ...[
+                            SizedBox(
                               width: double.infinity,
                               child: ElevatedButton.icon(
-                                onPressed: () {
-                                  _showDetailedReport(context, model);
+                                onPressed: () async {
+                                  try {
+                                    final reportData = model.exportState();
+                                    reportData['saved_at'] =
+                                        DateTime.now().toIso8601String();
+                                    String reportType = 'Detailed';
+                                    String useCaseType =
+                                        model.userType.name[0].toUpperCase() +
+                                            model.userType.name.substring(1);
+                                    if (widget.reportId != null) {
+                                      await _reportService.updateReport(
+                                        widget.reportId!,
+                                        reportData: reportData,
+                                        reportType: reportType,
+                                      );
+                                    } else {
+                                      await _reportService.saveReport(
+                                        reportType,
+                                        reportData,
+                                        useCaseType: useCaseType,
+                                      );
+                                    }
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Row(
+                                            children: [
+                                              Icon(Icons.check_circle,
+                                                  color: Colors.white),
+                                              SizedBox(width: 12),
+                                              Text(
+                                                  'Changes saved successfully!'),
+                                            ],
+                                          ),
+                                          backgroundColor: Color(0xFF10B981),
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
+                                      Navigator.pop(context, reportData);
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Row(
+                                            children: [
+                                              const Icon(Icons.error,
+                                                  color: Colors.white),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                  child: Text(
+                                                      'Failed to save: $e')),
+                                            ],
+                                          ),
+                                          backgroundColor:
+                                              AppTheme.paymentColor,
+                                          duration: const Duration(seconds: 3),
+                                        ),
+                                      );
+                                    }
+                                  }
                                 },
-                                icon: const Icon(Icons.article, size: 20),
+                                icon: const Icon(Icons.save_rounded, size: 20),
                                 label: const Text(
-                                  'Generate Balance Report',
-                                  textAlign: TextAlign.center,
+                                  'Save Edited Report',
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.receiptColor,
+                                  backgroundColor: const Color(0xFF10B981),
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                    horizontal: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   elevation: 2,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+
+                          // Generate Balance Report Button
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                _showDetailedReport(context, model);
+                              },
+                              icon:
+                                  const Icon(Icons.bar_chart_rounded, size: 22),
+                              label: const Text(
+                                'Generate Balance Report',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.receiptColor,
+                                foregroundColor: Colors.white,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 18),
+                                elevation: 3,
+                                shadowColor: AppTheme.receiptColor
+                                    .withValues(alpha: 0.4),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 24),
 
                           // Opening Balances Section
@@ -2354,36 +2413,33 @@ class _AccountingFormState extends State<AccountingForm>
                           _buildExpensesSection(isDark, model),
                           const SizedBox(height: 24),
 
-                          // Generate Report Button (Bottom Duplicate)
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  _showDetailedReport(context, model);
-                                },
-                                icon: const Icon(Icons.article, size: 20),
-                                label: const Text(
-                                  'Generate Balance Report',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          // Generate Report Button (Bottom)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                _showDetailedReport(context, model);
+                              },
+                              icon:
+                                  const Icon(Icons.bar_chart_rounded, size: 22),
+                              label: const Text(
+                                'Generate Balance Report',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.3,
                                 ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.receiptColor,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 16,
-                                  ),
-                                  elevation: 2,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.receiptColor,
+                                foregroundColor: Colors.white,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 18),
+                                elevation: 3,
+                                shadowColor: AppTheme.receiptColor
+                                    .withValues(alpha: 0.4),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
                             ),
