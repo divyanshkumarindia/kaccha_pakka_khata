@@ -844,544 +844,429 @@ class _AccountingFormState extends State<AccountingForm>
 
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 900, maxHeight: 800),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with title and period
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF374151) : Colors.white,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: isDark
-                          ? const Color(0xFF4B5563)
-                          : const Color(0xFFE5E7EB),
-                    ),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          model.firmName.isNotEmpty && !model.isDefaultFirmName
-                              ? model.firmName
-                              : model.t('card_${model.userType.name}'),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryColor,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close, size: 24),
-                          iconSize: 24,
-                          padding: const EdgeInsets.all(8),
-                          constraints: const BoxConstraints(
-                            minWidth: 44,
-                            minHeight: 44,
-                          ),
-                          tooltip: 'Close',
-                          style: IconButton.styleFrom(
-                            tapTargetSize: MaterialTapTargetSize.padded,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _getReportPeriodText(model),
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+      builder: (context) {
+        final screenHeight = MediaQuery.of(context).size.height;
+        return Dialog(
+          backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+          child: Container(
+            constraints:
+                BoxConstraints(maxWidth: 900, maxHeight: screenHeight * 0.92),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header with title and period
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF374151) : Colors.white,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: isDark
+                            ? const Color(0xFF4B5563)
+                            : const Color(0xFFE5E7EB),
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-              // Action Buttons
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF111827)
-                      : const Color(0xFFF9FAFB),
-                  border: Border(
-                    bottom: BorderSide(
-                      color: isDark
-                          ? const Color(0xFF374151)
-                          : const Color(0xFFE5E7EB),
-                    ),
                   ),
-                ),
-                child: Column(
-                  children: [
-                    // Action Buttons Row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildPremiumActionButton(
-                            'Download Excel',
-                            Icons.file_download,
-                            AppTheme.receiptColor,
-                            () {
-                              Navigator.pop(context);
-                              ReportGenerator.generateAndShareExcel(
-                                  context, model);
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildPremiumActionButton(
-                            'Download PDF',
-                            Icons.picture_as_pdf,
-                            AppTheme.paymentColor,
-                            () {
-                              Navigator.pop(context);
-                              ReportGenerator.generateAndSharePdf(
-                                  context, model);
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildPremiumActionButton(
-                            'Print',
-                            Icons.print,
-                            const Color(0xFF6366F1), // Indigo color
-                            () {
-                              Navigator.pop(context);
-                              ReportGenerator.printReport(context, model);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    // Save Report Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          _saveReportToSupabase(context, model);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _reportJustSaved
-                              ? const Color(
-                                  0xFF059669) // Darker green when saved
-                              : const Color(0xFF10B981),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 14),
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              _reportJustSaved
-                                  ? Icons.check_circle
-                                  : Icons.save,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              _reportJustSaved ? 'Saved!' : 'Save Report',
-                              style: const TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Main Content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Firm Name and Period Header
-                      Text(
-                        model.firmName.isNotEmpty && !model.isDefaultFirmName
-                            ? model.firmName
-                            : model.t('card_${model.userType.name}'),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                        textAlign: TextAlign.center,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            model.firmName.isNotEmpty &&
+                                    !model.isDefaultFirmName
+                                ? model.firmName
+                                : model.t('card_${model.userType.name}'),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close, size: 24),
+                            iconSize: 24,
+                            padding: const EdgeInsets.all(8),
+                            constraints: const BoxConstraints(
+                              minWidth: 44,
+                              minHeight: 44,
+                            ),
+                            tooltip: 'Close',
+                            style: IconButton.styleFrom(
+                              tapTargetSize: MaterialTapTargetSize.padded,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Text(
                         _getReportPeriodText(model),
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '(All amounts in ${_getCurrencyName(model.currency)})',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark ? Colors.grey[500] : Colors.grey[500],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
 
-                      // Receipts Table
-                      _buildDetailedTable(
-                        '${model.userType == UserType.personal ? model.t('label_income') : model.t('label_receipts')} ($currencySymbol)',
-                        AppTheme.receiptColor,
-                        isDark
-                            ? const Color(0xFF111827)
-                            : const Color(0xFFF0FDF4),
-                        [
-                          // Table Header
-                          _buildTableRow(
-                            [
-                              'Particulars',
-                              'Cash ($currencySymbol)',
-                              'Bank ($currencySymbol)',
-                              'Total ($currencySymbol)'
+                // Action Buttons
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF111827)
+                        : const Color(0xFFF9FAFB),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: isDark
+                            ? const Color(0xFF374151)
+                            : const Color(0xFFE5E7EB),
+                      ),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Action Buttons Row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildPremiumActionButton(
+                              'Download Excel',
+                              Icons.file_download,
+                              AppTheme.receiptColor,
+                              () {
+                                Navigator.pop(context);
+                                ReportGenerator.generateAndShareExcel(
+                                    context, model);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildPremiumActionButton(
+                              'Download PDF',
+                              Icons.picture_as_pdf,
+                              AppTheme.paymentColor,
+                              () {
+                                Navigator.pop(context);
+                                ReportGenerator.generateAndSharePdf(
+                                    context, model);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildPremiumActionButton(
+                              'Print',
+                              Icons.print,
+                              const Color(0xFF6366F1), // Indigo color
+                              () {
+                                Navigator.pop(context);
+                                ReportGenerator.printReport(context, model);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // Save Report Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _saveReportToSupabase(context, model);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _reportJustSaved
+                                ? const Color(
+                                    0xFF059669) // Darker green when saved
+                                : const Color(0xFF10B981),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 14),
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _reportJustSaved
+                                    ? Icons.check_circle
+                                    : Icons.save,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                _reportJustSaved ? 'Saved!' : 'Save Report',
+                                style: const TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w600),
+                              ),
                             ],
-                            isDark,
-                            isHeader: true,
                           ),
-                          // Opening Balance
-                          _buildTableRow(
-                            ['Opening Balances B/F', '', '', ''],
-                            isDark,
-                            isBold: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Main Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        // Firm Name and Period Header
+                        Text(
+                          model.firmName.isNotEmpty && !model.isDefaultFirmName
+                              ? model.firmName
+                              : model.t('card_${model.userType.name}'),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
-                          // Cash Balance B/F - Always show
-                          _buildTableRow(
-                            [
-                              '   Cash Balance B/F',
-                              _formatAmount(model.openingCash),
-                              '0.00',
-                              _formatAmount(model.openingCash)
-                            ],
-                            isDark,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _getReportPeriodText(model),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: isDark ? Colors.grey[400] : Colors.grey[600],
                           ),
-                          // Bank Balance B/F - Always show
-                          _buildTableRow(
-                            [
-                              '   Bank Balance B/F',
-                              '0.00',
-                              _formatAmount(model.openingBank),
-                              _formatAmount(model.openingBank)
-                            ],
-                            isDark,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '(All amounts in ${_getCurrencyName(model.currency)})',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.grey[500] : Colors.grey[500],
                           ),
-                          // Other Balance B/F - Always show
-                          _buildTableRow(
-                            [
-                              '   Other Balance B/F',
-                              '0.00',
-                              _formatAmount(model.openingOther),
-                              _formatAmount(model.openingOther)
-                            ],
-                            isDark,
-                          ),
-                          // Custom Balance Boxes (show only if > 0)
-                          ...model.customOpeningBalances.entries
-                              .where((e) => e.value > 0)
-                              .map((entry) {
-                            final title = model.getBalanceCardTitle(entry.key,
-                                defaultValue: 'Custom Balance');
-                            return _buildTableRow(
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Receipts Table
+                        _buildDetailedTable(
+                          '${model.userType == UserType.personal ? model.t('label_income') : model.t('label_receipts')} ($currencySymbol)',
+                          AppTheme.receiptColor,
+                          isDark
+                              ? const Color(0xFF111827)
+                              : const Color(0xFFF0FDF4),
+                          [
+                            // Table Header
+                            _buildTableRow(
                               [
-                                '   $title',
-                                '0.00',
-                                _formatAmount(entry.value),
-                                _formatAmount(entry.value)
+                                'Particulars',
+                                'Cash ($currencySymbol)',
+                                'Bank ($currencySymbol)',
+                                'Total ($currencySymbol)'
                               ],
                               isDark,
-                            );
-                          }),
-                          // Income Categories
-                          ...model.receiptAccounts.entries.expand((entry) {
-                            double cash = 0, bank = 0;
-                            entry.value.forEach((e) {
-                              e.rows.forEach((row) {
-                                cash += row.cash;
-                                bank += row.bank;
-                              });
-                            });
-                            if (cash + bank > 0) {
-                              return [
-                                _buildTableRow(
-                                  [
-                                    model.receiptLabels[entry.key] ?? entry.key,
-                                    _formatAmount(cash),
-                                    _formatAmount(bank),
-                                    _formatAmount(cash + bank)
-                                  ],
-                                  isDark,
-                                )
-                              ];
-                            }
-                            return <Widget>[];
-                          }).toList(),
-                          // Divider
-                          Divider(
-                              height: 1,
-                              thickness: 2,
-                              color: isDark
-                                  ? const Color(0xFF4B5563)
-                                  : const Color(0xFF10B981)),
-                          // Total Receipts
-                          _buildTableRow(
-                            [
-                              model.userType == UserType.personal
-                                  ? model.t('label_total_income')
-                                  : model.t('label_total_receipts'),
-                              _formatAmount(totalReceiptsCash),
-                              _formatAmount(totalReceiptsBank),
-                              _formatAmount(
-                                  totalReceiptsCash + totalReceiptsBank)
-                            ],
-                            isDark,
-                            isBold: true,
-                            color: AppTheme.receiptColor,
-                          ),
-                        ],
-                        isDark,
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Payments Table
-                      _buildDetailedTable(
-                        '${model.userType == UserType.personal ? model.t('label_expenses') : model.t('label_payments')} ($currencySymbol)',
-                        AppTheme.paymentColor,
-                        isDark
-                            ? const Color(0xFF111827)
-                            : const Color(0xFFFEF2F2),
-                        [
-                          // Table Header
-                          _buildTableRow(
-                            [
-                              'Particulars',
-                              'Cash ($currencySymbol)',
-                              'Bank ($currencySymbol)',
-                              'Total ($currencySymbol)'
-                            ],
-                            isDark,
-                            isHeader: true,
-                          ),
-                          // Expense Categories
-                          ...model.paymentAccounts.entries.expand((entry) {
-                            double cash = 0, bank = 0;
-                            entry.value.forEach((e) {
-                              e.rows.forEach((row) {
-                                cash += row.cash;
-                                bank += row.bank;
-                              });
-                            });
-                            if (cash + bank > 0) {
-                              return [
-                                _buildTableRow(
-                                  [
-                                    model.paymentLabels[entry.key] ?? entry.key,
-                                    _formatAmount(cash),
-                                    _formatAmount(bank),
-                                    _formatAmount(cash + bank)
-                                  ],
-                                  isDark,
-                                )
-                              ];
-                            }
-                            return <Widget>[];
-                          }).toList(),
-                          // Closing Balance C/F
-                          _buildTableRow(
-                            [
-                              'Closing Balance C/F',
-                              _formatAmount(closingCash),
-                              _formatAmount(closingBank),
-                              _formatAmount(totalClosing)
-                            ],
-                            isDark,
-                            isBold: true,
-                          ),
-                          // Divider
-                          Divider(
-                              height: 1,
-                              thickness: 2,
-                              color: isDark
-                                  ? const Color(0xFF4B5563)
-                                  : AppTheme.paymentColor),
-                          // Total Payments
-                          _buildTableRow(
-                            [
-                              model.userType == UserType.personal
-                                  ? model.t('label_total_expenses')
-                                  : model.t('label_total_payments'),
-                              _formatAmount(totalPaymentsCash + closingCash),
-                              _formatAmount(totalPaymentsBank + closingBank),
-                              _formatAmount(totalPaymentsCash +
-                                  totalPaymentsBank +
-                                  totalClosing)
-                            ],
-                            isDark,
-                            isBold: true,
-                            color: AppTheme.paymentColor,
-                          ),
-                        ],
-                        isDark,
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Closing Balance Summary
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color:
-                              isDark ? const Color(0xFF111827) : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isDark
-                                ? const Color(0xFF374151)
-                                : const Color(0xFFE5E7EB),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Closing Balance Summary',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : Colors.black87,
-                              ),
+                              isHeader: true,
                             ),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'Closing Cash',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: isDark
-                                              ? Colors.grey[400]
-                                              : Colors.grey[600],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        '$currencySymbol${_formatAmount(closingCash)}',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: closingCash >= 0
-                                              ? AppTheme.receiptColor
-                                              : AppTheme.paymentColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 50,
-                                  color: isDark
-                                      ? const Color(0xFF374151)
-                                      : const Color(0xFFE5E7EB),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'Closing Bank',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: isDark
-                                              ? Colors.grey[400]
-                                              : Colors.grey[600],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        '$currencySymbol${_formatAmount(closingBank)}',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: closingBank >= 0
-                                              ? AppTheme.receiptColor
-                                              : AppTheme.paymentColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 50,
-                                  color: isDark
-                                      ? const Color(0xFF374151)
-                                      : const Color(0xFFE5E7EB),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'Total Closing',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: isDark
-                                              ? Colors.grey[400]
-                                              : Colors.grey[600],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        '$currencySymbol${_formatAmount(totalClosing)}',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color(0xFF4F46E5),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                            // Opening Balance
+                            _buildTableRow(
+                              ['Opening Balances B/F', '', '', ''],
+                              isDark,
+                              isBold: true,
+                            ),
+                            // Cash Balance B/F - Always show
+                            _buildTableRow(
+                              [
+                                '   Cash Balance B/F',
+                                _formatAmount(model.openingCash),
+                                '0.00',
+                                _formatAmount(model.openingCash)
                               ],
+                              isDark,
+                            ),
+                            // Bank Balance B/F - Always show
+                            _buildTableRow(
+                              [
+                                '   Bank Balance B/F',
+                                '0.00',
+                                _formatAmount(model.openingBank),
+                                _formatAmount(model.openingBank)
+                              ],
+                              isDark,
+                            ),
+                            // Other Balance B/F - Always show
+                            _buildTableRow(
+                              [
+                                '   Other Balance B/F',
+                                '0.00',
+                                _formatAmount(model.openingOther),
+                                _formatAmount(model.openingOther)
+                              ],
+                              isDark,
+                            ),
+                            // Custom Balance Boxes (show only if > 0)
+                            ...model.customOpeningBalances.entries
+                                .where((e) => e.value > 0)
+                                .map((entry) {
+                              final title = model.getBalanceCardTitle(entry.key,
+                                  defaultValue: 'Custom Balance');
+                              return _buildTableRow(
+                                [
+                                  '   $title',
+                                  '0.00',
+                                  _formatAmount(entry.value),
+                                  _formatAmount(entry.value)
+                                ],
+                                isDark,
+                              );
+                            }),
+                            // Income Categories
+                            ...model.receiptAccounts.entries.expand((entry) {
+                              double cash = 0, bank = 0;
+                              entry.value.forEach((e) {
+                                e.rows.forEach((row) {
+                                  cash += row.cash;
+                                  bank += row.bank;
+                                });
+                              });
+                              if (cash + bank > 0) {
+                                return [
+                                  _buildTableRow(
+                                    [
+                                      model.receiptLabels[entry.key] ??
+                                          entry.key,
+                                      _formatAmount(cash),
+                                      _formatAmount(bank),
+                                      _formatAmount(cash + bank)
+                                    ],
+                                    isDark,
+                                  )
+                                ];
+                              }
+                              return <Widget>[];
+                            }).toList(),
+                            // Divider
+                            Divider(
+                                height: 1,
+                                thickness: 2,
+                                color: isDark
+                                    ? const Color(0xFF4B5563)
+                                    : const Color(0xFF10B981)),
+                            // Total Receipts
+                            _buildTableRow(
+                              [
+                                model.userType == UserType.personal
+                                    ? model.t('label_total_income')
+                                    : model.t('label_total_receipts'),
+                                _formatAmount(totalReceiptsCash),
+                                _formatAmount(totalReceiptsBank),
+                                _formatAmount(
+                                    totalReceiptsCash + totalReceiptsBank)
+                              ],
+                              isDark,
+                              isBold: true,
+                              color: AppTheme.receiptColor,
                             ),
                           ],
+                          isDark,
                         ),
-                      ),
 
-                      // --- LOAN LIABILITIES SECTION ---
-                      if (hasLoanTransactions) ...[
                         const SizedBox(height: 24),
+
+                        // Payments Table
+                        _buildDetailedTable(
+                          '${model.userType == UserType.personal ? model.t('label_expenses') : model.t('label_payments')} ($currencySymbol)',
+                          AppTheme.paymentColor,
+                          isDark
+                              ? const Color(0xFF111827)
+                              : const Color(0xFFFEF2F2),
+                          [
+                            // Table Header
+                            _buildTableRow(
+                              [
+                                'Particulars',
+                                'Cash ($currencySymbol)',
+                                'Bank ($currencySymbol)',
+                                'Total ($currencySymbol)'
+                              ],
+                              isDark,
+                              isHeader: true,
+                            ),
+                            // Expense Categories
+                            ...model.paymentAccounts.entries.expand((entry) {
+                              double cash = 0, bank = 0;
+                              entry.value.forEach((e) {
+                                e.rows.forEach((row) {
+                                  cash += row.cash;
+                                  bank += row.bank;
+                                });
+                              });
+                              if (cash + bank > 0) {
+                                return [
+                                  _buildTableRow(
+                                    [
+                                      model.paymentLabels[entry.key] ??
+                                          entry.key,
+                                      _formatAmount(cash),
+                                      _formatAmount(bank),
+                                      _formatAmount(cash + bank)
+                                    ],
+                                    isDark,
+                                  )
+                                ];
+                              }
+                              return <Widget>[];
+                            }).toList(),
+                            // Closing Balance C/F
+                            _buildTableRow(
+                              [
+                                'Closing Balance C/F',
+                                _formatAmount(closingCash),
+                                _formatAmount(closingBank),
+                                _formatAmount(totalClosing)
+                              ],
+                              isDark,
+                              isBold: true,
+                            ),
+                            // Divider
+                            Divider(
+                                height: 1,
+                                thickness: 2,
+                                color: isDark
+                                    ? const Color(0xFF4B5563)
+                                    : AppTheme.paymentColor),
+                            // Total Payments
+                            _buildTableRow(
+                              [
+                                model.userType == UserType.personal
+                                    ? model.t('label_total_expenses')
+                                    : model.t('label_total_payments'),
+                                _formatAmount(totalPaymentsCash + closingCash),
+                                _formatAmount(totalPaymentsBank + closingBank),
+                                _formatAmount(totalPaymentsCash +
+                                    totalPaymentsBank +
+                                    totalClosing)
+                              ],
+                              isDark,
+                              isBold: true,
+                              color: AppTheme.paymentColor,
+                            ),
+                          ],
+                          isDark,
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Closing Balance Summary
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
@@ -1395,63 +1280,39 @@ class _AccountingFormState extends State<AccountingForm>
                             ),
                           ),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Section Header
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.account_balance_wallet,
-                                    color: const Color(0xFFF59E0B),
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Total Loan Liabilities',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark
-                                          ? Colors.white
-                                          : Colors.black87,
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                'Closing Balance Summary',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
                               ),
                               const SizedBox(height: 16),
-
-                              // Loans Summary Row
                               Row(
                                 children: [
                                   Expanded(
                                     child: Column(
                                       children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(Icons.arrow_downward,
-                                                color: const Color(0xFFEF4444),
-                                                size: 16),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              'Loans Received',
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: isDark
-                                                    ? Colors.grey[400]
-                                                    : Colors.grey[600],
-                                              ),
-                                            ),
-                                          ],
+                                        Text(
+                                          'Closing Cash',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: isDark
+                                                ? Colors.grey[400]
+                                                : Colors.grey[600],
+                                          ),
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          '$currencySymbol${_formatAmount(totalLoansReceived)}',
-                                          style: const TextStyle(
-                                            fontSize: 16,
+                                          '$currencySymbol${_formatAmount(closingCash)}',
+                                          style: TextStyle(
+                                            fontSize: 18,
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFFEF4444),
+                                            color: closingCash >= 0
+                                                ? AppTheme.receiptColor
+                                                : AppTheme.paymentColor,
                                           ),
                                         ),
                                       ],
@@ -1467,32 +1328,55 @@ class _AccountingFormState extends State<AccountingForm>
                                   Expanded(
                                     child: Column(
                                       children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(Icons.arrow_upward,
-                                                color: const Color(0xFF10B981),
-                                                size: 16),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              'Loan Repayments',
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: isDark
-                                                    ? Colors.grey[400]
-                                                    : Colors.grey[600],
-                                              ),
-                                            ),
-                                          ],
+                                        Text(
+                                          'Closing Bank',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: isDark
+                                                ? Colors.grey[400]
+                                                : Colors.grey[600],
+                                          ),
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          '$currencySymbol${_formatAmount(totalLoanRepayments)}',
-                                          style: const TextStyle(
-                                            fontSize: 16,
+                                          '$currencySymbol${_formatAmount(closingBank)}',
+                                          style: TextStyle(
+                                            fontSize: 18,
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF10B981),
+                                            color: closingBank >= 0
+                                                ? AppTheme.receiptColor
+                                                : AppTheme.paymentColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 50,
+                                    color: isDark
+                                        ? const Color(0xFF374151)
+                                        : const Color(0xFFE5E7EB),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'Total Closing',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: isDark
+                                                ? Colors.grey[400]
+                                                : Colors.grey[600],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          '$currencySymbol${_formatAmount(totalClosing)}',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFF4F46E5),
                                           ),
                                         ),
                                       ],
@@ -1500,114 +1384,243 @@ class _AccountingFormState extends State<AccountingForm>
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
-
-                              // Net Outstanding Liability
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(14),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: netLoanLiability > 0
-                                        ? [
-                                            const Color(0xFFEF4444),
-                                            const Color(0xFFDC2626)
-                                          ]
-                                        : [
-                                            const Color(0xFF10B981),
-                                            const Color(0xFF059669)
-                                          ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      netLoanLiability > 0
-                                          ? 'Net Outstanding Liability'
-                                          : 'Loans Fully Repaid',
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          netLoanLiability > 0
-                                              ? Icons.warning_amber_rounded
-                                              : Icons.check_circle,
-                                          color: Colors.white,
-                                          size: 22,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          '$currencySymbol${_formatAmount(netLoanLiability.abs())}',
-                                          style: const TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    if (netLoanLiability > 0) ...[
-                                      const SizedBox(height: 4),
-                                      const Text(
-                                        'Amount pending to be repaid',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.white70,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
                             ],
                           ),
                         ),
-                      ],
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            _showSaveReportDialog(context, model);
-                          },
-                          icon: const Icon(Icons.save_rounded, size: 20),
-                          label: Text(
-                            model.t('label_save_report'),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+
+                        // --- LOAN LIABILITIES SECTION ---
+                        if (hasLoanTransactions) ...[
+                          const SizedBox(height: 24),
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF111827)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF374151)
+                                    : const Color(0xFFE5E7EB),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Section Header
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.account_balance_wallet,
+                                      color: const Color(0xFFF59E0B),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Total Loan Liabilities',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Loans Summary Row
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.arrow_downward,
+                                                  color:
+                                                      const Color(0xFFEF4444),
+                                                  size: 16),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                'Loans Received',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: isDark
+                                                      ? Colors.grey[400]
+                                                      : Colors.grey[600],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            '$currencySymbol${_formatAmount(totalLoansReceived)}',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFFEF4444),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 1,
+                                      height: 50,
+                                      color: isDark
+                                          ? const Color(0xFF374151)
+                                          : const Color(0xFFE5E7EB),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.arrow_upward,
+                                                  color:
+                                                      const Color(0xFF10B981),
+                                                  size: 16),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                'Loan Repayments',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: isDark
+                                                      ? Colors.grey[400]
+                                                      : Colors.grey[600],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            '$currencySymbol${_formatAmount(totalLoanRepayments)}',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF10B981),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Net Outstanding Liability
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: netLoanLiability > 0
+                                          ? [
+                                              const Color(0xFFEF4444),
+                                              const Color(0xFFDC2626)
+                                            ]
+                                          : [
+                                              const Color(0xFF10B981),
+                                              const Color(0xFF059669)
+                                            ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        netLoanLiability > 0
+                                            ? 'Net Outstanding Liability'
+                                            : 'Loans Fully Repaid',
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            netLoanLiability > 0
+                                                ? Icons.warning_amber_rounded
+                                                : Icons.check_circle,
+                                            color: Colors.white,
+                                            size: 22,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            '$currencySymbol${_formatAmount(netLoanLiability.abs())}',
+                                            style: const TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (netLoanLiability > 0) ...[
+                                        const SizedBox(height: 4),
+                                        const Text(
+                                          'Amount pending to be repaid',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF10B981), // Green
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                        ],
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              _showSaveReportDialog(context, model);
+                            },
+                            icon: const Icon(Icons.save_rounded, size: 20),
+                            label: Text(
+                              model.t('label_save_report'),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            elevation: 2,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF10B981), // Green
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 2,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -1618,7 +1631,7 @@ class _AccountingFormState extends State<AccountingForm>
       children: [
         // Table Header
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: headerColor,
             borderRadius: const BorderRadius.only(
@@ -1663,7 +1676,7 @@ class _AccountingFormState extends State<AccountingForm>
   Widget _buildTableRow(List<String> cells, bool isDark,
       {bool isHeader = false, bool isBold = false, Color? color}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(

@@ -27,11 +27,11 @@ class AuthService {
     try {
       await _googleSignIn.initialize(
         clientId: kIsWeb
-            ? (dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '')
-            : (defaultTargetPlatform == TargetPlatform.iOS
-                ? (dotenv.env['GOOGLE_IOS_CLIENT_ID'] ?? '')
-                : null),
-        serverClientId: dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '',
+            ? (dotenv.env['WEB_CLIENT'] ?? '')
+            : (Platform.isAndroid
+                ? (dotenv.env['ANDROID_CLIENT'] ?? '')
+                : (Platform.isIOS ? (dotenv.env['IOS_CLIENT'] ?? '') : null)),
+        serverClientId: dotenv.env['WEB_CLIENT'] ?? '',
       );
     } catch (e) {
       // Log the error but don't crash the app
@@ -109,10 +109,9 @@ class AuthService {
 
   // Use the Web Client ID you generated in Google Cloud:
   // Google Client IDs from Environment
-  static String get kWebClientId => dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '';
-  static String get kAndroidClientId =>
-      dotenv.env['GOOGLE_ANDROID_CLIENT_ID'] ?? '';
-  static String get kIosClientId => dotenv.env['GOOGLE_IOS_CLIENT_ID'] ?? '';
+  static String get kWebClientId => dotenv.env['WEB_CLIENT'] ?? '';
+  static String get kAndroidClientId => dotenv.env['ANDROID_CLIENT'] ?? '';
+  static String get kIosClientId => dotenv.env['IOS_CLIENT'] ?? '';
 
   // Sign In with Google
   Future<AuthResponse> signInWithGoogle() async {
