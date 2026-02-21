@@ -1800,7 +1800,7 @@ class _AccountingFormState extends State<AccountingForm>
                   child: SingleChildScrollView(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 24), // Increased padding
+                          horizontal: 20, vertical: 16), // Increased padding
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1812,43 +1812,42 @@ class _AccountingFormState extends State<AccountingForm>
                               children: [
                                 Icon(
                                   Icons.arrow_back_ios_new,
-                                  size: 18, // Increased size
+                                  size: 16,
                                   color: isDark
                                       ? const Color(0xFF9CA3AF)
-                                      : Colors
-                                          .black, // Changed to black for better visibility
+                                      : Colors.black54,
                                 ),
-                                const SizedBox(width: 8), // Increased spacing
+                                const SizedBox(width: 6),
                                 Text(
                                   model.t('link_back_dashboard'),
                                   style: GoogleFonts.outfit(
-                                    fontSize: 16, // Increased font size
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: isDark
                                         ? const Color(0xFF9CA3AF)
-                                        : Colors.black,
+                                        : Colors.black54,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 12),
 
                           // ── IDENTITY CARD ──────────────────────────────────
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 18),
+                                horizontal: 16, vertical: 16),
                             decoration: BoxDecoration(
                               color: isDark
                                   ? const Color(0xFF1E293B)
                                   : const Color(0xFFF8FAFF),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: isDark
                                     ? const Color(0xFF334155)
                                     : const Color(0xFFE0E7FF),
-                                width: 1.5,
+                                width: 1,
                               ),
                             ),
                             child: Column(
@@ -1865,7 +1864,7 @@ class _AccountingFormState extends State<AccountingForm>
                                             : _getHeaderHint(
                                                 widget.templateKey),
                                         style: GoogleFonts.outfit(
-                                          fontSize: 26,
+                                          fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                           color: _headerTitleController
                                                   .text.isNotEmpty
@@ -1902,7 +1901,7 @@ class _AccountingFormState extends State<AccountingForm>
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 8),
 
                                 // Divider
                                 Container(
@@ -1919,7 +1918,7 @@ class _AccountingFormState extends State<AccountingForm>
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 8),
 
                                 // Page type + subtitle row
                                 Row(
@@ -1932,7 +1931,7 @@ class _AccountingFormState extends State<AccountingForm>
                                             ? model.pageTitle!
                                             : useCasePageTitle(model.userType),
                                         style: GoogleFonts.outfit(
-                                          fontSize: 18,
+                                          fontSize: 15,
                                           fontWeight: FontWeight.w700,
                                           color: const Color(0xFF4F46E5),
                                         ),
@@ -2104,7 +2103,7 @@ class _AccountingFormState extends State<AccountingForm>
                                     ],
                                   ],
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 4),
                                 Text(
                                   model.t('subtitle_track_income_expenses'),
                                   style: TextStyle(
@@ -2119,7 +2118,7 @@ class _AccountingFormState extends State<AccountingForm>
                             ),
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 12),
 
                           // Currency Dropdown
                           Center(
@@ -2269,12 +2268,12 @@ class _AccountingFormState extends State<AccountingForm>
                             ),
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
 
                           // Duration + Period in a row
                           _buildDurationAndPeriod(isDark, model),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 12),
 
                           // ── GENERATE REPORT BUTTON ──────────────────────
                           if (widget.initialState != null) ...[
@@ -2357,7 +2356,7 @@ class _AccountingFormState extends State<AccountingForm>
                                   backgroundColor: const Color(0xFF10B981),
                                   foregroundColor: Colors.white,
                                   padding:
-                                      const EdgeInsets.symmetric(vertical: 16),
+                                      const EdgeInsets.symmetric(vertical: 13),
                                   elevation: 2,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
@@ -2376,25 +2375,25 @@ class _AccountingFormState extends State<AccountingForm>
                                 _showDetailedReport(context, model);
                               },
                               icon:
-                                  const Icon(Icons.bar_chart_rounded, size: 22),
+                                  const Icon(Icons.bar_chart_rounded, size: 20),
                               label: const Text(
                                 'Generate Balance Report',
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.3,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.2,
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.receiptColor,
                                 foregroundColor: Colors.white,
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 18),
-                                elevation: 3,
+                                    const EdgeInsets.symmetric(vertical: 13),
+                                elevation: 2,
                                 shadowColor: AppTheme.receiptColor
-                                    .withValues(alpha: 0.4),
+                                    .withValues(alpha: 0.3),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
                             ),
