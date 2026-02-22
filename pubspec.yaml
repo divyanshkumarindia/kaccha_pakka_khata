@@ -1,7 +1,11 @@
 name: kaccha_pakka_khata
 description: A minimal Flutter project skeleton for Kaccha Pakka Khata.
 publish_to: 'none'
-version: 1.0.0+4
+version: 1.1.0+5
+# Here the first 1 is for Major Version, in this case we add a big change.
+# the second 1 is for Minor Version, in this case we add a new feature.
+# the third 0 is for Patch Version, in this case we fix a bug.
+# the fourth 0 is for Build Number, in this case we do a small change.
 # Version of the app
 # Never Change it after Publishing, It will be treated as a unique identifier for your app.
 # But when you make a change in the app, you need to increment the version number.
@@ -59,3 +63,4 @@ flutter:
     - .env
     - assets/icon/
     - assets/
+    - shorebird.yaml
