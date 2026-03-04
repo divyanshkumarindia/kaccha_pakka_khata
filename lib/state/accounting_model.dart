@@ -471,6 +471,7 @@ class AccountingModel extends ChangeNotifier {
     String baseName = originalName;
 
     // Check if the name already has a (copy N) pattern
+    // ignore: deprecated_member_use
     final copyPattern = RegExp(r'\s*\(copy\s*\d*\)\s*$', caseSensitive: false);
     if (copyPattern.hasMatch(originalName)) {
       baseName = originalName.replaceAll(copyPattern, '').trim();
@@ -478,6 +479,7 @@ class AccountingModel extends ChangeNotifier {
 
     // Find all existing copies of this base name
     int maxCopyNumber = 0;
+    // ignore: deprecated_member_use
     final copyNumberPattern = RegExp(r'\(copy\s*(\d+)\)', caseSensitive: false);
 
     for (var label in existingLabels.values) {

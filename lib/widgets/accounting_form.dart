@@ -687,7 +687,9 @@ class _AccountingFormState extends State<AccountingForm>
       String formatted = amount.toStringAsFixed(2);
       // Remove trailing zeros after decimal point
       if (formatted.contains('.')) {
+        // ignore: deprecated_member_use
         formatted = formatted.replaceAll(RegExp(r'0+$'), '');
+        // ignore: deprecated_member_use
         formatted = formatted.replaceAll(RegExp(r'\.$'), '');
       }
       return formatted;
@@ -4767,6 +4769,7 @@ class _AccountingFormState extends State<AccountingForm>
                                             decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(
+                                          // ignore: deprecated_member_use
                                           RegExp(r'^\d*\.?\d*')),
                                     ],
                                     decoration: InputDecoration(
@@ -4830,6 +4833,7 @@ class _AccountingFormState extends State<AccountingForm>
                                             decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(
+                                          // ignore: deprecated_member_use
                                           RegExp(r'^\d*\.?\d*')),
                                     ],
                                     decoration: InputDecoration(

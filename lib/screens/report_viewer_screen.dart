@@ -1059,7 +1059,9 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
     if (amount == amount.roundToDouble()) return amount.toInt().toString();
     String formatted = amount.toStringAsFixed(2);
     if (formatted.contains('.')) {
+      // ignore: deprecated_member_use
       formatted = formatted.replaceAll(RegExp(r'0+$'), '');
+      // ignore: deprecated_member_use
       formatted = formatted.replaceAll(RegExp(r'\.$'), '');
     }
     return formatted;

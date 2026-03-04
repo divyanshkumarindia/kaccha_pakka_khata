@@ -399,6 +399,7 @@ class _BalanceCardState extends State<BalanceCard> {
                           const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
+                            // ignore: deprecated_member_use
                             RegExp(r'^\d*\.?\d*')),
                       ],
                       decoration: InputDecoration(

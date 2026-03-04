@@ -25,6 +25,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
 
+    // ignore: deprecated_member_use
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(email)) {
       ToastUtils.showErrorToast(context, 'Please enter a valid email address.',
