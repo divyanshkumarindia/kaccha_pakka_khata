@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'services/auth_service.dart';
 import 'state/accounting_model.dart';
 import 'state/app_state.dart';
@@ -35,8 +36,38 @@ void main() async {
       ),
     );
     debugPrint('✅ Supabase Initialized');
+
+    // Supabase Auth State Change Listener for OneSignal
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final AuthChangeEvent event = data.event;
+      final Session? session = data.session;
+
+      try {
+        if (event == AuthChangeEvent.signedIn && session != null) {
+          final userId = session.user.id;
+          OneSignal.login(userId);
+          debugPrint('✅ OneSignal login successful for user: $userId');
+        } else if (event == AuthChangeEvent.signedOut) {
+          OneSignal.logout();
+          debugPrint('✅ OneSignal logout successful');
+        }
+      } catch (e) {
+        debugPrint('❌ OneSignal auth sync error: $e');
+      }
+    });
   } catch (e) {
     debugPrint('❌ Supabase initialization error: $e');
+  }
+
+  // Initialize OneSignal
+  try {
+    debugPrint('⏳ Initializing OneSignal...');
+    OneSignal.initialize("888349b2-9a69-4914-a58e-7fc9d9d22877");
+    // Request permission safely when app is ready
+    OneSignal.Notifications.requestPermission(true);
+    debugPrint('✅ OneSignal Initialized');
+  } catch (e) {
+    debugPrint('❌ OneSignal initialization error: $e');
   }
 
   debugPrint('🚀 Calling runApp...');

@@ -32,6 +32,7 @@ dependencies:
   google_sign_in: ^7.2.0
   share_plus: ^12.0.1
   universal_html: ^2.2.4
+  onesignal_flutter: ^5.4.1
 
 dev_dependencies:
   flutter_test:
