@@ -97,17 +97,37 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Kaccha Pakka Khata',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      builder: (context, child) => GestureDetector(
-        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: child,
-      ),
+    return Consumer<AccountingModel>(
+      builder: (context, accountingModel, child) {
+        ThemeMode appThemeMode = ThemeMode.system;
+        if (accountingModel.themeMode == 'dark') {
+          appThemeMode = ThemeMode.dark;
+        } else if (accountingModel.themeMode == 'light') {
+          appThemeMode = ThemeMode.light;
+        }
+
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Kaccha Pakka Khata',
+          themeMode: appThemeMode,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.light,
+            ),
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.dark,
+            ),
+            useMaterial3: true,
+          ),
+          builder: (context, child) => GestureDetector(
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: child,
+          ),
       home: StreamBuilder<AuthState>(
         stream: AuthService().authStateChanges,
         builder: (context, snapshot) {
@@ -141,6 +161,8 @@ class MyApp extends StatelessWidget {
             const AccountingTemplateScreen(templateKey: 'institute'),
         '/accounting/other': (context) =>
             const AccountingTemplateScreen(templateKey: 'other'),
+      },
+        );
       },
     );
   }
