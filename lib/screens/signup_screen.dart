@@ -80,11 +80,20 @@ class _SignupScreenState extends State<SignupScreen>
           ),
         );
       }
+    } on AuthException catch (e) {
+      if (mounted) {
+        String message = e.message;
+        if (message.toLowerCase().contains('socketexception') || 
+            message.toLowerCase().contains('failed host lookup')) {
+          message = 'No internet connection. Please check your network settings.';
+        }
+        ToastUtils.showErrorToast(context, message, bottomPadding: 25.0);
+      }
     } catch (e) {
       if (mounted) {
         String errorMessage = 'Failed to sign up: ${e.toString()}';
-        if (e.toString().contains('SocketException') ||
-            e.toString().contains('Failed host lookup')) {
+        if (e.toString().toLowerCase().contains('socketexception') ||
+            e.toString().toLowerCase().contains('failed host lookup')) {
           errorMessage =
               'No internet connection. Please check your network settings.';
         }

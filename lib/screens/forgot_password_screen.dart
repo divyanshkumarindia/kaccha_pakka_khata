@@ -55,10 +55,30 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         );
       }
+    } on AuthException catch (e) {
+      if (mounted) {
+        String message = e.message;
+        if (message.toLowerCase().contains('socketexception') || 
+            message.toLowerCase().contains('failed host lookup')) {
+          message = 'No internet connection. Please check your network settings.';
+        } else if (message.toLowerCase().contains('rate limit') || 
+                   message.toLowerCase().contains('60 seconds')) {
+          message = 'Too many requests. Please wait a minute before trying again.';
+        }
+        ToastUtils.showErrorToast(context, message, bottomPadding: 25.0);
+      }
     } catch (e) {
       if (mounted) {
-        ToastUtils.showErrorToast(context, 'Error: ${e.toString()}',
-            bottomPadding: 25.0);
+        String errorMessage = 'Error: ${e.toString()}';
+        if (e.toString().toLowerCase().contains('socketexception') ||
+            e.toString().toLowerCase().contains('failed host lookup')) {
+          errorMessage =
+              'No internet connection. Please check your network settings.';
+        } else if (errorMessage.toLowerCase().contains('rate limit') || 
+                   errorMessage.toLowerCase().contains('60 seconds')) {
+          errorMessage = 'Too many requests. Please wait a minute before trying again.';
+        }
+        ToastUtils.showErrorToast(context, errorMessage, bottomPadding: 25.0);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
