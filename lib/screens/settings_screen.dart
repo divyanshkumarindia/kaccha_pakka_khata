@@ -223,14 +223,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _buildSettingTile(
                         context,
                         'Custom Invoice Logo',
-                        model.invoiceLogoBase64 != null 
+                        (model.invoiceLogoBase64 != null && model.invoiceLogoBase64!.isNotEmpty)
                             ? 'Logo uploaded (Tap to change)' 
                             : 'Upload logo for PDF reports',
                         Icons.image_rounded,
                         const Color(0xFFEAB308), // Yellow
                         () => _pickInvoiceLogo(context, model),
                         isDark,
-                        trailing: model.invoiceLogoBase64 != null
+                        trailing: (model.invoiceLogoBase64 != null && model.invoiceLogoBase64!.isNotEmpty)
                             ? Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -241,6 +241,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       width: 32,
                                       height: 32,
                                       fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 32, color: Colors.grey),
                                     ),
                                   ),
                                   const SizedBox(width: 8),

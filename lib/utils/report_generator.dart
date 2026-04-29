@@ -462,7 +462,7 @@ class ReportGenerator {
           pw.Center(
             child: pw.Column(
               children: [
-                if (model.invoiceLogoBase64 != null)
+                if (model.invoiceLogoBase64 != null && model.invoiceLogoBase64!.isNotEmpty)
                   pw.Container(
                     margin: const pw.EdgeInsets.only(bottom: 8),
                     height: 60,
