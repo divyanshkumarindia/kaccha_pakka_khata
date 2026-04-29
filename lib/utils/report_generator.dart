@@ -462,6 +462,15 @@ class ReportGenerator {
           pw.Center(
             child: pw.Column(
               children: [
+                if (model.invoiceLogoBase64 != null)
+                  pw.Container(
+                    margin: const pw.EdgeInsets.only(bottom: 8),
+                    height: 60,
+                    child: pw.Image(
+                      pw.MemoryImage(base64Decode(model.invoiceLogoBase64!)),
+                      fit: pw.BoxFit.contain,
+                    ),
+                  ),
                 pw.Text(
                   firmName,
                   style: pw.TextStyle(

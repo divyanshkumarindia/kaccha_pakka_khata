@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
 import '../services/auth_service.dart';
@@ -213,6 +214,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 24),
 
+                  // Report Settings
+                  _buildSectionHeader(
+                      'Report Settings', Icons.picture_as_pdf_rounded, isDark),
+                  _buildSettingsCard(
+                    isDark,
+                    [
+                      _buildSettingTile(
+                        context,
+                        'Custom Invoice Logo',
+                        model.invoiceLogoBase64 != null 
+                            ? 'Logo uploaded (Tap to change)' 
+                            : 'Upload logo for PDF reports',
+                        Icons.image_rounded,
+                        const Color(0xFFEAB308), // Yellow
+                        () => _pickInvoiceLogo(context, model),
+                        isDark,
+                        trailing: model.invoiceLogoBase64 != null
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: Image.memory(
+                                      base64Decode(model.invoiceLogoBase64!),
+                                      width: 32,
+                                      height: 32,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    icon: const Icon(Icons.close_rounded, size: 20),
+                                    color: Colors.red,
+                                    onPressed: () {
+                                      model.setInvoiceLogo(null);
+                                    },
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+                                ],
+                              )
+                            : null,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
                   // Data Management
                   _buildSectionHeader(
                       model.t('sec_data'), Icons.storage_rounded, isDark),
@@ -401,6 +449,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool isDark, {
     bool isDestructive = false,
     Color? customIconColor,
+    Widget? trailing,
   }) {
     return Material(
       color: Colors.transparent,
@@ -457,8 +506,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
 
-              // Arrow
-              Icon(
+              // Trailing or Arrow
+              if (trailing != null) trailing
+              else Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,
                 color: isDark ? Colors.white24 : Colors.grey.shade300,
@@ -1039,6 +1089,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
 
+
+  Future<void> _pickInvoiceLogo(BuildContext context, AccountingModel model) async {
+    final picker = ImagePicker();
+    try {
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 500,
+        maxHeight: 500,
+        imageQuality: 80,
+      );
+      
+      if (image != null) {
+        final bytes = await image.readAsBytes();
+        final base64String = base64Encode(bytes);
+        model.setInvoiceLogo(base64String);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Logo updated successfully!', style: GoogleFonts.inter()),
+              backgroundColor: const Color(0xFF10B981),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error selecting image: $e', style: GoogleFonts.inter()),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      }
+    }
+  }
 
   void _showClearDataDialog(BuildContext context, AccountingModel model) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

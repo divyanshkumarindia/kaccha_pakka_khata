@@ -19,6 +19,7 @@ class AccountingModel extends ChangeNotifier {
   String periodStartDate;
   String periodEndDate;
   String language = 'en'; // Default to English ('en' or 'hi')
+  String? invoiceLogoBase64; // Custom PDF Branding Logo
 
   Map<String, List<TransactionEntry>> receiptAccounts = {};
   Map<String, List<TransactionEntry>> paymentAccounts = {};
@@ -97,6 +98,12 @@ class AccountingModel extends ChangeNotifier {
     saveToPrefs();
   }
 
+  void setInvoiceLogo(String? base64) {
+    invoiceLogoBase64 = base64;
+    notifyListeners();
+    saveToPrefs();
+  }
+
   // Persistence: simple JSON save/load using SharedPreferences + Supabase Cloud Sync
   Future<void> saveToPrefs() async {
     final prefs = await SharedPreferences.getInstance();
@@ -107,6 +114,7 @@ class AccountingModel extends ChangeNotifier {
       'paymentLabels': paymentLabels,
       'currency': currency,
       'language': language,
+      'invoiceLogoBase64': invoiceLogoBase64,
       'pageHeaderTitles': pageHeaderTitles,
       // Don't save opening balances or entry data - they should reset each time
     };
@@ -217,6 +225,7 @@ class AccountingModel extends ChangeNotifier {
       firmName = data['firmName'] ?? firmName;
       currency = data['currency'] ?? currency;
       language = data['language'] ?? 'en';
+      invoiceLogoBase64 = data['invoiceLogoBase64'];
 
       // Load header titles from main blob if valid there (fallback)
       if (data['pageHeaderTitles'] != null) {
