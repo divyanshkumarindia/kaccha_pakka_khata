@@ -8,6 +8,7 @@ import '../state/accounting_model.dart';
 import '../models/accounting.dart';
 import '../services/auth_service.dart';
 import 'welcome_screen.dart';
+import 'backup_sync_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -220,21 +221,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     [
                       _buildSettingTile(
                         context,
-                        model.t('label_backup'),
-                        model.t('desc_backup'),
-                        Icons.cloud_upload_rounded,
+                        'Backup & Sync',
+                        'Manage your cloud data',
+                        Icons.cloud_sync_rounded,
                         const Color(0xFF0EA5E9), // Sky
-                        () => _showBackupDialog(context, model),
-                        isDark,
-                      ),
-                      _buildDivider(isDark),
-                      _buildSettingTile(
-                        context,
-                        model.t('label_restore'),
-                        model.t('desc_restore'),
-                        Icons.settings_backup_restore_rounded,
-                        const Color(0xFF6366F1), // Indigo
-                        () => _showRestoreDialog(context, model),
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const BackupSyncScreen()),
+                          );
+                        },
                         isDark,
                       ),
                       _buildDivider(isDark),
@@ -1042,100 +1038,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showBackupDialog(BuildContext context, AccountingModel model) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(model.t('dialog_backup_title'),
-            style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content: Text(model.t('dialog_backup_msg'), style: GoogleFonts.inter()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              model.t('btn_cancel'),
-              style: GoogleFonts.outfit(
-                color: isDark ? Colors.white60 : Colors.grey.shade600,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              model.backupData();
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(model.t('msg_backup_success'),
-                      style: GoogleFonts.inter()),
-                  backgroundColor: const Color(0xFF10B981),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF10B981),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              elevation: 0,
-            ),
-            child: Text(model.t('btn_backup'), style: GoogleFonts.outfit()),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showRestoreDialog(BuildContext context, AccountingModel model) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(model.t('dialog_restore_title'),
-            style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content:
-            Text(model.t('dialog_restore_msg'), style: GoogleFonts.inter()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              model.t('btn_cancel'),
-              style: GoogleFonts.outfit(
-                color: isDark ? Colors.white60 : Colors.grey.shade600,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              model.restoreData();
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(model.t('msg_restore_success'),
-                      style: GoogleFonts.inter()),
-                  backgroundColor: const Color(0xFF10B981),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6366F1),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              elevation: 0,
-            ),
-            child: Text(model.t('btn_restore'), style: GoogleFonts.outfit()),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showClearDataDialog(BuildContext context, AccountingModel model) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

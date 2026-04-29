@@ -97,12 +97,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AccountingModel>(
-      builder: (context, accountingModel, child) {
+    return Selector<AccountingModel, String>(
+      selector: (context, accountingModel) => accountingModel.themeMode,
+      builder: (context, themeModeString, child) {
         ThemeMode appThemeMode = ThemeMode.system;
-        if (accountingModel.themeMode == 'dark') {
+        if (themeModeString == 'dark') {
           appThemeMode = ThemeMode.dark;
-        } else if (accountingModel.themeMode == 'light') {
+        } else if (themeModeString == 'light') {
           appThemeMode = ThemeMode.light;
         }
 

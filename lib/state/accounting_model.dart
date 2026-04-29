@@ -1103,15 +1103,13 @@ class AccountingModel extends ChangeNotifier {
   }
 
   Future<void> backupData() async {
-    // Placeholder for backup functionality
-    // In a real app, this would export data to a file
-    await Future.delayed(const Duration(seconds: 1));
+    // Force a push to cloud
+    await saveToPrefs();
   }
 
   Future<void> restoreData() async {
-    // Placeholder for restore functionality
-    // In a real app, this would import data from a file
-    await Future.delayed(const Duration(seconds: 1));
+    // Force a pull from cloud
+    await loadFromCloud();
   }
 
   Future<void> clearAllData() async {
