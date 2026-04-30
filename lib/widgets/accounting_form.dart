@@ -4712,17 +4712,23 @@ class _AccountingFormState extends State<AccountingForm>
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(
+                          color: isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB),
+                          width: 1.5,
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(
+                          color: isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB),
+                          width: 1.5,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(
                           color: AppTheme.primaryColor,
-                          width: 1.5,
+                          width: 2.0,
                         ),
                       ),
                       filled: true,
@@ -4844,6 +4850,7 @@ class _AccountingFormState extends State<AccountingForm>
                                           color: isDark
                                               ? const Color(0xFF4B5563)
                                               : const Color(0xFFD1D5DB),
+                                          width: 1.5,
                                         ),
                                       ),
                                       enabledBorder: OutlineInputBorder(
@@ -4852,6 +4859,7 @@ class _AccountingFormState extends State<AccountingForm>
                                           color: isDark
                                               ? const Color(0xFF4B5563)
                                               : const Color(0xFFD1D5DB),
+                                          width: 1.5,
                                         ),
                                       ),
                                       filled: true,
@@ -4908,6 +4916,7 @@ class _AccountingFormState extends State<AccountingForm>
                                           color: isDark
                                               ? const Color(0xFF4B5563)
                                               : const Color(0xFFD1D5DB),
+                                          width: 1.5,
                                         ),
                                       ),
                                       enabledBorder: OutlineInputBorder(
@@ -4916,6 +4925,7 @@ class _AccountingFormState extends State<AccountingForm>
                                           color: isDark
                                               ? const Color(0xFF4B5563)
                                               : const Color(0xFFD1D5DB),
+                                          width: 1.5,
                                         ),
                                       ),
                                       filled: true,
