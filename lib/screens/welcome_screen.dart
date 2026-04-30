@@ -160,7 +160,7 @@ class WelcomeScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 48), // Gap b/w buttons and bottom of the screen
                           ],
                         ),
                       ),
