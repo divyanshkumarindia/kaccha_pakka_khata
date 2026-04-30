@@ -457,6 +457,8 @@ class ReportGenerator {
           italic: italicFont,
         ),
         margin: const pw.EdgeInsets.all(32),
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        mainAxisAlignment: pw.MainAxisAlignment.center,
         build: (pw.Context context) => [
           // --- HEADER ---
           pw.Center(
@@ -524,6 +526,7 @@ class ReportGenerator {
 
           // --- INCOME / RECEIPTS TABLE ---
           pw.Container(
+            width: double.infinity,
             decoration: pw.BoxDecoration(
               color: PdfColors.green50, // Very light green
               borderRadius: const pw.BorderRadius.only(
@@ -543,6 +546,7 @@ class ReportGenerator {
             ),
           ),
           pw.Container(
+            width: double.infinity,
             color: PdfColors.green50,
             padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: pw.Column(
@@ -652,6 +656,7 @@ class ReportGenerator {
 
           // --- EXPENSES / PAYMENTS TABLE ---
           pw.Container(
+            width: double.infinity,
             decoration: pw.BoxDecoration(
               color: PdfColors.red50, // Very light red
               borderRadius: const pw.BorderRadius.only(
@@ -671,6 +676,7 @@ class ReportGenerator {
             ),
           ),
           pw.Container(
+            width: double.infinity,
             color: PdfColors.red50,
             padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: pw.Column(
@@ -754,6 +760,7 @@ class ReportGenerator {
 
           // --- CLOSING BALANCE SUMMARY ---
           pw.Container(
+            width: double.infinity,
             padding: const pw.EdgeInsets.all(16),
             decoration: pw.BoxDecoration(
               border: pw.Border.all(color: PdfColors.grey300),
