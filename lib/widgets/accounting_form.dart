@@ -1865,6 +1865,7 @@ class _AccountingFormState extends State<AccountingForm>
                                         style: GoogleFonts.outfit(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
+                                          // COLOR FOR THE FAMILY NAME PLACEHOLDER TEXT
                                           color: _headerTitleController
                                                   .text.isNotEmpty
                                               ? (isDark
@@ -1884,6 +1885,7 @@ class _AccountingFormState extends State<AccountingForm>
                                       child: Container(
                                         padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
+                                          // COLOR FOR THE EDIT PENCIL ICON BACKGROUND
                                           color: isDark
                                               ? const Color(0xFF334155) // Slate 700
                                               : const Color(0xFFF1F5F9), // Slate 100
@@ -1893,6 +1895,7 @@ class _AccountingFormState extends State<AccountingForm>
                                         child: Icon(
                                           Icons.edit_outlined,
                                           size: 16,
+                                          // COLOR FOR THE EDIT PENCIL ICON
                                           color: isDark
                                               ? const Color(0xFFCBD5E1) // Slate 300
                                               : const Color(0xFF475569), // Slate 600
@@ -5649,7 +5652,7 @@ class _ExpandableCategoryCardState extends State<ExpandableCategoryCard>
               ],
             ),
           ),
-q        ],
+        ],
       ),
     );
   }
