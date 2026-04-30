@@ -1867,11 +1867,12 @@ class _AccountingFormState extends State<AccountingForm>
                                           fontWeight: FontWeight.bold,
                                           color: _headerTitleController
                                                   .text.isNotEmpty
-                                              ? const Color(0xFF0F172A)
+                                              ? (isDark
+                                                  ? Colors.white
+                                                  : const Color(0xFF0F172A))
                                               : (isDark
-                                                  ? Colors.green.shade800
-                                                      .withValues(alpha: 0.5)
-                                                  : Colors.green.shade200),
+                                                  ? const Color(0xFF94A3B8) // Slate 400
+                                                  : const Color(0xFF64748B)), // Slate 500
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
@@ -1884,8 +1885,8 @@ class _AccountingFormState extends State<AccountingForm>
                                         padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
                                           color: isDark
-                                              ? const Color(0xFF374151)
-                                              : const Color(0xFFEEF2FF),
+                                              ? const Color(0xFF334155) // Slate 700
+                                              : const Color(0xFFF1F5F9), // Slate 100
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
@@ -1893,8 +1894,8 @@ class _AccountingFormState extends State<AccountingForm>
                                           Icons.edit_outlined,
                                           size: 16,
                                           color: isDark
-                                              ? const Color(0xFF9CA3AF)
-                                              : const Color(0xFF4F46E5),
+                                              ? const Color(0xFFCBD5E1) // Slate 300
+                                              : const Color(0xFF475569), // Slate 600
                                         ),
                                       ),
                                     ),
@@ -5648,7 +5649,7 @@ class _ExpandableCategoryCardState extends State<ExpandableCategoryCard>
               ],
             ),
           ),
-        ],
+q        ],
       ),
     );
   }
