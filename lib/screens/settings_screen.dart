@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
@@ -230,33 +231,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const Color(0xFFEAB308), // Yellow
                         () => _pickInvoiceLogo(context, model),
                         isDark,
-                        trailing: (model.invoiceLogoBase64 != null && model.invoiceLogoBase64!.isNotEmpty)
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(4),
-                                    child: Image.memory(
-                                      base64Decode(model.invoiceLogoBase64!),
-                                      width: 32,
-                                      height: 32,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 32, color: Colors.grey),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  IconButton(
-                                    icon: const Icon(Icons.close_rounded, size: 20),
-                                    color: Colors.red,
-                                    onPressed: () {
-                                      model.setInvoiceLogo(null);
-                                    },
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                  ),
-                                ],
-                              )
-                            : null,
+                        trailing: () {
+                          if (model.invoiceLogoBase64 == null || model.invoiceLogoBase64!.isEmpty) return null;
+                          Uint8List? bytes;
+                          try {
+                            String cleanBase64 = model.invoiceLogoBase64!;
+                            if (cleanBase64.contains(',')) {
+                              cleanBase64 = cleanBase64.split(',').last; // Remove data:image/... part if present
+                            }
+                            bytes = base64Decode(cleanBase64.replaceAll(RegExp(r'\s+'), ''));
+                          } catch (e) {
+                            bytes = null; // Failsafe against any FormatException
+                          }
+                          if (bytes == null) return null;
+                          
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: Image.memory(
+                                  bytes,
+                                  width: 32,
+                                  height: 32,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 32, color: Colors.grey),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.close_rounded, size: 20),
+                                color: Colors.red,
+                                onPressed: () {
+                                  model.setInvoiceLogo(null);
+                                },
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
+                          );
+                        }(),
                       ),
                     ],
                   ),

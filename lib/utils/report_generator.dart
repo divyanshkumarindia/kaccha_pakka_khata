@@ -463,14 +463,23 @@ class ReportGenerator {
             child: pw.Column(
               children: [
                 if (model.invoiceLogoBase64 != null && model.invoiceLogoBase64!.isNotEmpty)
-                  pw.Container(
-                    margin: const pw.EdgeInsets.only(bottom: 8),
-                    height: 60,
-                    child: pw.Image(
-                      pw.MemoryImage(base64Decode(model.invoiceLogoBase64!)),
-                      fit: pw.BoxFit.contain,
-                    ),
-                  ),
+                  () {
+                    try {
+                      String cleanBase64 = model.invoiceLogoBase64!;
+                      if (cleanBase64.contains(',')) cleanBase64 = cleanBase64.split(',').last;
+                      final bytes = base64Decode(cleanBase64.replaceAll(RegExp(r'\s+'), ''));
+                      return pw.Container(
+                        margin: const pw.EdgeInsets.only(bottom: 8),
+                        height: 60,
+                        child: pw.Image(
+                          pw.MemoryImage(bytes),
+                          fit: pw.BoxFit.contain,
+                        ),
+                      );
+                    } catch (e) {
+                      return pw.SizedBox(); // Hide if invalid
+                    }
+                  }(),
                 pw.Text(
                   firmName,
                   style: pw.TextStyle(

@@ -87,7 +87,7 @@ void main() async {
           return AuthService();
         }),
       ],
-      child: const MyApp(),
+      child: const MyApp(), 
     ),
   );
 }
