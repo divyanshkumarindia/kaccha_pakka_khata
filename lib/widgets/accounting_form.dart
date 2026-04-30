@@ -4463,17 +4463,40 @@ class _AccountingFormState extends State<AccountingForm>
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(model.t('dialog_duplicate_category_title')),
-                  content: Text(model.t('dialog_duplicate_category_msg')),
+                  backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  title: Text(
+                    model.t('dialog_duplicate_category_title'),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
+                  ),
+                  content: Text(
+                    model.t('dialog_duplicate_category_msg'),
+                    style: TextStyle(
+                      color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                    ),
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: Text(model.t('btn_cancel')),
+                      child: Text(
+                        model.t('btn_cancel'),
+                        style: TextStyle(
+                          color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                        ),
+                      ),
                     ),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context, true),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4F46E5),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                       child: Text(model.t('btn_duplicate')),
                     ),
@@ -4502,17 +4525,48 @@ class _AccountingFormState extends State<AccountingForm>
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(model.t('dialog_delete_category_title')),
-                  content: Text(model.t('dialog_delete_category_msg')),
+                  backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  title: Row(
+                    children: [
+                      Icon(Icons.warning_amber_rounded, color: Colors.red.shade400),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          model.t('dialog_delete_category_title'),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  content: Text(
+                    model.t('dialog_delete_category_msg'),
+                    style: TextStyle(
+                      color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                    ),
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: Text(model.t('btn_cancel')),
+                      child: Text(
+                        model.t('btn_cancel'),
+                        style: TextStyle(
+                          color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                        ),
+                      ),
                     ),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context, true),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                       child: Text(model.t('btn_delete')),
                     ),
