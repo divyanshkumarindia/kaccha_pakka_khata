@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb, debugPrint;
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../models/subscription.dart';
 import 'subscription_repository.dart';
@@ -30,6 +30,14 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
     if (_isInitialized) return;
 
     try {
+      // Skip on web — RevenueCat requires native mobile platform
+      if (kIsWeb) {
+        if (kDebugMode) {
+          debugPrint('⚠️ RevenueCat: Web platform not supported, skipping');
+        }
+        return;
+      }
+
       String apiKey;
       if (Platform.isIOS) {
         apiKey = _iosApiKey;

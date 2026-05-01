@@ -18,7 +18,6 @@ enum Feature {
   // --- Pro Features ---
   downloadPdfExcel,
   printReports,
-  darkMode,
   noAds,
   unlimitedKhatas,
   unlimitedReportHistory,
@@ -37,7 +36,6 @@ const Map<Feature, SubscriptionPlan> featureMinimumPlan = {
   // Pro tier
   Feature.downloadPdfExcel: SubscriptionPlan.pro,
   Feature.printReports: SubscriptionPlan.pro,
-  Feature.darkMode: SubscriptionPlan.pro,
   Feature.noAds: SubscriptionPlan.pro,
   Feature.unlimitedKhatas: SubscriptionPlan.pro,
   Feature.unlimitedReportHistory: SubscriptionPlan.pro,
@@ -55,7 +53,6 @@ const Map<Feature, SubscriptionPlan> featureMinimumPlan = {
 const Map<Feature, String> featureDisplayName = {
   Feature.downloadPdfExcel: 'Download PDF & Excel',
   Feature.printReports: 'Print Reports',
-  Feature.darkMode: 'Dark Mode',
   Feature.noAds: 'Ad-Free Experience',
   Feature.unlimitedKhatas: 'Unlimited Khatas',
   Feature.unlimitedReportHistory: 'Unlimited Report History',

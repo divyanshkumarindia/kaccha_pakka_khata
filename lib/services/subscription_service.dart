@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import '../models/subscription.dart';
 import '../repositories/subscription_repository.dart';
 
@@ -10,13 +11,15 @@ import '../repositories/subscription_repository.dart';
 /// Usage:
 /// ```dart
 /// final sub = Provider.of<SubscriptionService>(context, listen: false);
-/// if (sub.canAccess(Feature.darkMode)) { ... }
+/// if (sub.canAccess(Feature.downloadPdfExcel)) { enableExport(); }
+/// else { SubscriptionService.showFeatureGate(context, Feature.downloadPdfExcel); }
 /// ```
 class SubscriptionService extends ChangeNotifier {
   final SubscriptionRepository _repository;
   SubscriptionPlan _currentPlan = SubscriptionPlan.free;
   bool _isTrialActive = false;
   DateTime? _expirationDate;
+  bool _isInitialized = false;
   StreamSubscription<SubscriptionPlan>? _planSubscription;
 
   SubscriptionService(this._repository);
@@ -26,6 +29,7 @@ class SubscriptionService extends ChangeNotifier {
   SubscriptionPlan get currentPlan => _currentPlan;
   bool get isTrialActive => _isTrialActive;
   DateTime? get expirationDate => _expirationDate;
+  bool get isInitialized => _isInitialized;
 
   bool get isFree => _currentPlan == SubscriptionPlan.free;
   bool get isPro => _currentPlan.isAtLeast(SubscriptionPlan.pro);
@@ -34,6 +38,18 @@ class SubscriptionService extends ChangeNotifier {
   int get maxKhatas => PlanLimits.maxKhatas(_currentPlan);
   int get maxSavedReports => PlanLimits.maxSavedReports(_currentPlan);
   int get reportHistoryDays => PlanLimits.reportHistoryDays(_currentPlan);
+
+  /// Human-readable name for the current plan.
+  String get currentPlanDisplayName {
+    switch (_currentPlan) {
+      case SubscriptionPlan.free:
+        return 'Free';
+      case SubscriptionPlan.pro:
+        return 'Pro';
+      case SubscriptionPlan.premium:
+        return 'Premium';
+    }
+  }
 
   // ─── Core Guard Method ─────────────────────────────────────
 
@@ -77,15 +93,23 @@ class SubscriptionService extends ChangeNotifier {
       _currentPlan = await _repository.getCurrentPlan();
       _isTrialActive = await _repository.isTrialActive();
       _expirationDate = await _repository.getExpirationDate();
+      _isInitialized = true;
     } catch (e) {
       if (kDebugMode) debugPrint('SubscriptionService init error: $e');
       _currentPlan = SubscriptionPlan.free;
+      _isInitialized = true; // Mark as initialized even on error (fail-safe to Free)
     }
+
+    // Cancel any previous listener before creating a new one (prevents duplicates)
+    await _planSubscription?.cancel();
 
     // Listen for live plan updates (purchase, renewal, expiry)
     _planSubscription = _repository.planChanges.listen((plan) {
       if (_currentPlan != plan) {
         _currentPlan = plan;
+        // Refresh trial + expiration info when plan changes
+        _repository.isTrialActive().then((v) => _isTrialActive = v);
+        _repository.getExpirationDate().then((v) => _expirationDate = v);
         notifyListeners();
       }
     });
@@ -93,23 +117,24 @@ class SubscriptionService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Restore purchases (e.g. after reinstall).
-  Future<void> restorePurchases() async {
+  /// Restore purchases (e.g. after reinstall or app reset).
+  Future<SubscriptionPlan> restorePurchases() async {
     try {
       _currentPlan = await _repository.restorePurchases();
       _isTrialActive = await _repository.isTrialActive();
       _expirationDate = await _repository.getExpirationDate();
       notifyListeners();
+      return _currentPlan;
     } catch (e) {
       if (kDebugMode) debugPrint('Restore purchases error: $e');
+      return _currentPlan;
     }
   }
 
   /// Link the subscription state to a specific user.
   Future<void> loginUser(String userId) async {
     await _repository.loginUser(userId);
-    // Refresh state after login
-    await init();
+    await init(); // Refresh state after login
   }
 
   /// Disconnect user from subscription provider.
@@ -124,87 +149,160 @@ class SubscriptionService extends ChangeNotifier {
   // ─── UI Helpers ────────────────────────────────────────────
 
   /// Shows a feature gate dialog when a user tries to access a locked feature.
-  /// Returns true if the user upgraded (so the caller can retry the action).
-  ///
-  /// This is a placeholder that will be replaced with the beautiful paywall
-  /// in Phase 3. For now it shows a simple informational dialog.
+  /// If the user taps "Upgrade", it presents the RevenueCat Paywall.
+  /// Returns true if the user successfully upgraded.
   static Future<bool> showFeatureGate(
       BuildContext context, Feature feature) async {
     final featureName = featureDisplayName[feature] ?? 'This feature';
     final requiredPlan = featureMinimumPlan[feature] ?? SubscriptionPlan.pro;
-    final planName = requiredPlan == SubscriptionPlan.premium ? 'Premium' : 'Pro';
+    final planName =
+        requiredPlan == SubscriptionPlan.premium ? 'Premium' : 'Pro';
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            const Icon(Icons.lock_outline, color: Color(0xFF6366F1), size: 24),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                '$planName Feature',
-                style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.w700),
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return AlertDialog(
+          backgroundColor:
+              isDark ? const Color(0xFF1F2937) : Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6366F1).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.lock_outline,
+                    color: Color(0xFF6366F1), size: 22),
               ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '$featureName is available on the $planName plan.',
-              style: const TextStyle(fontSize: 15),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF6366F1).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.star, color: Color(0xFFF59E0B), size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Upgrade to $planName to unlock this and many more features!',
-                      style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w500),
-                    ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '$planName Feature',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
-                ],
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$featureName is available on the $planName plan.',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: isDark
+                      ? const Color(0xFFCBD5E1)
+                      : const Color(0xFF475569),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF6366F1).withValues(alpha: 0.12),
+                      const Color(0xFF8B5CF6).withValues(alpha: 0.08),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.auto_awesome,
+                        color: Color(0xFFF59E0B), size: 22),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Start your 14-day free trial of $planName today!',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? const Color(0xFFE2E8F0)
+                              : const Color(0xFF334155),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actionsPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(
+                'Maybe Later',
+                style: TextStyle(
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
+                ),
+              ),
+            ),
+            ElevatedButton.icon(
+              onPressed: () async {
+                Navigator.of(ctx).pop(true);
+              },
+              icon: const Icon(Icons.rocket_launch, size: 18),
+              label: Text('Upgrade to $planName'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6366F1),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Maybe Later'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(ctx).pop(true);
-              // TODO: Phase 3 — Navigate to Paywall screen
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6366F1),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-            ),
-            child: Text('Upgrade to $planName'),
-          ),
-        ],
-      ),
+        );
+      },
     );
 
-    return result ?? false;
+    // If user tapped "Upgrade", present the RevenueCat paywall
+    if (result == true && context.mounted) {
+      try {
+        final paywallResult = await RevenueCatUI.presentPaywall();
+        // PaywallResult.purchased or .restored means they upgraded
+        return paywallResult == PaywallResult.purchased ||
+            paywallResult == PaywallResult.restored;
+      } catch (e) {
+        if (kDebugMode) debugPrint('Paywall error: $e');
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  /// Directly opens the RevenueCat paywall without showing the gate dialog first.
+  /// Useful for the "Upgrade" button in settings / navigation drawer.
+  static Future<bool> showPaywall() async {
+    try {
+      final result = await RevenueCatUI.presentPaywall();
+      return result == PaywallResult.purchased ||
+          result == PaywallResult.restored;
+    } catch (e) {
+      if (kDebugMode) debugPrint('Paywall error: $e');
+      return false;
+    }
   }
 
   @override
