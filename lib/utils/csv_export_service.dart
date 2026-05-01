@@ -23,6 +23,9 @@ class CsvExportService {
 
       // Build CSV content
       final StringBuffer csv = StringBuffer();
+      
+      // Add UTF-8 BOM for Excel compatibility with special characters (like ₹)
+      csv.write('\uFEFF');
 
       // Helper to add CSV row
       void addRow(List<String> cells) {

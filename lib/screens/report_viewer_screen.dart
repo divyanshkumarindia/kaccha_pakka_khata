@@ -141,7 +141,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                               Expanded(
                                 flex: 1,
                                 child: _buildPremiumActionButton(
-                                  'Detailed Excel',
+                                  'Download Excel',
                                   Icons.file_download,
                                   AppTheme.receiptColor,
                                   () {

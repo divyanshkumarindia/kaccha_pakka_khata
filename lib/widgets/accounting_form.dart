@@ -614,11 +614,19 @@ class _AccountingFormState extends State<AccountingForm>
       String useCaseType = model.userType.name[0].toUpperCase() +
           model.userType.name.substring(1);
 
-      await _reportService.saveReport(
-        reportType,
-        reportData,
-        useCaseType: useCaseType,
-      );
+      if (widget.reportId != null) {
+        await _reportService.updateReport(
+          widget.reportId!,
+          reportData: reportData,
+          reportType: reportType,
+        );
+      } else {
+        await _reportService.saveReport(
+          reportType,
+          reportData,
+          useCaseType: useCaseType,
+        );
+      }
 
       // Update state to show checkmark
       if (mounted) {
@@ -843,7 +851,7 @@ class _AccountingFormState extends State<AccountingForm>
                           Expanded(
                             flex: 1,
                             child: _buildPremiumActionButton(
-                              'Detailed Excel',
+                              'Download Excel',
                               Icons.file_download,
                               AppTheme.receiptColor,
                               () {
