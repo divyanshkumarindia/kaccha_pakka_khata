@@ -13,6 +13,7 @@ import 'components/duration_period_picker.dart';
 import 'components/premium_card.dart';
 import 'package:kaccha_pakka_khata/state/app_state.dart';
 import '../utils/report_generator.dart';
+import '../utils/csv_export_service.dart';
 import 'package:kaccha_pakka_khata/services/report_service.dart';
 import 'package:kaccha_pakka_khata/services/user_config_service.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -836,23 +837,25 @@ class _AccountingFormState extends State<AccountingForm>
                   ),
                   child: Column(
                     children: [
-                      // Action Buttons Row
+                      // Row 1: Downloads (1/2 each)
                       Row(
                         children: [
                           Expanded(
+                            flex: 1,
                             child: _buildPremiumActionButton(
-                              'Download Excel',
+                              'Detailed Excel',
                               Icons.file_download,
                               AppTheme.receiptColor,
                               () {
                                 Navigator.pop(context);
-                                ReportGenerator.generateAndShareExcel(
+                                CsvExportService.generateAndShareDetailedCsv(
                                     context, model);
                               },
                             ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
+                            flex: 1,
                             child: _buildPremiumActionButton(
                               'Download PDF',
                               Icons.picture_as_pdf,
@@ -864,8 +867,14 @@ class _AccountingFormState extends State<AccountingForm>
                               },
                             ),
                           ),
-                          const SizedBox(width: 8),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // Row 2: Print (1/3) and Save (2/3)
+                      Row(
+                        children: [
                           Expanded(
+                            flex: 1,
                             child: _buildPremiumActionButton(
                               'Print',
                               Icons.print,
@@ -876,47 +885,48 @@ class _AccountingFormState extends State<AccountingForm>
                               },
                             ),
                           ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 2,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _saveReportToSupabase(context, model);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _reportJustSaved
+                                    ? const Color(0xFF059669) // Darker green
+                                    : const Color(0xFF10B981),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 14),
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    _reportJustSaved
+                                        ? Icons.check_circle
+                                        : Icons.save,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      _reportJustSaved ? 'Saved!' : 'Save Report',
+                                      style: const TextStyle(
+                                          fontSize: 15, fontWeight: FontWeight.w600),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Save Report Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _saveReportToSupabase(context, model);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _reportJustSaved
-                                ? const Color(
-                                    0xFF059669) // Darker green when saved
-                                : const Color(0xFF10B981),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 14),
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                _reportJustSaved
-                                    ? Icons.check_circle
-                                    : Icons.save,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                _reportJustSaved ? 'Saved!' : 'Save Report',
-                                style: const TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
                       ),
                     ],
                   ),

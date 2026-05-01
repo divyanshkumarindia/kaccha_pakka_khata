@@ -135,9 +135,11 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                       child: Column(
                         children: [
                           // Action Buttons Row
+                          // Row 1: Downloads (1/2 each)
                           Row(
                             children: [
                               Expanded(
+                                flex: 1,
                                 child: _buildPremiumActionButton(
                                   'Detailed Excel',
                                   Icons.file_download,
@@ -150,6 +152,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                               ),
                               const SizedBox(width: 8),
                               Expanded(
+                                flex: 1,
                                 child: _buildPremiumActionButton(
                                   'Download PDF',
                                   Icons.picture_as_pdf,
@@ -160,8 +163,14 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                                   },
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          // Row 2: Print (1/3) and Save (2/3)
+                          Row(
+                            children: [
                               Expanded(
+                                flex: 1,
                                 child: _buildPremiumActionButton(
                                   'Print Report',
                                   Icons.print,
@@ -172,46 +181,48 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                                   },
                                 ),
                               ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    _saveReportToSupabase(context, _model);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: _reportJustSaved
+                                        ? const Color(0xFF059669) // Darker green
+                                        : const Color(0xFF10B981),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14),
+                                    elevation: 2,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12)),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        _reportJustSaved
+                                            ? Icons.check_circle
+                                            : Icons.save,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Flexible(
+                                        child: Text(
+                                          _reportJustSaved ? 'Saved!' : 'Save Report',
+                                          style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ],
-                          ),
-                          const SizedBox(height: 12),
-                          // Save Report Button
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                _saveReportToSupabase(context, _model);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: _reportJustSaved
-                                    ? const Color(0xFF059669) // Darker green
-                                    : const Color(0xFF10B981),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 14),
-                                elevation: 2,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    _reportJustSaved
-                                        ? Icons.check_circle
-                                        : Icons.save,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    _reportJustSaved ? 'Saved!' : 'Save Report',
-                                    style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ),
                         ],
                       ),
