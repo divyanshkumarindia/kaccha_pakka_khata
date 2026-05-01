@@ -8,7 +8,9 @@ import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
+import '../models/subscription.dart';
 import '../services/auth_service.dart';
+import '../services/subscription_service.dart';
 import 'welcome_screen.dart';
 import 'backup_sync_screen.dart';
 import '../theme.dart';
@@ -158,6 +160,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(24),
                 children: [
+                  // ── Subscription Plan Card ──
+                  _buildSubscriptionCard(context, isDark),
+                  const SizedBox(height: 24),
+
                   // Account Settings
                   _buildSectionHeader(
                       model.t('sec_account'), Icons.person_rounded, isDark),
@@ -190,8 +196,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         '${model.currency} (${model.currencySymbol})',
                         Icons.payments_rounded,
                         const Color(0xFF10B981), // Emerald
-                        () => _showCurrencyDialog(context, model),
+                        () {
+                          final sub = Provider.of<SubscriptionService>(context, listen: false);
+                          if (sub.canAccess(Feature.multiCurrency)) {
+                            _showCurrencyDialog(context, model);
+                          } else {
+                            SubscriptionService.showFeatureGate(context, Feature.multiCurrency);
+                          }
+                        },
                         isDark,
+                        showLock: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.multiCurrency),
                       ),
                     ],
                   ),
@@ -240,8 +254,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             : 'Upload logo for PDF reports',
                         Icons.image_rounded,
                         const Color(0xFFEAB308), // Yellow
-                        () => _pickInvoiceLogo(context, model),
+                        () {
+                          final sub = Provider.of<SubscriptionService>(context, listen: false);
+                          if (sub.canAccess(Feature.customPdfBranding)) {
+                            _pickInvoiceLogo(context, model);
+                          } else {
+                            SubscriptionService.showFeatureGate(context, Feature.customPdfBranding);
+                          }
+                        },
                         isDark,
+                        showLock: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.customPdfBranding),
                         trailing: () {
                           if (model.invoiceLogoBase64 == null || model.invoiceLogoBase64!.isEmpty) return null;
                           Uint8List? bytes;
@@ -476,6 +498,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool isDestructive = false,
     Color? customIconColor,
     Widget? trailing,
+    bool showLock = false,
   }) {
     return Material(
       color: Colors.transparent,
@@ -506,15 +529,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.outfit(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: isDestructive
-                            ? (const Color(0xFFEF4444))
-                            : (isDark ? Colors.white : const Color(0xFF1E293B)),
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            title,
+                            style: GoogleFonts.outfit(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: isDestructive
+                                  ? (const Color(0xFFEF4444))
+                                  : (isDark ? Colors.white : const Color(0xFF1E293B)),
+                            ),
+                          ),
+                        ),
+                        if (showLock) ...[
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.lock_rounded,
+                            size: 14,
+                            color: isDark
+                                ? const Color(0xFF6366F1).withValues(alpha: 0.7)
+                                : const Color(0xFF6366F1),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -1456,6 +1495,214 @@ class _SettingsScreenState extends State<SettingsScreen> {
         onTap: () => onTap(value),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
+    );
+  }
+
+  /// Beautiful subscription plan card shown at the top of Settings.
+  Widget _buildSubscriptionCard(BuildContext context, bool isDark) {
+    return Consumer<SubscriptionService>(
+      builder: (context, sub, _) {
+        final isFree = sub.isFree;
+
+        // Plan-specific styling
+        final Color gradStart;
+        final Color gradEnd;
+        final IconData planIcon;
+        final String planLabel;
+        final String planDescription;
+
+        if (sub.isPremium) {
+          gradStart = const Color(0xFF7C3AED);
+          gradEnd = const Color(0xFFDB2777);
+          planIcon = Icons.diamond_rounded;
+          planLabel = 'Premium';
+          planDescription = 'You have access to all features!';
+        } else if (sub.isPro) {
+          gradStart = const Color(0xFF6366F1);
+          gradEnd = const Color(0xFF8B5CF6);
+          planIcon = Icons.star_rounded;
+          planLabel = 'Pro';
+          planDescription = 'Upgrade to Premium for cloud sync & more.';
+        } else {
+          gradStart = const Color(0xFF334155);
+          gradEnd = const Color(0xFF475569);
+          planIcon = Icons.person_rounded;
+          planLabel = 'Free';
+          planDescription = 'Upgrade to unlock powerful features!';
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [gradStart, gradEnd],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: gradStart.withValues(alpha: 0.3),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Top row: Plan badge + icon
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(planIcon, color: Colors.white, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'Current Plan',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                if (sub.isTrialActive) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF59E0B),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      'TRIAL',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              planLabel,
+                              style: GoogleFonts.outfit(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Description
+                  Text(
+                    planDescription,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha: 0.8),
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Action buttons
+                  Row(
+                    children: [
+                      if (isFree || sub.isPro) ...[
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              SubscriptionService.showPaywall();
+                            },
+                            icon: const Icon(Icons.rocket_launch_rounded, size: 18),
+                            label: Text(
+                              isFree ? 'Upgrade Now' : 'Go Premium',
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: gradStart,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                      ],
+                      // Restore button
+                      Material(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(14),
+                        child: InkWell(
+                          onTap: () async {
+                            final plan = await sub.restorePurchases();
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    plan == SubscriptionPlan.free
+                                        ? 'No previous purchases found.'
+                                        : 'Purchases restored! You\'re on ${sub.currentPlanDisplayName}.',
+                                  ),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                ),
+                              );
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(14),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 14),
+                            child: Text(
+                              'Restore',
+                              style: GoogleFonts.outfit(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
