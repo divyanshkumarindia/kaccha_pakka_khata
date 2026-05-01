@@ -160,7 +160,8 @@ class _AccountingFormState extends State<AccountingForm>
       '${d.day.toString().padLeft(2, '0')}-${d.month.toString().padLeft(2, '0')}-${d.year}';
 
   // Currency helper methods
-  String _getCurrencySymbol(String currencyCode) => AppTheme.getCurrencySymbol(currencyCode);
+  String _getCurrencySymbol(String currencyCode) =>
+      AppTheme.getCurrencySymbol(currencyCode);
 
   String _getCurrencyName(String currencyCode) {
     if (currencyCode == 'INR') return model.t('currency_rupee');
@@ -172,7 +173,6 @@ class _AccountingFormState extends State<AccountingForm>
     return AppTheme.getCurrencyName(currencyCode);
   }
 
-  List<String> _getAvailableCurrencies() => AppTheme.getAvailableCurrencies();
 
   DateTime? _parseDate(String s) {
     if (s.isEmpty) return null;
@@ -1773,8 +1773,10 @@ class _AccountingFormState extends State<AccountingForm>
                                                   ? Colors.white
                                                   : const Color(0xFF0F172A))
                                               : (isDark
-                                                  ? const Color(0xFF94A3B8) // Slate 400
-                                                  : const Color(0xFF64748B)), // Slate 500
+                                                  ? const Color(
+                                                      0xFF94A3B8) // Slate 400
+                                                  : const Color(
+                                                      0xFF64748B)), // Slate 500
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
@@ -1788,8 +1790,10 @@ class _AccountingFormState extends State<AccountingForm>
                                         decoration: BoxDecoration(
                                           // COLOR FOR THE EDIT PENCIL ICON BACKGROUND
                                           color: isDark
-                                              ? const Color(0xFF334155) // Slate 700
-                                              : const Color(0xFFF1F5F9), // Slate 100
+                                              ? const Color(
+                                                  0xFF334155) // Slate 700
+                                              : const Color(
+                                                  0xFFF1F5F9), // Slate 100
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
@@ -1798,8 +1802,10 @@ class _AccountingFormState extends State<AccountingForm>
                                           size: 16,
                                           // COLOR FOR THE EDIT PENCIL ICON
                                           color: isDark
-                                              ? const Color(0xFFCBD5E1) // Slate 300
-                                              : const Color(0xFF475569), // Slate 600
+                                              ? const Color(
+                                                  0xFFCBD5E1) // Slate 300
+                                              : const Color(
+                                                  0xFF475569), // Slate 600
                                         ),
                                       ),
                                     ),
@@ -2022,162 +2028,12 @@ class _AccountingFormState extends State<AccountingForm>
                             ),
                           ),
 
-                          const SizedBox(height: 12),
-
-                          // Currency Dropdown
-                          Center(
-                            child: InkWell(
-                              onTap: () async {
-                                final selected = await showDialog<String>(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    backgroundColor: isDark
-                                        ? const Color(0xFF1F2937)
-                                        : Colors.white,
-                                    title: Text(
-                                      model.t('dialog_select_currency'),
-                                      style: TextStyle(
-                                        color: isDark
-                                            ? Colors.white
-                                            : Colors.black87,
-                                      ),
-                                    ),
-                                    content: SizedBox(
-                                      width: double.maxFinite,
-                                      child: ListView.builder(
-                                        shrinkWrap: true,
-                                        itemCount:
-                                            _getAvailableCurrencies().length,
-                                        itemBuilder: (context, index) {
-                                          final currency =
-                                              _getAvailableCurrencies()[index];
-                                          final isSelected =
-                                              currency == model.currency;
-                                          return ListTile(
-                                            selected: isSelected,
-                                            selectedTileColor: isDark
-                                                ? const Color(0xFF374151)
-                                                : const Color(0xFFEEF2FF),
-                                            leading: Text(
-                                              _getCurrencySymbol(currency),
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: isSelected
-                                                    ? const Color(0xFF4F46E5)
-                                                    : (isDark
-                                                        ? Colors.grey[400]
-                                                        : Colors.grey[700]),
-                                              ),
-                                            ),
-                                            title: Text(
-                                              currency,
-                                              style: TextStyle(
-                                                fontWeight: isSelected
-                                                    ? FontWeight.bold
-                                                    : FontWeight.normal,
-                                                color: isSelected
-                                                    ? const Color(0xFF4F46E5)
-                                                    : (isDark
-                                                        ? Colors.white
-                                                        : Colors.black87),
-                                              ),
-                                            ),
-                                            subtitle: Text(
-                                              _getCurrencyName(currency),
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: isDark
-                                                    ? Colors.grey[400]
-                                                    : Colors.grey[600],
-                                              ),
-                                            ),
-                                            trailing: isSelected
-                                                ? const Icon(
-                                                    Icons.check_circle,
-                                                    color: Color(0xFF4F46E5),
-                                                  )
-                                                : null,
-                                            onTap: () => Navigator.pop(
-                                                context, currency),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: Text(
-                                          model.t('btn_cancel'),
-                                          style: TextStyle(
-                                            color: isDark
-                                                ? Colors.grey[400]
-                                                : Colors.grey[700],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                if (selected != null &&
-                                    selected != model.currency) {
-                                  model.setCurrency(selected);
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? const Color(0xFF374151)
-                                      : Colors.white,
-                                  border: Border.all(
-                                    color: isDark
-                                        ? const Color(0xFF4B5563)
-                                        : const Color(0xFFD1D5DB),
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      _getCurrencySymbol(model.currency),
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      '${model.currency} - ${_getCurrencyName(model.currency)}',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: isDark
-                                            ? const Color(0xFFE5E7EB)
-                                            : const Color(0xFF374151),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Icon(
-                                      Icons.arrow_drop_down,
-                                      color: isDark
-                                          ? const Color(0xFF9CA3AF)
-                                          : const Color(0xFF6B7280),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-
                           const SizedBox(height: 10),
 
                           // Duration + Period in a row
                           _buildDurationAndPeriod(isDark, model),
 
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
 
                           // ── GENERATE REPORT BUTTON ──────────────────────
                           if (widget.initialState != null) ...[
@@ -2302,7 +2158,7 @@ class _AccountingFormState extends State<AccountingForm>
                               ),
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
 
                           // Opening Balances Section
                           _buildOpeningBalancesSection(isDark, model),
@@ -4364,7 +4220,8 @@ class _AccountingFormState extends State<AccountingForm>
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+                  backgroundColor:
+                      isDark ? const Color(0xFF1F2937) : Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -4377,7 +4234,9 @@ class _AccountingFormState extends State<AccountingForm>
                   content: Text(
                     model.t('dialog_duplicate_category_msg'),
                     style: TextStyle(
-                      color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                      color: isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF6B7280),
                     ),
                   ),
                   actions: [
@@ -4386,7 +4245,9 @@ class _AccountingFormState extends State<AccountingForm>
                       child: Text(
                         model.t('btn_cancel'),
                         style: TextStyle(
-                          color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                          color: isDark
+                              ? const Color(0xFF9CA3AF)
+                              : const Color(0xFF6B7280),
                         ),
                       ),
                     ),
@@ -4426,19 +4287,22 @@ class _AccountingFormState extends State<AccountingForm>
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+                  backgroundColor:
+                      isDark ? const Color(0xFF1F2937) : Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   title: Row(
                     children: [
-                      Icon(Icons.warning_amber_rounded, color: Colors.red.shade400),
+                      Icon(Icons.warning_amber_rounded,
+                          color: Colors.red.shade400),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           model.t('dialog_delete_category_title'),
                           style: TextStyle(
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color:
+                                isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
                         ),
                       ),
@@ -4447,7 +4311,9 @@ class _AccountingFormState extends State<AccountingForm>
                   content: Text(
                     model.t('dialog_delete_category_msg'),
                     style: TextStyle(
-                      color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                      color: isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF6B7280),
                     ),
                   ),
                   actions: [
@@ -4456,7 +4322,9 @@ class _AccountingFormState extends State<AccountingForm>
                       child: Text(
                         model.t('btn_cancel'),
                         style: TextStyle(
-                          color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                          color: isDark
+                              ? const Color(0xFF9CA3AF)
+                              : const Color(0xFF6B7280),
                         ),
                       ),
                     ),
@@ -4614,14 +4482,18 @@ class _AccountingFormState extends State<AccountingForm>
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB),
+                          color: isDark
+                              ? const Color(0xFF4B5563)
+                              : const Color(0xFFD1D5DB),
                           width: 1.5,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB),
+                          color: isDark
+                              ? const Color(0xFF4B5563)
+                              : const Color(0xFFD1D5DB),
                           width: 1.5,
                         ),
                       ),
