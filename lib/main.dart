@@ -119,7 +119,7 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
           ),
           darkTheme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
+            colorScheme: ColorScheme.fromSeed( 
               seedColor: Colors.deepPurple,
               brightness: Brightness.dark,
             ),

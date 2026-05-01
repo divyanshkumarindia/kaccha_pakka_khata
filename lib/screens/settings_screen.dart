@@ -11,6 +11,7 @@ import '../models/accounting.dart';
 import '../services/auth_service.dart';
 import 'welcome_screen.dart';
 import 'backup_sync_screen.dart';
+import '../theme.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -180,6 +181,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.dashboard_customize_rounded,
                         const Color(0xFF8B5CF6), // Purple
                         () => _showHomePageLayoutDialog(context, model),
+                        isDark,
+                      ),
+                      _buildDivider(isDark),
+                      _buildSettingTile(
+                        context,
+                        'Currency',
+                        '${model.currency} (${model.currencySymbol})',
+                        Icons.payments_rounded,
+                        const Color(0xFF10B981), // Emerald
+                        () => _showCurrencyDialog(context, model),
                         isDark,
                       ),
                     ],
@@ -1139,6 +1150,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
     }
+  }
+
+  void _showCurrencyDialog(BuildContext context, AccountingModel model) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final availableCurrencies = AppTheme.getAvailableCurrencies();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Select Currency',
+            style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: availableCurrencies.length,
+            itemBuilder: (context, index) {
+              final code = availableCurrencies[index];
+              final symbol = AppTheme.getCurrencySymbol(code);
+              final name = AppTheme.getCurrencyName(code);
+              final isSelected = model.currency == code;
+
+              return ListTile(
+                title: Text(
+                  '$symbol $name',
+                  style: GoogleFonts.inter(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                trailing: isSelected
+                    ? const Icon(Icons.check_circle_rounded,
+                        color: Color(0xFF3B82F6))
+                    : null,
+                onTap: () {
+                  model.setCurrency(code);
+                  Navigator.pop(context);
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              model.t('btn_cancel'),
+              style: GoogleFonts.outfit(
+                color: isDark ? Colors.white60 : Colors.grey.shade600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showClearDataDialog(BuildContext context, AccountingModel model) {

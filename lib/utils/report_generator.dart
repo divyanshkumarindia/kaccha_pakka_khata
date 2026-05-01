@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:universal_html/html.dart' as html;
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
+import '../theme.dart';
 import 'package:intl/intl.dart';
 
 /// Utility class for generating reports in various formats
@@ -965,30 +966,11 @@ class ReportGenerator {
   }
 
   static String _formatCurrency(double amount, String currency) {
-    final symbol = _getCurrencySymbol(currency);
-    return '$symbol ${amount.toStringAsFixed(2)}';
+    final symbol = AppTheme.getCurrencySymbol(currency);
+    return '$symbol${amount.toStringAsFixed(2)}';
   }
 
-  static String _getCurrencySymbol(String currency) {
-    switch (currency) {
-      case 'INR':
-        return '₹';
-      case 'USD':
-        return '\$';
-      case 'EUR':
-        return '€';
-      case 'GBP':
-        return '£';
-      default:
-        return currency;
-    }
-  }
+  static String _getCurrencySymbol(String currencyCode) => AppTheme.getCurrencySymbol(currencyCode);
 
-  static String _getCurrencyName(String currencyCode) {
-    if (currencyCode == 'INR') return 'Indian Rupee';
-    if (currencyCode == 'USD') return 'US Dollar';
-    if (currencyCode == 'EUR') return 'Euro';
-    if (currencyCode == 'GBP') return 'British Pound';
-    return currencyCode;
-  }
+  static String _getCurrencyName(String currencyCode) => AppTheme.getCurrencyName(currencyCode);
 }

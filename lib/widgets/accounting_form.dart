@@ -160,41 +160,7 @@ class _AccountingFormState extends State<AccountingForm>
       '${d.day.toString().padLeft(2, '0')}-${d.month.toString().padLeft(2, '0')}-${d.year}';
 
   // Currency helper methods
-  String _getCurrencySymbol(String currencyCode) {
-    const currencySymbols = {
-      'INR': '₹',
-      'USD': '\$',
-      'EUR': '€',
-      'GBP': '£',
-      'JPY': '¥',
-      'AUD': 'A\$',
-      'CAD': 'C\$',
-      'CHF': 'CHF',
-      'CNY': '¥',
-      'SEK': 'kr',
-      'NZD': 'NZ\$',
-      'SGD': 'S\$',
-      'HKD': 'HK\$',
-      'NOK': 'kr',
-      'KRW': '₩',
-      'TRY': '₺',
-      'RUB': '₽',
-      'BRL': 'R\$',
-      'ZAR': 'R',
-      'MXN': 'Mex\$',
-      'AED': 'AED',
-      'SAR': 'SAR',
-      'THB': '฿',
-      'MYR': 'RM',
-      'IDR': 'Rp',
-      'PHP': '₱',
-      'PKR': 'Rs',
-      'BDT': '৳',
-      'LKR': 'Rs',
-      'NPR': 'Rs',
-    };
-    return currencySymbols[currencyCode] ?? currencyCode;
-  }
+  String _getCurrencySymbol(String currencyCode) => AppTheme.getCurrencySymbol(currencyCode);
 
   String _getCurrencyName(String currencyCode) {
     if (currencyCode == 'INR') return model.t('currency_rupee');
@@ -203,75 +169,10 @@ class _AccountingFormState extends State<AccountingForm>
     if (currencyCode == 'GBP') return model.t('currency_pound');
     if (currencyCode == 'JPY') return model.t('currency_yen');
 
-    const currencyNames = {
-      'INR': 'Indian Rupee',
-      'USD': 'US Dollar',
-      'EUR': 'Euro',
-      'GBP': 'British Pound',
-      'JPY': 'Japanese Yen',
-      'AUD': 'Australian Dollar',
-      'CAD': 'Canadian Dollar',
-      'CHF': 'Swiss Franc',
-      'CNY': 'Chinese Yuan',
-      'SEK': 'Swedish Krona',
-      'NZD': 'New Zealand Dollar',
-      'SGD': 'Singapore Dollar',
-      'HKD': 'Hong Kong Dollar',
-      'NOK': 'Norwegian Krone',
-      'KRW': 'South Korean Won',
-      'TRY': 'Turkish Lira',
-      'RUB': 'Russian Ruble',
-      'BRL': 'Brazilian Real',
-      'ZAR': 'South African Rand',
-      'MXN': 'Mexican Peso',
-      'AED': 'UAE Dirham',
-      'SAR': 'Saudi Riyal',
-      'THB': 'Thai Baht',
-      'MYR': 'Malaysian Ringgit',
-      'IDR': 'Indonesian Rupiah',
-      'PHP': 'Philippine Peso',
-      'PKR': 'Pakistani Rupee',
-      'BDT': 'Bangladeshi Taka',
-      'LKR': 'Sri Lankan Rupee',
-      'NPR': 'Nepalese Rupee',
-    };
-    return currencyNames[currencyCode] ?? currencyCode;
+    return AppTheme.getCurrencyName(currencyCode);
   }
 
-  List<String> _getAvailableCurrencies() {
-    return [
-      'INR',
-      'USD',
-      'EUR',
-      'GBP',
-      'JPY',
-      'AUD',
-      'CAD',
-      'CHF',
-      'CNY',
-      'SEK',
-      'NZD',
-      'SGD',
-      'HKD',
-      'NOK',
-      'KRW',
-      'TRY',
-      'RUB',
-      'BRL',
-      'ZAR',
-      'MXN',
-      'AED',
-      'SAR',
-      'THB',
-      'MYR',
-      'IDR',
-      'PHP',
-      'PKR',
-      'BDT',
-      'LKR',
-      'NPR',
-    ];
-  }
+  List<String> _getAvailableCurrencies() => AppTheme.getAvailableCurrencies();
 
   DateTime? _parseDate(String s) {
     if (s.isEmpty) return null;

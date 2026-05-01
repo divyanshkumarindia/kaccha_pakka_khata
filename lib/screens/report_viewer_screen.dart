@@ -1068,20 +1068,11 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
   }
 
   String _getCurrencySymbol(String currency) {
-    // Simple lookup, fast enough for now
-    if (currency == 'USD') return '\$';
-    if (currency == 'EUR') return '€';
-    if (currency == 'GBP') return '£';
-    return '₹';
+    return _model.currencySymbol;
   }
 
   String _getCurrencyName(String currencyCode) {
-    // Simple lookup
-    if (currencyCode == 'INR') return 'Indian Rupee';
-    if (currencyCode == 'USD') return 'US Dollar';
-    if (currencyCode == 'EUR') return 'Euro';
-    if (currencyCode == 'GBP') return 'British Pound';
-    return currencyCode;
+    return AppTheme.getCurrencyName(currencyCode);
   }
 
   String _getReportTimestamp() {

@@ -40,6 +40,7 @@ class _AccountEntryWidgetState extends State<AccountEntryWidget>
 
   @override
   Widget build(BuildContext context) {
+    final model = Provider.of<AccountingModel>(context);
     final accent =
         widget.isReceipt ? AppTheme.receiptColor : AppTheme.paymentColor;
 
@@ -63,7 +64,7 @@ class _AccountEntryWidgetState extends State<AccountEntryWidget>
                     const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
             trailing: Row(mainAxisSize: MainAxisSize.min, children: [
               Text(
-                AppTheme.formatCurrency(_subtotal()),
+                AppTheme.formatCurrency(_subtotal(), currency: model.currency),
                 style: TextStyle(color: accent, fontWeight: FontWeight.w800),
               ),
               const SizedBox(width: 8),

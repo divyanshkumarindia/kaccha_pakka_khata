@@ -250,11 +250,11 @@ class AppTheme {
   static const Color primaryColor = Color(0xFF6366F1); // Indigo-500
 
   static String formatCurrency(double amount, {String currency = 'INR'}) {
-    final symbol = _getCurrencySymbol(currency);
+    final symbol = getCurrencySymbol(currency);
     return '$symbol${amount.toStringAsFixed(2)}';
   }
 
-  static String _getCurrencySymbol(String currencyCode) {
+  static String getCurrencySymbol(String currencyCode) {
     const currencySymbols = {
       'INR': '₹',
       'USD': '\$',
@@ -288,6 +288,50 @@ class AppTheme {
       'NPR': 'Rs',
     };
     return currencySymbols[currencyCode] ?? currencyCode;
+  }
+
+  static String getCurrencyName(String currencyCode) {
+    const currencyNames = {
+      'INR': 'Indian Rupee',
+      'USD': 'US Dollar',
+      'EUR': 'Euro',
+      'GBP': 'British Pound',
+      'JPY': 'Japanese Yen',
+      'AUD': 'Australian Dollar',
+      'CAD': 'Canadian Dollar',
+      'CHF': 'Swiss Franc',
+      'CNY': 'Chinese Yuan',
+      'SEK': 'Swedish Krona',
+      'NZD': 'New Zealand Dollar',
+      'SGD': 'Singapore Dollar',
+      'HKD': 'Hong Kong Dollar',
+      'NOK': 'Norwegian Krone',
+      'KRW': 'South Korean Won',
+      'TRY': 'Turkish Lira',
+      'RUB': 'Russian Ruble',
+      'BRL': 'Brazilian Real',
+      'ZAR': 'South African Rand',
+      'MXN': 'Mexican Peso',
+      'AED': 'UAE Dirham',
+      'SAR': 'Saudi Riyal',
+      'THB': 'Thai Baht',
+      'MYR': 'Malaysian Ringgit',
+      'IDR': 'Indonesian Rupiah',
+      'PHP': 'Philippine Peso',
+      'PKR': 'Pakistani Rupee',
+      'BDT': 'Bangladeshi Taka',
+      'LKR': 'Sri Lankan Rupee',
+      'NPR': 'Nepalese Rupee',
+    };
+    return currencyNames[currencyCode] ?? currencyCode;
+  }
+
+  static List<String> getAvailableCurrencies() {
+    return [
+      'INR', 'USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'SEK',
+      'NZD', 'SGD', 'HKD', 'NOK', 'KRW', 'TRY', 'RUB', 'BRL', 'ZAR', 'MXN',
+      'AED', 'SAR', 'THB', 'MYR', 'IDR', 'PHP', 'PKR', 'BDT', 'LKR', 'NPR',
+    ];
   }
 
   static const LinearGradient primaryGradient = LinearGradient(

@@ -9,6 +9,7 @@ import '../services/report_service.dart';
 import '../services/auth_service.dart';
 
 import '../utils/translations.dart';
+import '../theme.dart';
 
 class AccountingModel extends ChangeNotifier {
   UserType userType;
@@ -96,6 +97,24 @@ class AccountingModel extends ChangeNotifier {
     language = lang;
     notifyListeners();
     saveToPrefs();
+  }
+
+  void setCurrency(String newCurrency) {
+    currency = newCurrency;
+    notifyListeners();
+    saveToPrefs();
+  }
+
+  String get currencySymbol {
+    return AppTheme.getCurrencySymbol(currency);
+  }
+
+  String formatAmount(double amount) {
+    // Simple formatter, can be enhanced with proper NumberFormat if needed
+    final isNegative = amount < 0;
+    final absAmount = amount.abs();
+    final formatted = absAmount.toStringAsFixed(2).replaceAll(RegExp(r'([.]*0)(?!.*\d)'), '');
+    return '${isNegative ? "- " : ""}$currencySymbol $formatted';
   }
 
   void setInvoiceLogo(String? base64) {
@@ -779,12 +798,6 @@ class AccountingModel extends ChangeNotifier {
   }
 
   // Simple setters for basic fields
-  void setCurrency(String c) {
-    currency = c;
-    notifyListeners();
-    _persist();
-  }
-
   void setFirmName(String name) {
     firmName = name;
     notifyListeners();
