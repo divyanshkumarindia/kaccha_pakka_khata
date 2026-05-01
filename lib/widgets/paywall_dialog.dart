@@ -29,6 +29,7 @@ class _PaywallDialogState extends State<PaywallDialog>
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
   int _selectedPlanIndex = 1; // Default to Pro (middle plan)
+  bool _isAnimating = false;
 
   @override
   void initState() {
@@ -47,6 +48,26 @@ class _PaywallDialogState extends State<PaywallDialog>
   void dispose() {
     _animController.dispose();
     super.dispose();
+  }
+
+  /// Staggered plan selection: close current → wait → open new.
+  /// This prevents the simultaneous expand/collapse visual glitch.
+  void _selectPlan(int newIndex) {
+    if (_isAnimating || newIndex == _selectedPlanIndex) return;
+    _isAnimating = true;
+
+    // Phase 1: Collapse current card
+    setState(() => _selectedPlanIndex = -1);
+
+    // Phase 2: After collapse starts, expand the new card
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (mounted) {
+        setState(() {
+          _selectedPlanIndex = newIndex;
+          _isAnimating = false;
+        });
+      }
+    });
   }
 
   @override
@@ -358,7 +379,7 @@ class _PaywallDialogState extends State<PaywallDialog>
     final isSelected = _selectedPlanIndex == index;
 
     return GestureDetector(
-      onTap: () => setState(() => _selectedPlanIndex = index),
+      onTap: () => _selectPlan(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOutCubic,
@@ -504,57 +525,61 @@ class _PaywallDialogState extends State<PaywallDialog>
               ],
             ),
 
-            // Features list (collapsible — show when selected)
-            AnimatedCrossFade(
+            // Features list (collapsible — smooth height animation)
+            AnimatedSize(
               duration: const Duration(milliseconds: 300),
-              crossFadeState: isSelected
-                  ? CrossFadeState.showFirst
-                  : CrossFadeState.showSecond,
-              firstChild: Padding(
-                padding: const EdgeInsets.only(top: 14),
-                child: Column(
-                  children: features
-                      .map((f) => Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  f.included
-                                      ? Icons.check_circle_rounded
-                                      : Icons.cancel_rounded,
-                                  size: 16,
-                                  color: f.included
-                                      ? const Color(0xFF10B981)
-                                      : (isDark
-                                          ? Colors.white.withValues(alpha: 0.2)
-                                          : Colors.grey.shade300),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    f.name,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      color: f.included
-                                          ? (isDark
-                                              ? Colors.white.withValues(alpha: 0.8)
-                                              : const Color(0xFF334155))
-                                          : (isDark
-                                              ? Colors.white.withValues(alpha: 0.3)
-                                              : Colors.grey.shade400),
-                                      decoration: f.included
-                                          ? null
-                                          : TextDecoration.lineThrough,
+              curve: Curves.easeInOutCubic,
+              alignment: Alignment.topCenter,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: isSelected ? 1.0 : 0.0,
+                child: isSelected
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 14),
+                        child: Column(
+                          children: features
+                              .map((f) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 6),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          f.included
+                                              ? Icons.check_circle_rounded
+                                              : Icons.cancel_rounded,
+                                          size: 16,
+                                          color: f.included
+                                              ? const Color(0xFF10B981)
+                                              : (isDark
+                                                  ? Colors.white.withValues(alpha: 0.2)
+                                                  : Colors.grey.shade300),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            f.name,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 13,
+                                              color: f.included
+                                                  ? (isDark
+                                                      ? Colors.white.withValues(alpha: 0.8)
+                                                      : const Color(0xFF334155))
+                                                  : (isDark
+                                                      ? Colors.white.withValues(alpha: 0.3)
+                                                      : Colors.grey.shade400),
+                                              decoration: f.included
+                                                  ? null
+                                                  : TextDecoration.lineThrough,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ))
-                      .toList(),
-                ),
+                                  ))
+                              .toList(),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
-              secondChild: const SizedBox.shrink(),
             ),
           ],
         ),
