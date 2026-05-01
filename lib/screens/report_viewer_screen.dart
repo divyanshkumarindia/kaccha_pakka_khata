@@ -7,6 +7,7 @@ import '../theme.dart';
 import 'accounting_template_screen.dart';
 import '../services/report_service.dart';
 import '../utils/report_generator.dart';
+import '../utils/csv_export_service.dart';
 
 class ReportViewerScreen extends StatefulWidget {
   final Map<String, dynamic> reportData;
@@ -138,11 +139,11 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                             children: [
                               Expanded(
                                 child: _buildPremiumActionButton(
-                                  'Download Excel',
+                                  'Detailed Excel',
                                   Icons.file_download,
                                   AppTheme.receiptColor,
                                   () {
-                                    ReportGenerator.generateAndShareExcel(
+                                    CsvExportService.generateAndShareDetailedCsv(
                                         context, _model);
                                   },
                                 ),

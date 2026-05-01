@@ -173,7 +173,6 @@ class _AccountingFormState extends State<AccountingForm>
     return AppTheme.getCurrencyName(currencyCode);
   }
 
-
   DateTime? _parseDate(String s) {
     if (s.isEmpty) return null;
     try {
