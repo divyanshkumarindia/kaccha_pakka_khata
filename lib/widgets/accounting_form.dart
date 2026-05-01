@@ -63,7 +63,6 @@ class _AccountingFormState extends State<AccountingForm>
   late TextEditingController periodStartController;
   late TextEditingController periodEndController;
   late AnimationController _openingBalanceController;
-  bool _reportJustSaved = false;
 
   @override
   void initState() {
@@ -642,21 +641,6 @@ class _AccountingFormState extends State<AccountingForm>
         );
       }
 
-      // Update state to show checkmark
-      if (mounted) {
-        setState(() {
-          _reportJustSaved = true;
-        });
-
-        // Reset after 2 seconds
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted) {
-            setState(() {
-              _reportJustSaved = false;
-            });
-          }
-        });
-      }
 
       // Show success message
       if (context.mounted) {
@@ -769,8 +753,12 @@ class _AccountingFormState extends State<AccountingForm>
 
     showDialog(
       context: context,
-      builder: (context) {
-        final screenHeight = MediaQuery.of(context).size.height;
+      builder: (dialogContext) {
+        bool isSaving = false;
+        bool dialogSaved = false;
+        final screenHeight = MediaQuery.of(dialogContext).size.height;
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
         return Dialog(
           backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
           shape:
@@ -932,34 +920,60 @@ class _AccountingFormState extends State<AccountingForm>
                           Expanded(
                             flex: 2,
                             child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                _saveReportToSupabase(context, model);
-                              },
+                              onPressed: (isSaving || dialogSaved)
+                                  ? null
+                                  : () async {
+                                      setDialogState(() => isSaving = true);
+                                      try {
+                                        await _saveReportToSupabase(context, model);
+                                        setDialogState(() {
+                                          isSaving = false;
+                                          dialogSaved = true;
+                                        });
+                                      } catch (e) {
+                                        setDialogState(() => isSaving = false);
+                                      }
+                                    },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: _reportJustSaved
-                                    ? const Color(0xFF059669) // Darker green
+                                backgroundColor: dialogSaved
+                                    ? const Color(0xFF059669)
                                     : const Color(0xFF10B981),
+                                disabledBackgroundColor: dialogSaved
+                                    ? const Color(0xFF059669)
+                                    : const Color(0xFF10B981).withValues(alpha: 0.7),
                                 foregroundColor: Colors.white,
+                                disabledForegroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 13),
-                                elevation:0,
+                                elevation: 0,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12)),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    _reportJustSaved
-                                        ? Icons.check_circle
-                                        : Icons.save,
-                                    size: 20,
-                                  ),
+                                  if (isSaving)
+                                    const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  else
+                                    Icon(
+                                      dialogSaved
+                                          ? Icons.check_circle
+                                          : Icons.save,
+                                      size: 20,
+                                    ),
                                   const SizedBox(width: 8),
                                   Flexible(
                                     child: Text(
-                                      _reportJustSaved ? 'Saved!' : 'Save Report',
+                                      isSaving
+                                          ? 'Saving...'
+                                          : (dialogSaved ? 'Saved!' : 'Save Report'),
                                       style: const TextStyle(
                                           fontSize: 15, fontWeight: FontWeight.w600),
                                       overflow: TextOverflow.ellipsis,
@@ -1574,9 +1588,11 @@ class _AccountingFormState extends State<AccountingForm>
               ],
             ),
           ),
-        );
-      },
-    );
+        );  // Dialog
+          },  // StatefulBuilder builder
+        );  // StatefulBuilder
+      },  // showDialog builder
+    );  // showDialog
   }
 
   // Helper: Build detailed table
