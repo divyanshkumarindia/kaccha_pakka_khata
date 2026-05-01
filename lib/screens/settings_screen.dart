@@ -322,12 +322,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.cloud_sync_rounded,
                         const Color(0xFF0EA5E9), // Sky
                         () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const BackupSyncScreen()),
-                          );
+                          final sub = Provider.of<SubscriptionService>(context, listen: false);
+                          if (sub.canAccess(Feature.cloudBackup)) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const BackupSyncScreen()),
+                            );
+                          } else {
+                            SubscriptionService.showFeatureGate(context, Feature.cloudBackup);
+                          }
                         },
                         isDark,
+                        showLock: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.cloudBackup),
                       ),
                       _buildDivider(isDark),
                       _buildSettingTile(
@@ -1636,7 +1642,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              SubscriptionService.showPaywall();
+                              SubscriptionService.showPaywall(context);
                             },
                             icon: const Icon(Icons.rocket_launch_rounded, size: 18),
                             label: Text(

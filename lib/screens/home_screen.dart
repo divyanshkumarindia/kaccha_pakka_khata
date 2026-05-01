@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
+import '../models/subscription.dart';
+import '../services/subscription_service.dart';
 import '../utils/toast_utils.dart';
 import '../services/recent_service.dart';
 import '../state/app_state.dart';
@@ -807,7 +809,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: InkWell(
                                   onTap: () {
                                     if (isAddNew) {
-                                      _showAddNewPageDialog(context);
+                                      // Gate custom page creation behind khata limit
+                                      final sub = Provider.of<SubscriptionService>(context, listen: false);
+                                      final totalKhatas = UserType.values.length + customPages.length;
+                                      if (!sub.canCreateKhata(totalKhatas)) {
+                                        SubscriptionService.showFeatureGate(context, Feature.unlimitedKhatas);
+                                      } else {
+                                        _showAddNewPageDialog(context);
+                                      }
                                     } else {
                                       _handleNavigation(item);
                                     }

@@ -7,6 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
+import '../models/subscription.dart';
+import '../services/subscription_service.dart';
 import '../theme.dart';
 import 'components/balance_card.dart';
 import 'components/duration_period_picker.dart';
@@ -601,6 +603,18 @@ class _AccountingFormState extends State<AccountingForm>
   Future<void> _saveReportToSupabase(
       BuildContext context, AccountingModel model) async {
     try {
+      // Check saved reports limit (skip check for updates)
+      if (widget.reportId == null) {
+        final sub = Provider.of<SubscriptionService>(context, listen: false);
+        final currentCount = await _reportService.getReportCount();
+        if (!sub.canSaveReport(currentCount)) {
+          if (context.mounted) {
+            SubscriptionService.showFeatureGate(context, Feature.unlimitedSavedReports);
+          }
+          return;
+        }
+      }
+
       // Export current state
       final reportData = model.exportState();
 
@@ -855,10 +869,17 @@ class _AccountingFormState extends State<AccountingForm>
                               Icons.file_download,
                               AppTheme.receiptColor,
                               () {
-                                Navigator.pop(context);
-                                CsvExportService.generateAndShareDetailedCsv(
-                                    context, model);
+                                final sub = Provider.of<SubscriptionService>(context, listen: false);
+                                if (sub.canAccess(Feature.downloadPdfExcel)) {
+                                  Navigator.pop(context);
+                                  CsvExportService.generateAndShareDetailedCsv(
+                                      context, model);
+                                } else {
+                                  Navigator.pop(context);
+                                  SubscriptionService.showFeatureGate(context, Feature.downloadPdfExcel);
+                                }
                               },
+                              locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.downloadPdfExcel),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -869,10 +890,17 @@ class _AccountingFormState extends State<AccountingForm>
                               Icons.picture_as_pdf,
                               AppTheme.paymentColor,
                               () {
-                                Navigator.pop(context);
-                                ReportGenerator.generateAndSharePdf(
-                                    context, model);
+                                final sub = Provider.of<SubscriptionService>(context, listen: false);
+                                if (sub.canAccess(Feature.downloadPdfExcel)) {
+                                  Navigator.pop(context);
+                                  ReportGenerator.generateAndSharePdf(
+                                      context, model);
+                                } else {
+                                  Navigator.pop(context);
+                                  SubscriptionService.showFeatureGate(context, Feature.downloadPdfExcel);
+                                }
                               },
+                              locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.downloadPdfExcel),
                             ),
                           ),
                         ],
@@ -888,9 +916,16 @@ class _AccountingFormState extends State<AccountingForm>
                               Icons.print,
                               const Color(0xFF6366F1), // Indigo color
                               () {
-                                Navigator.pop(context);
-                                ReportGenerator.printReport(context, model);
+                                final sub = Provider.of<SubscriptionService>(context, listen: false);
+                                if (sub.canAccess(Feature.printReports)) {
+                                  Navigator.pop(context);
+                                  ReportGenerator.printReport(context, model);
+                                } else {
+                                  Navigator.pop(context);
+                                  SubscriptionService.showFeatureGate(context, Feature.printReports);
+                                }
                               },
+                              locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.printReports),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -5163,8 +5198,9 @@ class _AccountingFormState extends State<AccountingForm>
     String label,
     IconData icon,
     Color color,
-    VoidCallback onPressed,
-  ) {
+    VoidCallback onPressed, {
+    bool locked = false,
+  }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -5196,6 +5232,11 @@ class _AccountingFormState extends State<AccountingForm>
                   maxLines: 1,
                 ),
               ),
+              if (locked) ...[
+                const SizedBox(width: 4),
+                Icon(Icons.lock_rounded, size: 14,
+                    color: color.withValues(alpha: 0.6)),
+              ],
             ],
           ),
         ),

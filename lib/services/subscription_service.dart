@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import '../models/subscription.dart';
 import '../repositories/subscription_repository.dart';
+import '../widgets/paywall_dialog.dart';
 
 /// Central service that wraps a [SubscriptionRepository] and provides
 /// convenient guard methods for the entire app.
@@ -276,29 +276,19 @@ class SubscriptionService extends ChangeNotifier {
       },
     );
 
-    // If user tapped "Upgrade", present the RevenueCat paywall
+    // If user tapped "Upgrade", show our custom paywall
     if (result == true && context.mounted) {
-      try {
-        final paywallResult = await RevenueCatUI.presentPaywall();
-        // PaywallResult.purchased or .restored means they upgraded
-        return paywallResult == PaywallResult.purchased ||
-            paywallResult == PaywallResult.restored;
-      } catch (e) {
-        if (kDebugMode) debugPrint('Paywall error: $e');
-        return false;
-      }
+      return await showPaywall(context);
     }
 
     return false;
   }
 
-  /// Directly opens the RevenueCat paywall without showing the gate dialog first.
+  /// Opens the custom paywall dialog showing all 3 plans.
   /// Useful for the "Upgrade" button in settings / navigation drawer.
-  static Future<bool> showPaywall() async {
+  static Future<bool> showPaywall(BuildContext context) async {
     try {
-      final result = await RevenueCatUI.presentPaywall();
-      return result == PaywallResult.purchased ||
-          result == PaywallResult.restored;
+      return await PaywallDialog.show(context);
     } catch (e) {
       if (kDebugMode) debugPrint('Paywall error: $e');
       return false;

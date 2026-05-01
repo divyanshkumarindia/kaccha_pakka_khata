@@ -102,6 +102,22 @@ class ReportService {
     }
   }
 
+  /// Returns the total number of saved reports for the current user.
+  Future<int> getReportCount() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return 0;
+
+    try {
+      final data = await _supabase
+          .from('reports')
+          .select('id')
+          .eq('user_id', user.id);
+      return (data as List).length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
   /// Deletes a report by its ID.
   ///
   /// [id] - The unique identifier of the report to delete.

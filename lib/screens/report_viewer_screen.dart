@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
+import '../models/subscription.dart';
+import '../services/subscription_service.dart';
 import '../theme.dart';
 import 'accounting_template_screen.dart';
 import '../services/report_service.dart';
@@ -145,9 +147,15 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                                   Icons.file_download,
                                   AppTheme.receiptColor,
                                   () {
-                                    CsvExportService.generateAndShareDetailedCsv(
-                                        context, _model);
+                                    final sub = Provider.of<SubscriptionService>(context, listen: false);
+                                    if (sub.canAccess(Feature.downloadPdfExcel)) {
+                                      CsvExportService.generateAndShareDetailedCsv(
+                                          context, _model);
+                                    } else {
+                                      SubscriptionService.showFeatureGate(context, Feature.downloadPdfExcel);
+                                    }
                                   },
+                                  locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.downloadPdfExcel),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -158,9 +166,15 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                                   Icons.picture_as_pdf,
                                   AppTheme.paymentColor,
                                   () {
-                                    ReportGenerator.generateAndSharePdf(
-                                        context, _model);
+                                    final sub = Provider.of<SubscriptionService>(context, listen: false);
+                                    if (sub.canAccess(Feature.downloadPdfExcel)) {
+                                      ReportGenerator.generateAndSharePdf(
+                                          context, _model);
+                                    } else {
+                                      SubscriptionService.showFeatureGate(context, Feature.downloadPdfExcel);
+                                    }
                                   },
+                                  locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.downloadPdfExcel),
                                 ),
                               ),
                             ],
@@ -176,9 +190,15 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                                   Icons.print,
                                   const Color(0xFF6366F1), // Indigo color
                                   () {
-                                    ReportGenerator.printReport(
-                                        context, _model);
+                                    final sub = Provider.of<SubscriptionService>(context, listen: false);
+                                    if (sub.canAccess(Feature.printReports)) {
+                                      ReportGenerator.printReport(
+                                          context, _model);
+                                    } else {
+                                      SubscriptionService.showFeatureGate(context, Feature.printReports);
+                                    }
                                   },
+                                  locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.printReports),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -1134,8 +1154,9 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
     String label,
     IconData icon,
     Color color,
-    VoidCallback onPressed,
-  ) {
+    VoidCallback onPressed, {
+    bool locked = false,
+  }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1167,6 +1188,11 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                   maxLines: 1,
                 ),
               ),
+              if (locked) ...[
+                const SizedBox(width: 4),
+                Icon(Icons.lock_rounded, size: 14,
+                    color: color.withValues(alpha: 0.6)),
+              ],
             ],
           ),
         ),
