@@ -10,6 +10,7 @@ import '../services/auth_service.dart';
 
 import '../utils/translations.dart';
 import '../theme.dart';
+import 'dart:math';
 
 class AccountingModel extends ChangeNotifier {
   UserType userType;
@@ -42,6 +43,9 @@ class AccountingModel extends ChangeNotifier {
   List<String> get homePageOrder => _homePageOrder;
 
   Timer? _saveDebounceTimer;
+  RealtimeChannel? _realtimeChannel;
+  bool _isProcessingIncomingSync = false;
+  final String _clientId = '${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}';
 
   AccountingModel({required this.userType, bool shouldLoadFromStorage = true})
       : firmName = userTypeConfigs[userType]!.firmNamePlaceholder,
@@ -51,12 +55,18 @@ class AccountingModel extends ChangeNotifier {
         periodStartDate = '',
         periodEndDate = '' {
     _initializeAccounts();
+    addListener(_onModelChanged);
     if (shouldLoadFromStorage) {
       loadSettings();
       loadFromPrefs(); // Load local data immediately for offline support
       _migrateRemoveSavedReports(); // Clean up old saved reports data
       loadFromCloud(); // Try to sync from cloud on startup
     }
+  }
+
+  void _onModelChanged() {
+    if (_isProcessingIncomingSync) return;
+    _persist(); // Triggers debounce auto-save to cloud with latest draft
   }
 
   // One-time migration to remove legacy saved_reports
@@ -83,6 +93,7 @@ class AccountingModel extends ChangeNotifier {
   Future<void> refreshForUser() async {
     await loadSettings();
     await loadFromPrefs();
+    await loadFromCloud(); // Re-fetch from cloud and re-init realtime
     notifyListeners();
   }
 
@@ -135,7 +146,8 @@ class AccountingModel extends ChangeNotifier {
       'language': language,
       'invoiceLogoBase64': invoiceLogoBase64,
       'pageHeaderTitles': pageHeaderTitles,
-      // Don't save opening balances or entry data - they should reset each time
+      'live_draft': exportState(), // Save active draft!
+      'last_updated_by': _clientId,
     };
 
     // Offload JSON encoding to a background isolate to prevent UI jank
@@ -205,12 +217,62 @@ class AccountingModel extends ChangeNotifier {
         // Load into memory
         await loadFromPrefs();
       }
+      
+      initRealtimeSync();
     } catch (e) {
       if (kDebugMode && e is! SocketException) {
         debugPrint('Cloud Load Error: $e');
       }
     }
   }
+
+  void initRealtimeSync() {
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
+
+    _realtimeChannel?.unsubscribe();
+    
+    // We use a unique channel name per user to isolate it
+    _realtimeChannel = supabase.channel('public:user_data:user_${user.id}');
+    _realtimeChannel!.onPostgresChanges(
+      event: PostgresChangeEvent.all,
+      schema: 'public',
+      table: 'user_data',
+      filter: PostgresChangeFilter(
+        type: PostgresChangeFilterType.eq,
+        column: 'user_id',
+        value: user.id,
+      ),
+      callback: (PostgresChangePayload payload) async {
+        if (payload.newRecord.isNotEmpty && payload.newRecord['data'] != null) {
+          final data = payload.newRecord['data'] as Map<String, dynamic>;
+          
+          if (data['last_updated_by'] == _clientId) {
+            return; // Ignore updates we sent!
+          }
+
+          _isProcessingIncomingSync = true;
+          
+          // 1. Save preferences locally so offline works
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_uk('accounting_data_v1'), jsonEncode(data));
+          
+          // 2. Load into memory
+          await loadFromPrefs();
+
+          // 3. Import live draft if present
+          if (data['live_draft'] != null) {
+            importState(data['live_draft'] as Map<String, dynamic>, notify: false);
+          }
+
+          _isProcessingIncomingSync = false;
+          notifyListeners();
+        }
+      },
+    ).subscribe();
+  }
+
 
   Future<void> loadFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
@@ -255,13 +317,18 @@ class AccountingModel extends ChangeNotifier {
         }
       }
 
-      // Opening balances always start at 0 - don't load from prefs
-      openingCash = 0.0;
-      openingBank = 0.0;
-      openingOther = 0.0;
+      // Try to load live draft if present (to support cross-device session resume)
+      if (data['live_draft'] != null) {
+         importState(data['live_draft'] as Map<String, dynamic>, notify: false);
+      } else {
+        // Opening balances always start at 0 - don't load from prefs
+        openingCash = 0.0;
+        openingBank = 0.0;
+        openingOther = 0.0;
 
-      // Entry data (receiptAccounts & paymentAccounts) also resets - don't load from prefs
-      // They will be initialized by setUserType when needed
+        // Entry data (receiptAccounts & paymentAccounts) also resets - don't load from prefs
+        // They will be initialized by setUserType when needed
+      }
 
       // load labels if present
       final rl = data['receiptLabels'] as Map<String, dynamic>?;
