@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'services/auth_service.dart';
+import 'services/subscription_service.dart';
 import 'state/accounting_model.dart';
 import 'state/app_state.dart';
 import 'models/accounting.dart';
@@ -12,6 +13,7 @@ import 'screens/main_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
+import 'repositories/revenuecat_subscription_repository.dart';
 
 void main() async {
   debugPrint('🚀 App Launching...');
@@ -36,25 +38,6 @@ void main() async {
       ),
     );
     debugPrint('✅ Supabase Initialized');
-
-    // Supabase Auth State Change Listener for OneSignal
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      final AuthChangeEvent event = data.event;
-      final Session? session = data.session;
-
-      try {
-        if (event == AuthChangeEvent.signedIn && session != null) {
-          final userId = session.user.id;
-          OneSignal.login(userId);
-          debugPrint('✅ OneSignal login successful for user: $userId');
-        } else if (event == AuthChangeEvent.signedOut) {
-          OneSignal.logout();
-          debugPrint('✅ OneSignal logout successful');
-        }
-      } catch (e) {
-        debugPrint('❌ OneSignal auth sync error: $e');
-      }
-    });
   } catch (e) {
     debugPrint('❌ Supabase initialization error: $e');
   }
@@ -63,11 +46,56 @@ void main() async {
   try {
     debugPrint('⏳ Initializing OneSignal...');
     OneSignal.initialize("888349b2-9a69-4914-a58e-7fc9d9d22877");
-    // Request permission safely when app is ready
     OneSignal.Notifications.requestPermission(true);
     debugPrint('✅ OneSignal Initialized');
   } catch (e) {
     debugPrint('❌ OneSignal initialization error: $e');
+  }
+
+  // Initialize RevenueCat
+  final revenueCatRepo = RevenueCatSubscriptionRepository();
+  try {
+    debugPrint('⏳ Initializing RevenueCat...');
+    await revenueCatRepo.initialize();
+    debugPrint('✅ RevenueCat Initialized');
+
+    // Sync RevenueCat user with Supabase auth
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    if (currentUser != null) {
+      await revenueCatRepo.loginUser(currentUser.id);
+    }
+  } catch (e) {
+    debugPrint('❌ RevenueCat initialization error: $e');
+  }
+
+  // Create and initialize SubscriptionService
+  final subscriptionService = SubscriptionService(revenueCatRepo);
+  await subscriptionService.init();
+
+  // Supabase Auth State Change Listener — syncs OneSignal + RevenueCat
+  try {
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final AuthChangeEvent event = data.event;
+      final Session? session = data.session;
+
+      try {
+        if (event == AuthChangeEvent.signedIn && session != null) {
+          final userId = session.user.id;
+          OneSignal.login(userId);
+          revenueCatRepo.loginUser(userId);
+          subscriptionService.init(); // Refresh subscription state
+          debugPrint('✅ OneSignal + RevenueCat login for user: $userId');
+        } else if (event == AuthChangeEvent.signedOut) {
+          OneSignal.logout();
+          subscriptionService.logoutUser();
+          debugPrint('✅ OneSignal + RevenueCat logout successful');
+        }
+      } catch (e) {
+        debugPrint('❌ Auth sync error: $e');
+      }
+    });
+  } catch (e) {
+    debugPrint('❌ Auth listener setup error: $e');
   }
 
   debugPrint('🚀 Calling runApp...');
@@ -82,6 +110,9 @@ void main() async {
           );
         }),
         ChangeNotifierProvider(create: (_) => AppState()),
+        ChangeNotifierProvider<SubscriptionService>.value(
+          value: subscriptionService,
+        ),
         Provider<AuthService>(create: (_) {
           debugPrint('🏗️ Creating AuthService');
           return AuthService();
