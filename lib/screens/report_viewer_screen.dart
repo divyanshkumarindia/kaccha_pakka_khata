@@ -194,8 +194,8 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                                         : const Color(0xFF10B981),
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
-                                        vertical: 14),
-                                    elevation: 2,
+                                        vertical: 13),
+                                    elevation: 0,
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12)),
                                   ),
@@ -1142,7 +1142,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
