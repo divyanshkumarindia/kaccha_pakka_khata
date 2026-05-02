@@ -29,12 +29,23 @@ class _PaywallDialogState extends State<PaywallDialog>
   late AnimationController _animController;
   late AnimationController _waveController;
   late Animation<double> _fadeAnimation;
-  int _selectedPlanIndex = 1; // Default to Pro (middle plan)
+  late int _selectedPlanIndex;
   bool _isAnimating = false;
 
   @override
   void initState() {
     super.initState();
+    
+    // Set default plan based on current subscription
+    final sub = Provider.of<SubscriptionService>(context, listen: false);
+    if (sub.isFree) {
+      _selectedPlanIndex = 1; // Default to Pro for Free users
+    } else if (sub.isPro) {
+      _selectedPlanIndex = 2; // Default to Premium for Pro users
+    } else if (sub.isPremium) {
+      _selectedPlanIndex = 2; // Stay on Premium for Premium users
+    }
+
     _animController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
