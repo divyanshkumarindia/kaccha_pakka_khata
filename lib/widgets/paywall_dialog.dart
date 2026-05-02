@@ -356,7 +356,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                       ),
                     const SizedBox(height: 8),
                     Text(
-                      'Cancel anytime · Restore purchases',
+                      'Cancel anytime',
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: isDark
