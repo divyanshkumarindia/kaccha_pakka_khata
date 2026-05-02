@@ -1817,7 +1817,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: Text(
                         'Start 14-Day Free Trial',
                         style: GoogleFonts.outfit(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

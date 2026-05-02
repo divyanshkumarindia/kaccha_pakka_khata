@@ -113,17 +113,23 @@ class _PaywallDialogState extends State<PaywallDialog>
       },
       child: Container(
         constraints: BoxConstraints(maxHeight: screenHeight * 0.92),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0F172A), // Deep Slate
-              Color(0xFF1E293B), // Slate 800
-              Color(0xFF111827), // Gray 900
-            ],
+            colors: isDark
+                ? [
+                    const Color(0xFF0F172A), // Deep Slate
+                    const Color(0xFF1E293B), // Slate 800
+                    const Color(0xFF111827), // Gray 900
+                  ]
+                : [
+                    const Color(0xFFF8FAFC), // Slate 50
+                    const Color(0xFFF1F5F9), // Slate 100
+                    const Color(0xFFEEF2FF), // Indigo 50
+                  ],
           ),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         ),
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -137,7 +143,9 @@ class _PaywallDialogState extends State<PaywallDialog>
                   width: 250,
                   height: 250,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF6366F1).withValues(alpha: 0.08),
+                    color: isDark
+                        ? const Color(0xFF6366F1).withValues(alpha: 0.08)
+                        : const Color(0xFF6366F1).withValues(alpha: 0.05),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -149,7 +157,9 @@ class _PaywallDialogState extends State<PaywallDialog>
                   width: 150,
                   height: 150,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD946EF).withValues(alpha: 0.05),
+                    color: isDark
+                        ? const Color(0xFFD946EF).withValues(alpha: 0.05)
+                        : const Color(0xFFD946EF).withValues(alpha: 0.03),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -164,52 +174,42 @@ class _PaywallDialogState extends State<PaywallDialog>
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.white24,
+                        color: isDark ? Colors.white24 : Colors.black12,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
 
-            // Header
+            // Compact Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
               child: Column(
                 children: [
-                  // Crown icon with glow
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-                      ),
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF6366F1).withValues(alpha: 0.4),
-                          blurRadius: 20,
-                          offset: const Offset(0, 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Upgrade Your Khata',
+                        style: GoogleFonts.outfit(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
-                      ],
-                    ),
-                    child: const Icon(Icons.workspace_premium_rounded,
-                        color: Colors.white, size: 30),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.auto_awesome,
+                          color: Color(0xFFF59E0B), size: 22),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Upgrade Your Khata',
-                    style: GoogleFonts.outfit(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Text(
                     'Choose the plan that works best for your business',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 13,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.6)
+                          : const Color(0xFF64748B),
                     ),
                   ),
                 ],
@@ -226,6 +226,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                   children: [
                     // Plan selector cards
                     _buildPlanCard(
+                      context: context,
                       index: 0,
                       planName: 'Free',
                       price: '₹0',
@@ -247,6 +248,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                     ),
                     const SizedBox(height: 12),
                     _buildPlanCard(
+                      context: context,
                       index: 1,
                       planName: 'Pro',
                       price: '₹149',
@@ -269,6 +271,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                     ),
                     const SizedBox(height: 12),
                     _buildPlanCard(
+                      context: context,
                       index: 2,
                       planName: 'Premium',
                       price: '₹299',
@@ -293,14 +296,13 @@ class _PaywallDialogState extends State<PaywallDialog>
               ),
             ),
 
-            // Bottom action area
             Container(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.03),
-                border: const Border(
+                color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
+                border: Border(
                   top: BorderSide(
-                    color: Colors.white10,
+                    color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
                   ),
                 ),
               ),
@@ -401,7 +403,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                                     ? 'Continue with Free'
                                     : 'Start 14-Day Free Trial',
                                 style: GoogleFonts.outfit(
-                                  fontSize: 16,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -431,6 +433,7 @@ class _PaywallDialogState extends State<PaywallDialog>
 }
 
   Widget _buildPlanCard({
+    required BuildContext context,
     required int index,
     required String planName,
     required String price,
@@ -442,6 +445,7 @@ class _PaywallDialogState extends State<PaywallDialog>
     required bool isCurrentPlan,
     String? badge,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSelected = _selectedPlanIndex == index;
 
     return GestureDetector(
@@ -451,12 +455,18 @@ class _PaywallDialogState extends State<PaywallDialog>
         curve: Curves.easeOutCubic,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.03),
+          color: isSelected
+              ? (isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.white)
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.04)
+                  : Colors.white.withValues(alpha: 0.6)),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? gradStart
-                : Colors.white.withValues(alpha: 0.1),
+                : (isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
             width: isSelected ? 2.0 : 1.0,
           ),
           boxShadow: isSelected
@@ -498,7 +508,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                             style: GoogleFonts.outfit(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                             ),
                           ),
                           if (badge != null)
@@ -551,14 +561,18 @@ class _PaywallDialogState extends State<PaywallDialog>
                       style: GoogleFonts.outfit(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
-                        color: isSelected ? gradStart : Colors.white,
+                        color: isSelected
+                            ? (isDark ? Colors.white : gradStart)
+                            : (isDark ? Colors.white70 : const Color(0xFF1E293B)),
                       ),
                     ),
                     Text(
                       period,
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.5)
+                            : const Color(0xFF64748B),
                       ),
                     ),
                   ],
@@ -572,7 +586,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? gradStart : Colors.white24,
+                      color: isSelected ? gradStart : (isDark ? Colors.white24 : Colors.black12),
                       width: 2,
                     ),
                     color: isSelected ? gradStart : Colors.transparent,
@@ -608,7 +622,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                                           size: 16,
                                           color: f.included
                                               ? const Color(0xFF10B981)
-                                              : Colors.white.withValues(alpha: 0.2),
+                                              : (isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1)),
                                         ),
                                         const SizedBox(width: 8),
                                         Expanded(
@@ -617,8 +631,8 @@ class _PaywallDialogState extends State<PaywallDialog>
                                             style: GoogleFonts.inter(
                                               fontSize: 13,
                                               color: f.included
-                                                  ? Colors.white.withValues(alpha: 0.8)
-                                                  : Colors.white.withValues(alpha: 0.3),
+                                                  ? (isDark ? Colors.white.withValues(alpha: 0.8) : const Color(0xFF334155))
+                                                  : (isDark ? Colors.white.withValues(alpha: 0.3) : const Color(0xFF94A3B8)),
                                               decoration: f.included
                                                   ? null
                                                   : TextDecoration.lineThrough,
