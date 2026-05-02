@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb, debugPrint;
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/subscription.dart';
 import 'subscription_repository.dart';
 
@@ -16,9 +17,7 @@ class _Entitlements {
 ///
 /// Call [initialize] once at app startup before using any other methods.
 class RevenueCatSubscriptionRepository implements SubscriptionRepository {
-  static const String _androidApiKey = 'test_GTTrQQuaTekJcKfgGKlQtEwuVeF';
-  // Replace with your iOS key when you have one
-  static const String _iosApiKey = 'test_GTTrQQuaTekJcKfgGKlQtEwuVeF';
+
 
   final StreamController<SubscriptionPlan> _planController =
       StreamController<SubscriptionPlan>.broadcast();
@@ -40,9 +39,9 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
 
       String apiKey;
       if (Platform.isIOS) {
-        apiKey = _iosApiKey;
+        apiKey = dotenv.env['REVENUECAT_IOS_KEY'] ?? '';
       } else if (Platform.isAndroid) {
-        apiKey = _androidApiKey;
+        apiKey = dotenv.env['REVENUECAT_ANDROID_KEY'] ?? '';
       } else {
         // Desktop / Web — fall back to Android key or skip
         if (kDebugMode) {

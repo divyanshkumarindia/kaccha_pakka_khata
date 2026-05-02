@@ -51,6 +51,12 @@ class SubscriptionService extends ChangeNotifier {
     }
   }
 
+  /// FOR DEBUGGING ONLY: Manually override the current plan
+  void debugSetPlan(SubscriptionPlan newPlan) {
+    _currentPlan = newPlan;
+    notifyListeners();
+  }
+
   // ─── Core Guard Method ─────────────────────────────────────
 
   /// Returns true if the user's current plan allows access to [feature].

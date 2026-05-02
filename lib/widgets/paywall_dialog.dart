@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import '../services/subscription_service.dart';
+import '../utils/debug_purchase_simulator.dart';
 
 /// A beautiful, animated paywall dialog showing all 3 subscription plans
 /// with features and pricing. Opens as a full-screen modal bottom sheet.
@@ -25,8 +25,9 @@ class PaywallDialog extends StatefulWidget {
 }
 
 class _PaywallDialogState extends State<PaywallDialog>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _animController;
+  late AnimationController _waveController;
   late Animation<double> _fadeAnimation;
   int _selectedPlanIndex = 1; // Default to Pro (middle plan)
   bool _isAnimating = false;
@@ -38,6 +39,11 @@ class _PaywallDialogState extends State<PaywallDialog>
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
+    _waveController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat();
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animController, curve: Curves.easeOut),
     );
@@ -47,6 +53,7 @@ class _PaywallDialogState extends State<PaywallDialog>
   @override
   void dispose() {
     _animController.dispose();
+    _waveController.dispose();
     super.dispose();
   }
 
@@ -235,29 +242,50 @@ class _PaywallDialogState extends State<PaywallDialog>
                       isCurrentPlan: sub.isPremium,
                       isDark: isDark,
                     ),
-                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            ),
 
-                    // Free trial banner
+            // Bottom action area
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+              decoration: BoxDecoration(
+                color:
+                    isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                border: Border(
+                  top: BorderSide(
+                    color: isDark ? Colors.white10 : Colors.grey.shade200,
+                  ),
+                ),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  children: [
+                    // Free trial banner (Locked at bottom)
                     if (sub.isFree)
                       Container(
-                        padding: const EdgeInsets.all(14),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                            color:
+                                const Color(0xFFF59E0B).withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.celebration_rounded,
-                                color: Color(0xFFF59E0B), size: 22),
+                                color: Color(0xFFF59E0B), size: 20),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 '🎉 Start with a 14-day free trial — no charge until trial ends!',
                                 style: GoogleFonts.inter(
-                                  fontSize: 13,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: isDark
                                       ? const Color(0xFFFCD34D)
@@ -269,79 +297,62 @@ class _PaywallDialogState extends State<PaywallDialog>
                         ),
                       ),
 
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ),
-
-            // Bottom action area
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                border: Border(
-                  top: BorderSide(
-                    color: isDark ? Colors.white10 : Colors.grey.shade200,
-                  ),
-                ),
-              ),
-              child: SafeArea(
-                top: false,
-                child: Column(
-                  children: [
                     // Upgrade button
-                    if (_selectedPlanIndex > 0 || !sub.isFree)
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            // Attempt RevenueCat native purchase flow
-                            try {
-                              final paywallResult = await RevenueCatUI.presentPaywall();
-                              if (context.mounted) {
-                                final purchased = paywallResult == PaywallResult.purchased ||
-                                    paywallResult == PaywallResult.restored;
-                                Navigator.of(context).pop(purchased);
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Purchase will be available on a real device with Google Play.',
-                                      style: GoogleFonts.inter(fontSize: 13),
-                                    ),
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _selectedPlanIndex == 2
-                                ? const Color(0xFF7C3AED)
-                                : const Color(0xFF6366F1),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
+                    if (_selectedPlanIndex != 0 || !sub.isFree)
+                      AnimatedBuilder(
+                        animation: _waveController,
+                        builder: (context, child) {
+                          final Color gradStart = _selectedPlanIndex == 2
+                              ? const Color.fromARGB(255, 57, 60, 211)
+                              : const Color.fromARGB(255, 106, 78, 156);
+                          final Color gradEnd = _selectedPlanIndex == 2
+                              ? const Color(0xFFDB2777)
+                              : const Color(0xFF8B5CF6);
+
+                          return Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
+                              gradient: LinearGradient(
+                                colors: [gradStart, gradEnd, gradStart],
+                                stops: const [0.0, 0.5, 1.0],
+                                transform: GradientRotation(
+                                  _waveController.value * 2 * 3.14159,
+                                ),
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            _selectedPlanIndex == 0
-                                ? 'Continue with Free'
-                                : 'Start 14-Day Free Trial',
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                // Test/Debug Flow:
+                                await DebugPurchaseSimulator.simulatePurchase(
+                                    context, _selectedPlanIndex);
+                                if (context.mounted) {
+                                  Navigator.of(context).pop(true);
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: Text(
+                                _selectedPlanIndex == 0
+                                    ? 'Continue with Free'
+                                    : 'Start 14-Day Free Trial',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     const SizedBox(height: 8),
                     Text(
@@ -513,7 +524,9 @@ class _PaywallDialogState extends State<PaywallDialog>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? gradStart : (isDark ? Colors.white24 : Colors.grey.shade300),
+                      color: isSelected
+                          ? gradStart
+                          : (isDark ? Colors.white24 : Colors.grey.shade300),
                       width: 2,
                     ),
                     color: isSelected ? gradStart : Colors.transparent,
@@ -550,7 +563,8 @@ class _PaywallDialogState extends State<PaywallDialog>
                                           color: f.included
                                               ? const Color(0xFF10B981)
                                               : (isDark
-                                                  ? Colors.white.withValues(alpha: 0.2)
+                                                  ? Colors.white
+                                                      .withValues(alpha: 0.2)
                                                   : Colors.grey.shade300),
                                         ),
                                         const SizedBox(width: 8),
@@ -561,10 +575,12 @@ class _PaywallDialogState extends State<PaywallDialog>
                                               fontSize: 13,
                                               color: f.included
                                                   ? (isDark
-                                                      ? Colors.white.withValues(alpha: 0.8)
+                                                      ? Colors.white.withValues(
+                                                          alpha: 0.8)
                                                       : const Color(0xFF334155))
                                                   : (isDark
-                                                      ? Colors.white.withValues(alpha: 0.3)
+                                                      ? Colors.white.withValues(
+                                                          alpha: 0.3)
                                                       : Colors.grey.shade400),
                                               decoration: f.included
                                                   ? null
