@@ -313,12 +313,20 @@ class _PaywallDialogState extends State<PaywallDialog>
                       AnimatedBuilder(
                         animation: _waveController,
                         builder: (context, child) {
-                          final Color gradStart = _selectedPlanIndex == 2
-                              ? const Color.fromARGB(255, 57, 60, 211)
-                              : const Color.fromARGB(255, 106, 78, 156);
-                          final Color gradEnd = _selectedPlanIndex == 2
-                              ? const Color(0xFFDB2777)
-                              : const Color(0xFF8B5CF6);
+                          Color gradStart;
+                          Color gradEnd;
+
+                          if (_selectedPlanIndex == 2) {
+                            gradStart = const Color.fromARGB(255, 57, 60, 211);
+                            gradEnd = const Color(0xFFDB2777);
+                          } else if (_selectedPlanIndex == 1) {
+                            gradStart = const Color.fromARGB(255, 106, 78, 156);
+                            gradEnd = const Color(0xFF8B5CF6);
+                          } else {
+                            // Free Plan
+                            gradStart = isDark ? const Color(0xFF475569) : const Color(0xFF64748B);
+                            gradEnd = isDark ? const Color(0xFF334155) : const Color(0xFF475569);
+                          }
 
                           return Container(
                             width: double.infinity,
@@ -327,9 +335,11 @@ class _PaywallDialogState extends State<PaywallDialog>
                               gradient: LinearGradient(
                                 colors: [gradStart, gradEnd, gradStart],
                                 stops: const [0.0, 0.5, 1.0],
-                                transform: GradientRotation(
-                                  _waveController.value * 2 * 3.14159,
-                                ),
+                                transform: _selectedPlanIndex == 0
+                                    ? null
+                                    : GradientRotation(
+                                        _waveController.value * 2 * 3.14159,
+                                      ),
                               ),
                             ),
                             child: ElevatedButton(

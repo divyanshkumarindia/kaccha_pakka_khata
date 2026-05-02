@@ -1508,9 +1508,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSubscriptionCard(BuildContext context, bool isDark) {
     return Consumer<SubscriptionService>(
       builder: (context, sub, _) {
-        final isFree = sub.isFree;
+        if (sub.isFree) {
+          return _buildFreePromotionalCard(context, isDark);
+        }
 
-        // Plan-specific styling
+        // Plan-specific styling for Pro/Premium
         final Color gradStart;
         final Color gradEnd;
         final IconData planIcon;
@@ -1523,18 +1525,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           planIcon = Icons.diamond_rounded;
           planLabel = 'Premium';
           planDescription = 'You have access to all features!';
-        } else if (sub.isPro) {
+        } else {
+          // Pro Plan
           gradStart = const Color(0xFF6366F1);
           gradEnd = const Color(0xFF8B5CF6);
           planIcon = Icons.star_rounded;
           planLabel = 'Pro';
           planDescription = 'Upgrade to Premium for cloud sync & more.';
-        } else {
-          gradStart = const Color(0xFF334155);
-          gradEnd = const Color(0xFF475569);
-          planIcon = Icons.person_rounded;
-          planLabel = 'Free';
-          planDescription = 'Upgrade to unlock powerful features!';
         }
 
         return Container(
@@ -1544,7 +1541,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               end: Alignment.bottomRight,
               colors: [gradStart, gradEnd],
             ),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
                 color: gradStart.withValues(alpha: 0.3),
@@ -1560,7 +1557,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top row: Plan badge + icon
                   Row(
                     children: [
                       Container(
@@ -1623,8 +1619,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-
-                  // Description
                   Text(
                     planDescription,
                     style: GoogleFonts.inter(
@@ -1634,11 +1628,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Action buttons
                   Row(
                     children: [
-                      if (isFree || sub.isPro) ...[
+                      if (sub.isPro) ...[
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () {
@@ -1646,7 +1638,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             },
                             icon: const Icon(Icons.rocket_launch_rounded, size: 18),
                             label: Text(
-                              isFree ? 'Upgrade Now' : 'Go Premium',
+                              'Go Premium',
                               style: GoogleFonts.outfit(
                                 fontWeight: FontWeight.w600,
                               ),
@@ -1705,6 +1697,194 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         );
       },
+    );
+  }
+
+  /// Eye-catching promotional card for Free users to drive conversion.
+  Widget _buildFreePromotionalCard(BuildContext context, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF6366F1), // Indigo
+            Color(0xFF8B5CF6), // Violet
+            Color(0xFFD946EF), // Fuchsia
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6366F1).withValues(alpha: 0.4),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            // Decorative background shapes
+            Positioned(
+              right: -30,
+              top: -30,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            Positioned(
+              left: -20,
+              bottom: -20,
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            
+            // Content
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          'LIMITED TIME OFFER',
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ),
+                      const Icon(Icons.auto_awesome, color: Color(0xFFFCD34D), size: 24),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Try Premium Features\nFor Free!',
+                    style: GoogleFonts.outfit(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      height: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Get unlimited khatas, cloud backup, and PDF reports. No charge for 14 days!',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha: 0.9),
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Visual progression of tiers
+                  Row(
+                    children: [
+                      _buildTierIcon(Icons.person_outline, 'Free', false),
+                      _buildProgressionLine(),
+                      _buildTierIcon(Icons.star_rounded, 'Pro', true),
+                      _buildProgressionLine(),
+                      _buildTierIcon(Icons.diamond_rounded, 'Premium', true),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Main Action Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        SubscriptionService.showPaywall(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF6366F1),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Start 14-Day Free Trial',
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTierIcon(IconData icon, String label, bool isSpecial) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: isSpecial 
+                ? Colors.white.withValues(alpha: 0.3) 
+                : Colors.white.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+            border: isSpecial ? Border.all(color: Colors.white.withValues(alpha: 0.5), width: 2) : null,
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: Colors.white.withValues(alpha: 0.8),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProgressionLine() {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.only(left: 8, right: 8, bottom: 14),
+        height: 2,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(1),
+        ),
+      ),
     );
   }
 }
