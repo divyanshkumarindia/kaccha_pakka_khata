@@ -205,7 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           }
                         },
                         isDark,
-                        showLock: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.multiCurrency),
+                        showLock: !Provider.of<SubscriptionService>(context).canAccess(Feature.multiCurrency),
                       ),
                     ],
                   ),
@@ -263,7 +263,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           }
                         },
                         isDark,
-                        showLock: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.customPdfBranding),
+                        showLock: !Provider.of<SubscriptionService>(context).canAccess(Feature.customPdfBranding),
                         trailing: () {
                           if (model.invoiceLogoBase64 == null || model.invoiceLogoBase64!.isEmpty) return null;
                           Uint8List? bytes;
@@ -333,7 +333,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           }
                         },
                         isDark,
-                        showLock: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.cloudBackup),
+                        showLock: !Provider.of<SubscriptionService>(context).canAccess(Feature.cloudBackup),
                       ),
                       _buildDivider(isDark),
                       _buildSettingTile(

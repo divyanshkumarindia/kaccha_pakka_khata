@@ -155,7 +155,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                                       SubscriptionService.showFeatureGate(context, Feature.downloadPdfExcel);
                                     }
                                   },
-                                  locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.downloadPdfExcel),
+                                  locked: !Provider.of<SubscriptionService>(context).canAccess(Feature.downloadPdfExcel),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -174,7 +174,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                                       SubscriptionService.showFeatureGate(context, Feature.downloadPdfExcel);
                                     }
                                   },
-                                  locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.downloadPdfExcel),
+                                  locked: !Provider.of<SubscriptionService>(context).canAccess(Feature.downloadPdfExcel),
                                 ),
                               ),
                             ],
@@ -198,7 +198,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
                                       SubscriptionService.showFeatureGate(context, Feature.printReports);
                                     }
                                   },
-                                  locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.printReports),
+                                  locked: !Provider.of<SubscriptionService>(context).canAccess(Feature.printReports),
                                 ),
                               ),
                               const SizedBox(width: 8),

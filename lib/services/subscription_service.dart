@@ -32,7 +32,7 @@ class SubscriptionService extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
 
   bool get isFree => _currentPlan == SubscriptionPlan.free;
-  bool get isPro => _currentPlan.isAtLeast(SubscriptionPlan.pro);
+  bool get isPro => _currentPlan == SubscriptionPlan.pro;
   bool get isPremium => _currentPlan == SubscriptionPlan.premium;
 
   int get maxKhatas => PlanLimits.maxKhatas(_currentPlan);

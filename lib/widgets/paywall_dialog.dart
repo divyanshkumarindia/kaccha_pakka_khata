@@ -433,7 +433,10 @@ class _PaywallDialogState extends State<PaywallDialog>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
                           Text(
                             planName,
@@ -445,8 +448,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                                   : const Color(0xFF0F172A),
                             ),
                           ),
-                          if (badge != null) ...[
-                            const SizedBox(width: 8),
+                          if (badge != null)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 3),
@@ -465,9 +467,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                                 ),
                               ),
                             ),
-                          ],
-                          if (isCurrentPlan) ...[
-                            const SizedBox(width: 8),
+                          if (isCurrentPlan)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 3),
@@ -483,8 +483,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                                   color: Colors.white,
                                 ),
                               ),
-                            ),
-                          ],
+                          ),
                         ],
                       ),
                     ],

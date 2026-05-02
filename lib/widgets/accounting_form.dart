@@ -759,8 +759,10 @@ class _AccountingFormState extends State<AccountingForm>
         final screenHeight = MediaQuery.of(dialogContext).size.height;
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) {
-        return Dialog(
-          backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+            return Consumer<SubscriptionService>(
+              builder: (context, sub, child) {
+                return Dialog(
+                  backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           insetPadding:
@@ -857,7 +859,6 @@ class _AccountingFormState extends State<AccountingForm>
                               Icons.file_download,
                               AppTheme.receiptColor,
                               () {
-                                final sub = Provider.of<SubscriptionService>(context, listen: false);
                                 if (sub.canAccess(Feature.downloadPdfExcel)) {
                                   Navigator.pop(context);
                                   CsvExportService.generateAndShareDetailedCsv(
@@ -867,7 +868,7 @@ class _AccountingFormState extends State<AccountingForm>
                                   SubscriptionService.showFeatureGate(context, Feature.downloadPdfExcel);
                                 }
                               },
-                              locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.downloadPdfExcel),
+                              locked: !sub.canAccess(Feature.downloadPdfExcel),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -878,7 +879,6 @@ class _AccountingFormState extends State<AccountingForm>
                               Icons.picture_as_pdf,
                               AppTheme.paymentColor,
                               () {
-                                final sub = Provider.of<SubscriptionService>(context, listen: false);
                                 if (sub.canAccess(Feature.downloadPdfExcel)) {
                                   Navigator.pop(context);
                                   ReportGenerator.generateAndSharePdf(
@@ -888,7 +888,7 @@ class _AccountingFormState extends State<AccountingForm>
                                   SubscriptionService.showFeatureGate(context, Feature.downloadPdfExcel);
                                 }
                               },
-                              locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.downloadPdfExcel),
+                              locked: !sub.canAccess(Feature.downloadPdfExcel),
                             ),
                           ),
                         ],
@@ -904,7 +904,6 @@ class _AccountingFormState extends State<AccountingForm>
                               Icons.print,
                               const Color(0xFF6366F1), // Indigo color
                               () {
-                                final sub = Provider.of<SubscriptionService>(context, listen: false);
                                 if (sub.canAccess(Feature.printReports)) {
                                   Navigator.pop(context);
                                   ReportGenerator.printReport(context, model);
@@ -913,7 +912,7 @@ class _AccountingFormState extends State<AccountingForm>
                                   SubscriptionService.showFeatureGate(context, Feature.printReports);
                                 }
                               },
-                              locked: !Provider.of<SubscriptionService>(context, listen: false).canAccess(Feature.printReports),
+                              locked: !sub.canAccess(Feature.printReports),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -1588,7 +1587,9 @@ class _AccountingFormState extends State<AccountingForm>
               ],
             ),
           ),
-        );  // Dialog
+                ); // Dialog
+              }, // Consumer builder
+            ); // Consumer
           },  // StatefulBuilder builder
         );  // StatefulBuilder
       },  // showDialog builder
