@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../models/subscription.dart';
 import '../services/subscription_service.dart';
-import '../utils/debug_purchase_simulator.dart';
 
 /// A beautiful, animated paywall dialog showing all 3 subscription plans
 /// with features and pricing. Opens as a full-screen modal bottom sheet.
@@ -35,7 +35,7 @@ class _PaywallDialogState extends State<PaywallDialog>
   @override
   void initState() {
     super.initState();
-    
+
     // Set default plan based on current subscription
     final sub = Provider.of<SubscriptionService>(context, listen: false);
     if (sub.isFree) {
@@ -164,7 +164,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                   ),
                 ),
               ),
-              
+
               Column(
                 children: [
                   // Drag handle
@@ -180,257 +180,282 @@ class _PaywallDialogState extends State<PaywallDialog>
                     ),
                   ),
 
-            // Compact Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Upgrade Your Khata',
-                        style: GoogleFonts.outfit(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  // Compact Header
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Upgrade Your Khata',
+                              style: GoogleFonts.outfit(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF0F172A),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.auto_awesome,
+                                color: Color(0xFFF59E0B), size: 22),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Choose the plan that works best for your business',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.6)
+                                : const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Plan cards
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        children: [
+                          // Plan selector cards
+                          _buildPlanCard(
+                            context: context,
+                            index: 0,
+                            planName: 'Free',
+                            price: '₹0',
+                            period: 'forever',
+                            icon: Icons.person_rounded,
+                            gradStart: const Color(0xFF64748B),
+                            gradEnd: const Color(0xFF475569),
+                            features: [
+                              _PlanFeature('2 Khatas', true),
+                              _PlanFeature('30 Days Report History', true),
+                              _PlanFeature('5 Saved Reports', true),
+                              _PlanFeature('Dark Mode / Themes', true),
+                              _PlanFeature('Hindi + English', true),
+                              _PlanFeature('Download PDF / Excel', false),
+                              _PlanFeature('Cloud Backup', false),
+                              _PlanFeature('Multi-Device Sync', false),
+                            ],
+                            isCurrentPlan: sub.isFree,
+                          ),
+                          const SizedBox(height: 12),
+                          _buildPlanCard(
+                            context: context,
+                            index: 1,
+                            planName: 'Pro',
+                            price: '₹149',
+                            period: '/month',
+                            icon: Icons.star_rounded,
+                            gradStart: const Color(0xFF6366F1),
+                            gradEnd: const Color(0xFF8B5CF6),
+                            badge: 'POPULAR',
+                            features: [
+                              _PlanFeature('Unlimited Khatas', true),
+                              _PlanFeature('All-Time Report History', true),
+                              _PlanFeature('50 Saved Reports', true),
+                              _PlanFeature('Download PDF & Excel', true),
+                              _PlanFeature('Print Reports', true),
+                              _PlanFeature('Ad-Free Experience', true),
+                              _PlanFeature('Cloud Backup', false),
+                              _PlanFeature('Multi-Device Sync', false),
+                            ],
+                            isCurrentPlan: sub.isPro && !sub.isPremium,
+                          ),
+                          const SizedBox(height: 12),
+                          _buildPlanCard(
+                            context: context,
+                            index: 2,
+                            planName: 'Premium',
+                            price: '₹299',
+                            period: '/month',
+                            icon: Icons.diamond_rounded,
+                            gradStart: const Color(0xFF7C3AED),
+                            gradEnd: const Color(0xFFDB2777),
+                            badge: 'BEST VALUE',
+                            features: [
+                              _PlanFeature('Everything in Pro', true),
+                              _PlanFeature('Unlimited Saved Reports', true),
+                              _PlanFeature('Cloud Backup & Restore', true),
+                              _PlanFeature('Multi-Device Sync', true),
+                              _PlanFeature('Multi-Currency Support', true),
+                              _PlanFeature('Custom PDF Branding', true),
+                              _PlanFeature('Priority Support', true),
+                            ],
+                            isCurrentPlan: sub.isPremium,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.03)
+                          : Colors.black.withValues(alpha: 0.02),
+                      border: Border(
+                        top: BorderSide(
+                          color: isDark
+                              ? Colors.white10
+                              : Colors.black.withValues(alpha: 0.05),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.auto_awesome,
-                          color: Color(0xFFF59E0B), size: 22),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Choose the plan that works best for your business',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.6)
-                          : const Color(0xFF64748B),
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      child: Column(
+                        children: [
+                          // Free trial banner (Locked at bottom)
+                          if (sub.isFree)
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF59E0B)
+                                    .withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: const Color(0xFFF59E0B)
+                                      .withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.celebration_rounded,
+                                      color: Color(0xFFF59E0B), size: 20),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      '🎉 Start with a 14-day free trial — no charge until trial ends!',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark
+                                            ? const Color(0xFFFCD34D)
+                                            : const Color(0xFF92400E),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          // Upgrade button
+                          if (_selectedPlanIndex != 0 || !sub.isFree)
+                            AnimatedBuilder(
+                              animation: _waveController,
+                              builder: (context, child) {
+                                Color gradStart;
+                                Color gradEnd;
+
+                                if (_selectedPlanIndex == 2) {
+                                  gradStart =
+                                      const Color.fromARGB(255, 57, 60, 211);
+                                  gradEnd = const Color(0xFFDB2777);
+                                } else if (_selectedPlanIndex == 1) {
+                                  gradStart =
+                                      const Color.fromARGB(255, 106, 78, 156);
+                                  gradEnd = const Color(0xFF8B5CF6);
+                                } else {
+                                  // Free Plan
+                                  gradStart = isDark
+                                      ? const Color(0xFF475569)
+                                      : const Color(0xFF64748B);
+                                  gradEnd = isDark
+                                      ? const Color(0xFF334155)
+                                      : const Color(0xFF475569);
+                                }
+
+                                return Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    gradient: LinearGradient(
+                                      colors: [gradStart, gradEnd, gradStart],
+                                      stops: const [0.0, 0.5, 1.0],
+                                      transform: _selectedPlanIndex == 0
+                                          ? null
+                                          : GradientRotation(
+                                              _waveController.value *
+                                                  2 *
+                                                  3.14159,
+                                            ),
+                                    ),
+                                  ),
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      final plan = _selectedPlanIndex == 1
+                                          ? SubscriptionPlan.pro
+                                          : SubscriptionPlan.premium;
+
+                                      // Show loading state in UI if possible, or just wait
+                                      final subService =
+                                          Provider.of<SubscriptionService>(
+                                              context,
+                                              listen: false);
+                                      final newPlan =
+                                          await subService.purchasePlan(plan);
+
+                                      if (context.mounted &&
+                                          newPlan != SubscriptionPlan.free) {
+                                        Navigator.of(context).pop(true);
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      _selectedPlanIndex == 0
+                                          ? 'Continue with Free'
+                                          : 'Start 14-Day Free Trial',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Cancel anytime',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.white.withValues(alpha: 0.4),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Plan cards
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    // Plan selector cards
-                    _buildPlanCard(
-                      context: context,
-                      index: 0,
-                      planName: 'Free',
-                      price: '₹0',
-                      period: 'forever',
-                      icon: Icons.person_rounded,
-                      gradStart: const Color(0xFF64748B),
-                      gradEnd: const Color(0xFF475569),
-                      features: [
-                        _PlanFeature('2 Khatas', true),
-                        _PlanFeature('30 Days Report History', true),
-                        _PlanFeature('5 Saved Reports', true),
-                        _PlanFeature('Dark Mode / Themes', true),
-                        _PlanFeature('Hindi + English', true),
-                        _PlanFeature('Download PDF / Excel', false),
-                        _PlanFeature('Cloud Backup', false),
-                        _PlanFeature('Multi-Device Sync', false),
-                      ],
-                      isCurrentPlan: sub.isFree,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildPlanCard(
-                      context: context,
-                      index: 1,
-                      planName: 'Pro',
-                      price: '₹149',
-                      period: '/month',
-                      icon: Icons.star_rounded,
-                      gradStart: const Color(0xFF6366F1),
-                      gradEnd: const Color(0xFF8B5CF6),
-                      badge: 'POPULAR',
-                      features: [
-                        _PlanFeature('Unlimited Khatas', true),
-                        _PlanFeature('All-Time Report History', true),
-                        _PlanFeature('50 Saved Reports', true),
-                        _PlanFeature('Download PDF & Excel', true),
-                        _PlanFeature('Print Reports', true),
-                        _PlanFeature('Ad-Free Experience', true),
-                        _PlanFeature('Cloud Backup', false),
-                        _PlanFeature('Multi-Device Sync', false),
-                      ],
-                      isCurrentPlan: sub.isPro && !sub.isPremium,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildPlanCard(
-                      context: context,
-                      index: 2,
-                      planName: 'Premium',
-                      price: '₹299',
-                      period: '/month',
-                      icon: Icons.diamond_rounded,
-                      gradStart: const Color(0xFF7C3AED),
-                      gradEnd: const Color(0xFFDB2777),
-                      badge: 'BEST VALUE',
-                      features: [
-                        _PlanFeature('Everything in Pro', true),
-                        _PlanFeature('Unlimited Saved Reports', true),
-                        _PlanFeature('Cloud Backup & Restore', true),
-                        _PlanFeature('Multi-Device Sync', true),
-                        _PlanFeature('Multi-Currency Support', true),
-                        _PlanFeature('Custom PDF Branding', true),
-                        _PlanFeature('Priority Support', true),
-                      ],
-                      isCurrentPlan: sub.isPremium,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              decoration: BoxDecoration(
-                color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
-                border: Border(
-                  top: BorderSide(
-                    color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
-                  ),
-                ),
-              ),
-              child: SafeArea(
-                top: false,
-                child: Column(
-                  children: [
-                    // Free trial banner (Locked at bottom)
-                    if (sub.isFree)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color:
-                                const Color(0xFFF59E0B).withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.celebration_rounded,
-                                color: Color(0xFFF59E0B), size: 20),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                '🎉 Start with a 14-day free trial — no charge until trial ends!',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark
-                                      ? const Color(0xFFFCD34D)
-                                      : const Color(0xFF92400E),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    // Upgrade button
-                    if (_selectedPlanIndex != 0 || !sub.isFree)
-                      AnimatedBuilder(
-                        animation: _waveController,
-                        builder: (context, child) {
-                          Color gradStart;
-                          Color gradEnd;
-
-                          if (_selectedPlanIndex == 2) {
-                            gradStart = const Color.fromARGB(255, 57, 60, 211);
-                            gradEnd = const Color(0xFFDB2777);
-                          } else if (_selectedPlanIndex == 1) {
-                            gradStart = const Color.fromARGB(255, 106, 78, 156);
-                            gradEnd = const Color(0xFF8B5CF6);
-                          } else {
-                            // Free Plan
-                            gradStart = isDark ? const Color(0xFF475569) : const Color(0xFF64748B);
-                            gradEnd = isDark ? const Color(0xFF334155) : const Color(0xFF475569);
-                          }
-
-                          return Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: LinearGradient(
-                                colors: [gradStart, gradEnd, gradStart],
-                                stops: const [0.0, 0.5, 1.0],
-                                transform: _selectedPlanIndex == 0
-                                    ? null
-                                    : GradientRotation(
-                                        _waveController.value * 2 * 3.14159,
-                                      ),
-                              ),
-                            ),
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                // Test/Debug Flow:
-                                await DebugPurchaseSimulator.simulatePurchase(
-                                    context, _selectedPlanIndex);
-                                if (context.mounted) {
-                                  Navigator.of(context).pop(true);
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                              child: Text(
-                                _selectedPlanIndex == 0
-                                    ? 'Continue with Free'
-                                    : 'Start 14-Day Free Trial',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Cancel anytime',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.4),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ],
-    ),
-  ),
-),
-);
-}
+      ),
+    );
+  }
 
   Widget _buildPlanCard({
     required BuildContext context,
@@ -456,9 +481,7 @@ class _PaywallDialogState extends State<PaywallDialog>
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white)
+              ? (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white)
               : (isDark
                   ? Colors.white.withValues(alpha: 0.04)
                   : Colors.white.withValues(alpha: 0.6)),
@@ -466,7 +489,9 @@ class _PaywallDialogState extends State<PaywallDialog>
           border: Border.all(
             color: isSelected
                 ? gradStart
-                : (isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+                : (isDark
+                    ? Colors.white10
+                    : Colors.black.withValues(alpha: 0.05)),
             width: isSelected ? 2.0 : 1.0,
           ),
           boxShadow: isSelected
@@ -508,7 +533,9 @@ class _PaywallDialogState extends State<PaywallDialog>
                             style: GoogleFonts.outfit(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF0F172A),
                             ),
                           ),
                           if (badge != null)
@@ -546,7 +573,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                                   color: Colors.white,
                                 ),
                               ),
-                          ),
+                            ),
                         ],
                       ),
                     ],
@@ -563,7 +590,9 @@ class _PaywallDialogState extends State<PaywallDialog>
                         fontWeight: FontWeight.w800,
                         color: isSelected
                             ? (isDark ? Colors.white : gradStart)
-                            : (isDark ? Colors.white70 : const Color(0xFF1E293B)),
+                            : (isDark
+                                ? Colors.white70
+                                : const Color(0xFF1E293B)),
                       ),
                     ),
                     Text(
@@ -586,7 +615,9 @@ class _PaywallDialogState extends State<PaywallDialog>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? gradStart : (isDark ? Colors.white24 : Colors.black12),
+                      color: isSelected
+                          ? gradStart
+                          : (isDark ? Colors.white24 : Colors.black12),
                       width: 2,
                     ),
                     color: isSelected ? gradStart : Colors.transparent,
@@ -622,7 +653,11 @@ class _PaywallDialogState extends State<PaywallDialog>
                                           size: 16,
                                           color: f.included
                                               ? const Color(0xFF10B981)
-                                              : (isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1)),
+                                              : (isDark
+                                                  ? Colors.white
+                                                      .withValues(alpha: 0.2)
+                                                  : Colors.black
+                                                      .withValues(alpha: 0.1)),
                                         ),
                                         const SizedBox(width: 8),
                                         Expanded(
@@ -631,8 +666,15 @@ class _PaywallDialogState extends State<PaywallDialog>
                                             style: GoogleFonts.inter(
                                               fontSize: 13,
                                               color: f.included
-                                                  ? (isDark ? Colors.white.withValues(alpha: 0.8) : const Color(0xFF334155))
-                                                  : (isDark ? Colors.white.withValues(alpha: 0.3) : const Color(0xFF94A3B8)),
+                                                  ? (isDark
+                                                      ? Colors.white.withValues(
+                                                          alpha: 0.8)
+                                                      : const Color(0xFF334155))
+                                                  : (isDark
+                                                      ? Colors.white.withValues(
+                                                          alpha: 0.3)
+                                                      : const Color(
+                                                          0xFF94A3B8)),
                                               decoration: f.included
                                                   ? null
                                                   : TextDecoration.lineThrough,

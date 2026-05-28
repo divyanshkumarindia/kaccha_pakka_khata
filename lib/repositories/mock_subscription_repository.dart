@@ -42,6 +42,12 @@ class MockSubscriptionRepository implements SubscriptionRepository {
   Future<SubscriptionPlan> restorePurchases() async => _mockPlan;
 
   @override
+  Future<SubscriptionPlan> purchasePlan(SubscriptionPlan plan) async {
+    setMockPlan(plan);
+    return plan;
+  }
+
+  @override
   Future<void> loginUser(String userId) async {
     // No-op for mock
   }

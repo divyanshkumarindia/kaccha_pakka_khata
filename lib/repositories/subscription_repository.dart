@@ -21,6 +21,9 @@ abstract class SubscriptionRepository {
   /// Attempt to restore previous purchases (useful after reinstall).
   Future<SubscriptionPlan> restorePurchases();
 
+  /// Attempt to purchase a specific plan.
+  Future<SubscriptionPlan> purchasePlan(SubscriptionPlan plan);
+
   /// Log in the subscription provider with a user ID so purchases are
   /// tied to the correct account.
   Future<void> loginUser(String userId);

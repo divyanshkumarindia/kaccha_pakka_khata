@@ -137,6 +137,23 @@ class SubscriptionService extends ChangeNotifier {
     }
   }
 
+  /// Purchase a plan.
+  Future<SubscriptionPlan> purchasePlan(SubscriptionPlan plan) async {
+    try {
+      final newPlan = await _repository.purchasePlan(plan);
+      if (_currentPlan != newPlan) {
+        _currentPlan = newPlan;
+        _isTrialActive = await _repository.isTrialActive();
+        _expirationDate = await _repository.getExpirationDate();
+        notifyListeners();
+      }
+      return _currentPlan;
+    } catch (e) {
+      if (kDebugMode) debugPrint('Purchase error: $e');
+      return _currentPlan;
+    }
+  }
+
   /// Link the subscription state to a specific user.
   Future<void> loginUser(String userId) async {
     await _repository.loginUser(userId);
@@ -262,8 +279,13 @@ class SubscriptionService extends ChangeNotifier {
               ),
             ),
             ElevatedButton.icon(
-              onPressed: () async {
-                Navigator.of(ctx).pop(true);
+              onPressed: () {
+                Navigator.of(ctx).pop(); // Close feature gate dialog
+                // Show the paywall
+                showDialog(
+                  context: context,
+                  builder: (context) => const PaywallDialog(),
+                );
               },
               icon: const Icon(Icons.rocket_launch, size: 18),
               label: Text('Upgrade to $planName'),
