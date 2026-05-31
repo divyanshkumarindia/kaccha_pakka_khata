@@ -1125,7 +1125,7 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
 
     // Fallback to period logic
     if (_model.duration == DurationType.Daily) {
-      return 'Daily Report - ${_model.periodDate.isEmpty ? "No date selected" : _model.periodDate}';
+      return 'Daily Entry Report - ${_model.periodDate.isEmpty ? "No date selected" : _model.periodDate}';
     } else {
       return 'Report - ${_model.periodStartDate} to ${_model.periodEndDate}';
     }
@@ -1287,20 +1287,20 @@ class _ReportViewerScreenState extends State<ReportViewerScreen> {
   String _getReportPeriodText() {
     switch (_model.duration) {
       case DurationType.Daily:
-        return 'Daily Report - ${_model.periodDate.isEmpty ? "No date selected" : _model.periodDate}';
+        return 'Daily Entry Report - ${_model.periodDate.isEmpty ? "No date selected" : _model.periodDate}';
       case DurationType.Weekly:
         if (_model.periodStartDate.isEmpty || _model.periodEndDate.isEmpty) {
-          return 'Weekly Report - No period selected';
+          return 'Weekly Entry Report - No period selected';
         }
-        return 'Weekly Report - ${_model.periodStartDate} to ${_model.periodEndDate}';
+        return 'Weekly Entry Report - ${_model.periodStartDate} to ${_model.periodEndDate}';
       case DurationType.Monthly:
-        return 'Monthly Report - ${_model.periodDate.isEmpty ? "No month selected" : _model.periodDate}';
+        return 'Monthly Entry Report - ${_model.periodDate.isEmpty ? "No month selected" : _model.periodDate}';
       case DurationType.Yearly:
         if (_model.periodStartDate.isEmpty || _model.periodEndDate.isEmpty) {
           // Fallback for old yearly reports with single date
-          return 'Yearly Report - ${_model.periodDate.isEmpty ? "No year selected" : _model.periodDate}';
+          return 'Yearly Entry Report - ${_model.periodDate.isEmpty ? "No year selected" : _model.periodDate}';
         }
-        return 'Yearly Report - ${_model.periodStartDate} to ${_model.periodEndDate}';
+        return 'Yearly Entry Report - ${_model.periodStartDate} to ${_model.periodEndDate}';
       default:
         return 'Report';
     }

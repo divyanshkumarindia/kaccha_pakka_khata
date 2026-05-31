@@ -307,10 +307,10 @@ const Map<String, Map<String, String>> appTranslations = {
 
     // Period Picker
     'label_report_duration': 'Report Duration',
-    'duration_daily': 'Daily',
-    'duration_weekly': 'Weekly',
-    'duration_monthly': 'Monthly',
-    'duration_yearly': 'Yearly',
+    'duration_daily': 'Daily Entry',
+    'duration_weekly': 'Weekly Entry',
+    'duration_monthly': 'Monthly Entry',
+    'duration_yearly': 'Yearly Entry',
     'label_select_period': 'Select Period',
     'hint_start_date': 'Start date',
     'hint_end_date': 'End date',
@@ -643,10 +643,10 @@ const Map<String, Map<String, String>> appTranslations = {
 
     // Period Picker
     'label_report_duration': 'रिपोर्ट अवधि',
-    'duration_daily': 'दैनिक',
-    'duration_weekly': 'साप्ताहिक',
-    'duration_monthly': 'मासिक',
-    'duration_yearly': 'वार्षिक',
+    'duration_daily': 'दैनिक प्रविष्टि',
+    'duration_weekly': 'साप्ताहिक प्रविष्टि',
+    'duration_monthly': 'मासिक प्रविष्टि',
+    'duration_yearly': 'वार्षिक प्रविष्टि',
     'label_select_period': 'अवधि चुनें',
     'hint_start_date': 'आरंभ तिथि',
     'hint_end_date': 'अंतिम तिथि',

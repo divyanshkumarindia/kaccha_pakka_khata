@@ -1723,16 +1723,16 @@ class _AccountingFormState extends State<AccountingForm>
   String _getReportPeriodText(AccountingModel model) {
     switch (model.duration) {
       case DurationType.Daily:
-        return 'Daily Report - ${model.periodDate.isEmpty ? "No date selected" : model.periodDate}';
+        return 'Daily Entry Report - ${model.periodDate.isEmpty ? "No date selected" : model.periodDate}';
       case DurationType.Weekly:
         if (model.periodStartDate.isEmpty || model.periodEndDate.isEmpty) {
-          return 'Weekly Report - No period selected';
+          return 'Weekly Entry Report - No period selected';
         }
-        return 'Weekly Report - ${model.periodStartDate} to ${model.periodEndDate}';
+        return 'Weekly Entry Report - ${model.periodStartDate} to ${model.periodEndDate}';
       case DurationType.Monthly:
-        return 'Monthly Report - ${model.periodDate.isEmpty ? "No month selected" : model.periodDate}';
+        return 'Monthly Entry Report - ${model.periodDate.isEmpty ? "No month selected" : model.periodDate}';
       case DurationType.Yearly:
-        return 'Yearly Report - ${model.periodDate.isEmpty ? "No year selected" : model.periodDate}';
+        return 'Yearly Entry Report - ${model.periodDate.isEmpty ? "No year selected" : model.periodDate}';
       default:
         return 'Report';
     }

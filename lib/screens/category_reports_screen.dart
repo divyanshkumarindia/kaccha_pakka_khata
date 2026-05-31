@@ -347,16 +347,16 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
                       children: [
                         _buildFilterChip(context, 'All', null),
                         const SizedBox(width: 8),
-                        _buildFilterChip(context, 'Daily', DurationType.Daily),
+                        _buildFilterChip(context, 'Daily Entry', DurationType.Daily),
                         const SizedBox(width: 8),
                         _buildFilterChip(
-                            context, 'Weekly', DurationType.Weekly),
+                            context, 'Weekly Entry', DurationType.Weekly),
                         const SizedBox(width: 8),
                         _buildFilterChip(
-                            context, 'Monthly', DurationType.Monthly),
+                            context, 'Monthly Entry', DurationType.Monthly),
                         const SizedBox(width: 8),
                         _buildFilterChip(
-                            context, 'Yearly', DurationType.Yearly),
+                            context, 'Yearly Entry', DurationType.Yearly),
                       ],
                     ),
                   ),
@@ -848,13 +848,13 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
                                 Builder(builder: (context) {
                                   // Determine type for color
                                   DurationType? type;
-                                  if (durationText == 'Daily')
+                                  if (durationText == 'Daily Entry')
                                     type = DurationType.Daily;
-                                  if (durationText == 'Weekly')
+                                  if (durationText == 'Weekly Entry')
                                     type = DurationType.Weekly;
-                                  if (durationText == 'Monthly')
+                                  if (durationText == 'Monthly Entry')
                                     type = DurationType.Monthly;
-                                  if (durationText == 'Yearly')
+                                  if (durationText == 'Yearly Entry')
                                     type = DurationType.Yearly;
 
                                   final typeColor = _getDurationColor(type);
@@ -972,13 +972,13 @@ class _CategoryReportsScreenState extends State<CategoryReportsScreen> {
           final type = DurationType.values[durationIndex];
           switch (type) {
             case DurationType.Daily:
-              return 'Daily';
+              return 'Daily Entry';
             case DurationType.Weekly:
-              return 'Weekly';
+              return 'Weekly Entry';
             case DurationType.Monthly:
-              return 'Monthly';
+              return 'Monthly Entry';
             case DurationType.Yearly:
-              return 'Yearly';
+              return 'Yearly Entry';
           }
         }
       } catch (_) {}
