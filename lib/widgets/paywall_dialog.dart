@@ -946,7 +946,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                     child: Text(
                       opt.originalPrice!,
                       style: GoogleFonts.outfit(
-                        fontSize: 13,
+                        fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFFEF4444),
                         decoration: TextDecoration.lineThrough,
@@ -988,7 +988,7 @@ class _PaywallDialogState extends State<PaywallDialog>
   ) {
     return Container(
       margin: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
-      padding: const EdgeInsets.only(left: 18, top: 4, bottom: 4),
+      padding: const EdgeInsets.only(left: 10, top: 4, bottom: 4),
       decoration: BoxDecoration(
         border: Border(
           left: BorderSide(
@@ -1163,7 +1163,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                               child: Text(
                                 opt.originalPrice!,
                                 style: GoogleFonts.outfit(
-                                  fontSize: 12,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w700,
                                   color: const Color(0xFFEF4444),
                                   decoration: TextDecoration.lineThrough,
