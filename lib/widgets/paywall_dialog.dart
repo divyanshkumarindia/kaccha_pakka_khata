@@ -53,6 +53,7 @@ class _PaywallDialogState extends State<PaywallDialog>
   
   bool _isPremiumSelected = true;
   int _selectedDurationIndex = 1; // Default to Yearly Plan
+  bool _isYearlyDropdownOpen = true; // Stay open by default
   bool _isPurchasing = false;
 
   // Duration choices for Pro Plan
@@ -521,158 +522,35 @@ class _PaywallDialogState extends State<PaywallDialog>
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Column(
                         children: [
-                          // Duration cards mapped dynamically
-                          ...List.generate(options.length, (index) {
-                            final opt = options[index];
-                            final isSelected = _selectedDurationIndex == index;
+                          // Monthly option card (Index 0)
+                          _buildDurationOptionCard(
+                            context,
+                            0,
+                            options[0],
+                            primaryColor,
+                            secondaryColor,
+                            isDark,
+                          ),
+                          const SizedBox(height: 14),
 
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedDurationIndex = index;
-                                  });
-                                },
-                                borderRadius: BorderRadius.circular(18),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? (isDark ? primaryColor.withValues(alpha: 0.08) : Colors.white)
-                                        : (isDark ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.015)),
-                                    borderRadius: BorderRadius.circular(18),
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? primaryColor
-                                          : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08)),
-                                      width: isSelected ? 2 : 1,
-                                    ),
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: primaryColor.withValues(alpha: 0.12),
-                                              blurRadius: 16,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ]
-                                        : [],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      // Beautiful radio selector
-                                      AnimatedContainer(
-                                        duration: const Duration(milliseconds: 200),
-                                        width: 20,
-                                        height: 20,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: isSelected ? primaryColor : (isDark ? Colors.white30 : Colors.black38),
-                                            width: isSelected ? 6 : 2,
-                                          ),
-                                          color: isSelected ? Colors.transparent : Colors.transparent,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
+                          // Yearly option card (Index 1)
+                          _buildYearlyParentOptionCard(
+                            context,
+                            1,
+                            options[1],
+                            primaryColor,
+                            secondaryColor,
+                            isDark,
+                          ),
 
-                                      // Duration name and monthly equivalent
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  opt.label,
-                                                  style: GoogleFonts.outfit(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                  ),
-                                                ),
-                                                if (opt.badge != null) ...[
-                                                  const SizedBox(width: 8),
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                                    decoration: BoxDecoration(
-                                                      gradient: LinearGradient(
-                                                        colors: [primaryColor, secondaryColor],
-                                                      ),
-                                                      borderRadius: BorderRadius.circular(20),
-                                                    ),
-                                                    child: Text(
-                                                      opt.badge!,
-                                                      style: GoogleFonts.inter(
-                                                        fontSize: 9,
-                                                        fontWeight: FontWeight.w800,
-                                                        color: Colors.white,
-                                                        letterSpacing: 0.2,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ],
-                                            ),
-                                            const SizedBox(height: 3),
-                                            Text(
-                                              'Equivalent to just ${opt.monthlyEquivalent}',
-                                              style: GoogleFonts.inter(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w500,
-                                                color: isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF64748B),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-
-                                      // Pricing segment
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
-                                        children: [
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              if (opt.originalPrice != null) ...[
-                                                Text(
-                                                  opt.originalPrice!,
-                                                  style: GoogleFonts.outfit(
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors.red.withValues(alpha: 0.8),
-                                                    decoration: TextDecoration.lineThrough,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 6),
-                                              ],
-                                              Text(
-                                                opt.price,
-                                                style: GoogleFonts.outfit(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Text(
-                                            opt.isTrial ? 'then auto-renews' : 'one-time purchase',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w400,
-                                              color: isDark ? Colors.white30 : Colors.black38,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
+                          // Nested dropdown section (Indices 2, 3, 4)
+                          _buildNestedYearlyDropdown(
+                            context,
+                            options,
+                            primaryColor,
+                            secondaryColor,
+                            isDark,
+                          ),
 
                           const SizedBox(height: 18),
 
@@ -918,6 +796,541 @@ class _PaywallDialogState extends State<PaywallDialog>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDurationOptionCard(
+    BuildContext context,
+    int index,
+    _DurationOption opt,
+    Color primaryColor,
+    Color secondaryColor,
+    bool isDark,
+  ) {
+    final isSelected = _selectedDurationIndex == index;
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedDurationIndex = index;
+        });
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? primaryColor.withValues(alpha: 0.08) : Colors.white)
+              : (isDark ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.015)),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? primaryColor
+                : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08)),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.12),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
+        ),
+        child: Row(
+          children: [
+            // Beautiful radio selector
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? primaryColor : (isDark ? Colors.white30 : Colors.black38),
+                  width: isSelected ? 6 : 2,
+                ),
+                color: Colors.transparent,
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            // Duration name and monthly equivalent
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      Text(
+                        opt.label,
+                        style: GoogleFonts.outfit(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      if (opt.badge != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [primaryColor, secondaryColor],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            opt.badge!,
+                            style: GoogleFonts.inter(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    'Equivalent to just ${opt.monthlyEquivalent}',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Pricing segment
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (opt.originalPrice != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Text(
+                      opt.originalPrice!,
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red.withValues(alpha: 0.8),
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                  ),
+                Text(
+                  opt.price,
+                  style: GoogleFonts.outfit(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                ),
+                Text(
+                  opt.isTrial ? 'then auto-renews' : 'one-time purchase',
+                  style: GoogleFonts.inter(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w400,
+                    color: isDark ? Colors.white30 : Colors.black38,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildYearlyParentOptionCard(
+    BuildContext context,
+    int index,
+    _DurationOption opt,
+    Color primaryColor,
+    Color secondaryColor,
+    bool isDark,
+  ) {
+    final isSelected = _selectedDurationIndex == index;
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedDurationIndex = index;
+        });
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? primaryColor.withValues(alpha: 0.08) : Colors.white)
+              : (isDark ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.015)),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? primaryColor
+                : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08)),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.12),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
+        ),
+        child: Row(
+          children: [
+            // Beautiful radio selector
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? primaryColor : (isDark ? Colors.white30 : Colors.black38),
+                  width: isSelected ? 6 : 2,
+                ),
+                color: Colors.transparent,
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            // Duration name and monthly equivalent
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      Text(
+                        opt.label,
+                        style: GoogleFonts.outfit(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      if (opt.badge != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [primaryColor, secondaryColor],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            opt.badge!,
+                            style: GoogleFonts.inter(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    'Equivalent to just ${opt.monthlyEquivalent}',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Pricing segment
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (opt.originalPrice != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Text(
+                      opt.originalPrice!,
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red.withValues(alpha: 0.8),
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                  ),
+                Text(
+                  opt.price,
+                  style: GoogleFonts.outfit(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                ),
+                Text(
+                  opt.isTrial ? 'then auto-renews' : 'one-time purchase',
+                  style: GoogleFonts.inter(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w400,
+                    color: isDark ? Colors.white30 : Colors.black38,
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(width: 8),
+            Container(
+              height: 32,
+              width: 1,
+              color: isDark ? Colors.white12 : Colors.black12,
+            ),
+            const SizedBox(width: 4),
+            
+            // Dropdown Expand/Collapse Trigger
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isYearlyDropdownOpen = !_isYearlyDropdownOpen;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                color: Colors.transparent,
+                child: AnimatedRotation(
+                  turns: _isYearlyDropdownOpen ? 0.5 : 0.0,
+                  duration: const Duration(milliseconds: 250),
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: primaryColor,
+                    size: 26,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNestedYearlyDropdown(
+    BuildContext context,
+    List<_DurationOption> options,
+    Color primaryColor,
+    Color secondaryColor,
+    bool isDark,
+  ) {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+      child: _isYearlyDropdownOpen
+          ? Container(
+              margin: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
+              padding: const EdgeInsets.only(left: 18, top: 4, bottom: 4),
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: primaryColor.withValues(alpha: 0.35),
+                    width: 2.5,
+                  ),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12, top: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.auto_awesome_rounded, size: 14, color: primaryColor),
+                        const SizedBox(width: 8),
+                        Text(
+                          'EXCLUSIVE MULTI-YEAR ACCESS PLANS:',
+                          style: GoogleFonts.outfit(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: isDark ? Colors.white54 : Colors.black54,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ...List.generate(3, (index) {
+                    final actualIndex = index + 2; // Index 2, 3, 4
+                    final opt = options[actualIndex];
+                    final isSelected = _selectedDurationIndex == actualIndex;
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            _selectedDurationIndex = actualIndex;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(18),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? (isDark ? primaryColor.withValues(alpha: 0.08) : Colors.white)
+                                : (isDark ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.015)),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: isSelected
+                                  ? primaryColor
+                                  : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08)),
+                              width: isSelected ? 2 : 1,
+                            ),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: primaryColor.withValues(alpha: 0.12),
+                                      blurRadius: 14,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ]
+                                : [],
+                          ),
+                          child: Row(
+                            children: [
+                              // Radio selector
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 18,
+                                height: 18,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected ? primaryColor : (isDark ? Colors.white30 : Colors.black38),
+                                    width: isSelected ? 5 : 2,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+
+                              // Option description
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Wrap(
+                                      crossAxisAlignment: WrapCrossAlignment.center,
+                                      spacing: 8,
+                                      runSpacing: 4,
+                                      children: [
+                                        Text(
+                                          opt.label,
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w700,
+                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                          ),
+                                        ),
+                                        if (opt.badge != null)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [primaryColor, secondaryColor],
+                                              ),
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              opt.badge!,
+                                              style: GoogleFonts.inter(
+                                                fontSize: 8,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.white,
+                                                letterSpacing: 0.2,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Equivalent to just ${opt.monthlyEquivalent}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                        color: isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Pricing
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (opt.originalPrice != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 2),
+                                      child: Text(
+                                        opt.originalPrice!,
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.red.withValues(alpha: 0.8),
+                                          decoration: TextDecoration.lineThrough,
+                                        ),
+                                      ),
+                                    ),
+                                  Text(
+                                    opt.price,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                  Text(
+                                    'one-time purchase',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.w400,
+                                      color: isDark ? Colors.white30 : Colors.black38,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }
