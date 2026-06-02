@@ -48,6 +48,13 @@ class MockSubscriptionRepository implements SubscriptionRepository {
   }
 
   @override
+  Future<SubscriptionPlan> purchaseProduct(String productId) async {
+    final plan = productId.contains('pro') ? SubscriptionPlan.pro : SubscriptionPlan.premium;
+    setMockPlan(plan);
+    return plan;
+  }
+
+  @override
   Future<void> loginUser(String userId) async {
     // No-op for mock
   }

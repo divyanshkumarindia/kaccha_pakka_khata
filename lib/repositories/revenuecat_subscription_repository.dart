@@ -204,6 +204,35 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
   }
 
   @override
+  Future<SubscriptionPlan> purchaseProduct(String productId) async {
+    if (!_isInitialized) return SubscriptionPlan.free;
+
+    try {
+      // 1. Fetch the product from RevenueCat
+      final products = await Purchases.getProducts([productId]);
+      if (products.isEmpty) {
+        if (kDebugMode) debugPrint('❌ Product $productId not found in RevenueCat');
+        throw Exception('Product not found');
+      }
+
+      // 2. Trigger the native Google Play purchase flow
+      // ignore: deprecated_member_use
+      final purchaseResult = await Purchases.purchaseStoreProduct(products.first);
+      
+      // 3. Update state based on the new purchase
+      final newPlan = _planFromCustomerInfo(purchaseResult.customerInfo);
+      _planController.add(newPlan);
+      return newPlan;
+      
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Error purchasing product $productId: $e');
+      }
+      return await getCurrentPlan();
+    }
+  }
+
+  @override
   Future<void> loginUser(String userId) async {
     if (!_isInitialized) return;
 

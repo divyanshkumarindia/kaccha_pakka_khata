@@ -154,6 +154,23 @@ class SubscriptionService extends ChangeNotifier {
     }
   }
 
+  /// Purchase a specific product.
+  Future<SubscriptionPlan> purchaseProduct(String productId) async {
+    try {
+      final newPlan = await _repository.purchaseProduct(productId);
+      if (_currentPlan != newPlan) {
+        _currentPlan = newPlan;
+        _isTrialActive = await _repository.isTrialActive();
+        _expirationDate = await _repository.getExpirationDate();
+        notifyListeners();
+      }
+      return _currentPlan;
+    } catch (e) {
+      if (kDebugMode) debugPrint('Purchase product error: $e');
+      return _currentPlan;
+    }
+  }
+
   /// Link the subscription state to a specific user.
   Future<void> loginUser(String userId) async {
     await _repository.loginUser(userId);

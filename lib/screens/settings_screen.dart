@@ -1776,23 +1776,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Get unlimited khatas, cloud backup, and PDF reports. No charge for 14 days!',
+                    'Get unlimited khatas, cloud backup, and PDF reports. No charge for 30 days!',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       color: Colors.white.withValues(alpha: 0.9),
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   
-                  // Visual progression of tiers
-                  Row(
+                  // Beautiful features pill grid (replaces boring progress line)
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
-                      _buildTierIcon(Icons.person_outline, 'Free', false),
-                      _buildProgressionLine(),
-                      _buildTierIcon(Icons.star_rounded, 'Pro', true),
-                      _buildProgressionLine(),
-                      _buildTierIcon(Icons.diamond_rounded, 'Premium', true),
+                      _buildFeaturePill(Icons.star_rounded, 'Unlimited Khatas'),
+                      _buildFeaturePill(Icons.cloud_done_rounded, 'Auto Cloud Backup'),
+                      _buildFeaturePill(Icons.picture_as_pdf_rounded, 'Download PDF/Excel'),
+                      _buildFeaturePill(Icons.devices_rounded, 'Multi-Device Sync'),
                     ],
                   ),
                   
@@ -1815,7 +1816,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Start 14-Day Free Trial',
+                        'Start 30-Day Free Trial',
                         style: GoogleFonts.outfit(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -1832,42 +1833,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildTierIcon(IconData icon, String label, bool isSpecial) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isSpecial 
-                ? Colors.white.withValues(alpha: 0.3) 
-                : Colors.white.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-            border: isSpecial ? Border.all(color: Colors.white.withValues(alpha: 0.5), width: 2) : null,
+  Widget _buildFeaturePill(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.15),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: const Color(0xFFFCD34D), size: 16),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
           ),
-          child: Icon(icon, color: Colors.white, size: 20),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: Colors.white.withValues(alpha: 0.8),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProgressionLine() {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.only(left: 8, right: 8, bottom: 14),
-        height: 2,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(1),
-        ),
+        ],
       ),
     );
   }

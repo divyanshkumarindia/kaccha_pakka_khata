@@ -24,6 +24,9 @@ abstract class SubscriptionRepository {
   /// Attempt to purchase a specific plan.
   Future<SubscriptionPlan> purchasePlan(SubscriptionPlan plan);
 
+  /// Attempt to purchase a specific product by its ID (useful for multi-year products).
+  Future<SubscriptionPlan> purchaseProduct(String productId);
+
   /// Log in the subscription provider with a user ID so purchases are
   /// tied to the correct account.
   Future<void> loginUser(String userId);
