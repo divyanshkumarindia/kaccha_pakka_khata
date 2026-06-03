@@ -55,6 +55,7 @@ class _PaywallDialogState extends State<PaywallDialog>
   bool _isPremiumSelected = true;
   int _selectedDurationIndex = 1; // Default to Yearly Plan
   bool _isPurchasing = false;
+  final ScrollController _scrollController = ScrollController();
 
   // Duration choices for Pro Plan
   final List<_DurationOption> _proOptions = const [
@@ -191,6 +192,23 @@ class _PaywallDialogState extends State<PaywallDialog>
     return false;
   }
 
+  void _scrollToSelectedIfNeeded({bool animate = true}) {
+    if (_scrollController.hasClients) {
+      final double targetOffset = _selectedDurationIndex >= 2
+          ? _scrollController.position.maxScrollExtent
+          : 0.0;
+      if (animate) {
+        _scrollController.animateTo(
+          targetOffset,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOutCubic,
+        );
+      } else {
+        _scrollController.jumpTo(targetOffset);
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -227,12 +245,17 @@ class _PaywallDialogState extends State<PaywallDialog>
       CurvedAnimation(parent: _animController, curve: Curves.easeOut),
     );
     _animController.forward();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToSelectedIfNeeded(animate: false);
+    });
   }
 
   @override
   void dispose() {
     _animController.dispose();
     _pulseController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -651,6 +674,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                                     _selectedDurationIndex = 1;
                                   }
                                 });
+                                _scrollToSelectedIfNeeded();
                               },
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 250),
@@ -717,6 +741,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                                     _selectedDurationIndex = 1;
                                   }
                                 });
+                                _scrollToSelectedIfNeeded();
                               },
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 250),
@@ -774,6 +799,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                   // --- Duration Cards (Scrollable Viewport) ---
                   Expanded(
                     child: SingleChildScrollView(
+                      controller: _scrollController,
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Column(
                         children: [

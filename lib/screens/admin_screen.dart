@@ -237,15 +237,32 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     final untilStr = uData['granted_until'];
     final userId = row['user_id'];
     
+    String durationLabel(int days) {
+      if (days > 10000) return 'Lifetime';
+      if (days == 7) return '7 Days';
+      if (days == 30) return '30 Days';
+      if (days == 90) return '90 Days';
+      if (days == 365) return '1 Year';
+      if (days == 730) return '2 Years';
+      if (days == 1095) return '3 Years';
+      if (days == 1825) return '5 Years';
+      return '$days Days';
+    }
+
     String subInfo = 'Free tier';
     if (activePlan != 'free' && untilStr != null) {
       final until = DateTime.parse(untilStr);
       if (DateTime.now().isBefore(until)) {
-        final daysLeft = until.difference(DateTime.now()).inDays;
+        final daysLeft = until.difference(DateTime.now()).inDays + 1;
+        final durationDays = uData['granted_duration_days'] as int?;
+        final planName = activePlan.toString().toUpperCase();
+
         if (daysLeft > 10000) {
-          subInfo = '${activePlan.toString().toUpperCase()} • Lifetime';
+          subInfo = '$planName • Lifetime';
+        } else if (durationDays != null) {
+          subInfo = '$planName • ${durationLabel(durationDays)} ($daysLeft days left)';
         } else {
-          subInfo = '${activePlan.toString().toUpperCase()} • $daysLeft days left';
+          subInfo = '$planName • $daysLeft days left';
         }
       }
     }
@@ -975,7 +992,34 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     final email = configData['email'] ?? 'No email';
 
     String localPlan = configData['granted_plan'] ?? 'free';
-    int localDuration = configData['granted_duration_days'] as int? ?? 30;
+    int localDuration = 30;
+    if (configData['granted_duration_days'] != null) {
+      localDuration = configData['granted_duration_days'] as int;
+    } else if (configData['granted_until'] != null) {
+      final until = DateTime.parse(configData['granted_until'] as String);
+      final daysLeft = until.difference(DateTime.now()).inDays;
+      if (daysLeft > 0) {
+        if (daysLeft > 10000) {
+          localDuration = 99999;
+        } else if (daysLeft <= 7) {
+          localDuration = 7;
+        } else if (daysLeft <= 30) {
+          localDuration = 30;
+        } else if (daysLeft <= 90) {
+          localDuration = 90;
+        } else if (daysLeft <= 365) {
+          localDuration = 365;
+        } else if (daysLeft <= 730) {
+          localDuration = 730;
+        } else if (daysLeft <= 1095) {
+          localDuration = 1095;
+        } else if (daysLeft <= 1825) {
+          localDuration = 1825;
+        } else {
+          localDuration = 99999;
+        }
+      }
+    }
     bool localIsAdmin = configData['is_admin'] == true;
 
     showModalBottomSheet(
