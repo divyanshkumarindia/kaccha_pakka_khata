@@ -42,8 +42,12 @@ CREATE TABLE IF NOT EXISTS public.promo_codes (
     duration_days INTEGER NOT NULL, -- e.g. 30, 365, 99999 (for lifetime)
     max_uses INTEGER NOT NULL DEFAULT 1,
     uses_count INTEGER NOT NULL DEFAULT 0,
+    is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- If table already exists, run this to add the is_active column
+ALTER TABLE public.promo_codes ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
@@ -334,6 +338,186 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     } catch (e) {
       setState(() => _isLoadingCodes = false);
       _showErrorSnackBar('Failed to delete promo code: $e');
+    }
+  }
+
+  Future<void> _showEditPromoCodeDialog(Map<String, dynamic> promo) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final code = promo['code'] as String;
+    final plan = promo['plan'] as String;
+    final currentMaxUses = promo['max_uses'] as int;
+    final currentIsActive = promo['is_active'] as bool? ?? true;
+
+    final controller = TextEditingController(text: currentMaxUses.toString());
+    bool localIsActive = currentIsActive;
+
+    await showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              const Icon(Icons.edit_rounded, color: Color(0xFF6366F1), size: 28),
+              const SizedBox(width: 12),
+              Text(
+                'Edit Promo Code',
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF0F172A) : Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade200),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Code: $code',
+                        style: GoogleFonts.firaCode(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Plan: ${plan.toUpperCase()}',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: plan == 'premium' ? const Color(0xFFDB2777) : const Color(0xFF6366F1),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: controller,
+                  keyboardType: TextInputType.number,
+                  style: GoogleFonts.inter(fontSize: 14),
+                  decoration: InputDecoration(
+                    labelText: 'Max Uses Limit',
+                    labelStyle: GoogleFonts.outfit(color: isDark ? Colors.white70 : Colors.grey.shade700),
+                    filled: true,
+                    fillColor: isDark ? const Color(0xFF0F172A) : Colors.grey.shade50,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.grey.shade200),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF0F172A) : Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade200),
+                  ),
+                  child: SwitchListTile(
+                    title: Text(
+                      'Code Status',
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      ),
+                    ),
+                    subtitle: Text(
+                      localIsActive ? 'Active' : 'Disabled (Manually Expired)',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: localIsActive ? Colors.green : Colors.redAccent,
+                      ),
+                    ),
+                    value: localIsActive,
+                    onChanged: (val) {
+                      setDialogState(() {
+                        localIsActive = val;
+                      });
+                    },
+                    activeThumbColor: const Color(0xFF6366F1),
+                    activeTrackColor: const Color(0xFF6366F1).withValues(alpha: 0.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              ),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white60 : Colors.grey.shade600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final maxUses = int.tryParse(controller.text) ?? currentMaxUses;
+                Navigator.pop(ctx);
+                _updatePromoCode(code, maxUses, localIsActive);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6366F1),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text(
+                'Save',
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updatePromoCode(String code, int maxUses, bool isActive) async {
+    setState(() => _isLoadingCodes = true);
+    try {
+      await _supabase.from('promo_codes').update({
+        'max_uses': maxUses,
+        'is_active': isActive,
+      }).eq('code', code);
+
+      _showSuccessSnackBar('Promo code $code updated successfully!');
+      _fetchPromoCodes();
+    } catch (e) {
+      setState(() => _isLoadingCodes = false);
+      _showErrorSnackBar('Failed to update promo code: $e');
     }
   }
 
@@ -787,12 +971,13 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                       color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isDark ? Colors.white10 : Colors.grey.shade200,
+                        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
+                        width: 1.2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 8,
+                          color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
                       ],
@@ -862,11 +1047,13 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                 return Card(
                                   margin: const EdgeInsets.only(bottom: 12),
                                   color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                                  elevation: 0,
+                                  elevation: 2,
+                                  shadowColor: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     side: BorderSide(
-                                      color: isDark ? Colors.white10 : Colors.grey.shade100,
+                                      color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
+                                      width: 1.2,
                                     ),
                                   ),
                                   child: InkWell(
@@ -982,11 +1169,12 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                           color: isDark ? const Color(0xFF1E293B) : Colors.white,
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                            color: isDark ? Colors.white10 : Colors.grey.shade100,
+                            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
+                            width: 1.2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.03),
+                              color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.06),
                               blurRadius: 12,
                               offset: const Offset(0, 6),
                             ),
@@ -1173,8 +1361,10 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                     final duration = promo['duration_days'];
                                     final maxUses = promo['max_uses'];
                                     final usesCount = promo['uses_count'];
+                                    final isActive = promo['is_active'] as bool? ?? true;
 
-                                    final isExpired = usesCount >= maxUses;
+                                    final isLimitReached = usesCount >= maxUses;
+                                    final isExpired = !isActive || isLimitReached;
                                     final durationText = duration >= 99999 ? 'Lifetime' : '$duration Days';
 
                                     final Color planColor = plan == 'premium' 
@@ -1184,11 +1374,13 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                     return Card(
                                       margin: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
                                       color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                                      elevation: 0,
+                                      elevation: 2,
+                                      shadowColor: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(16),
                                         side: BorderSide(
-                                          color: isDark ? Colors.white10 : Colors.grey.shade100,
+                                          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
+                                          width: 1.2,
                                         ),
                                       ),
                                       child: Padding(
@@ -1228,13 +1420,26 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                                     ),
                                                   ],
                                                 ),
-                                                IconButton(
-                                                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
-                                                  onPressed: () => _deletePromoCode(code),
-                                                  style: IconButton.styleFrom(
-                                                    backgroundColor: Colors.red.withValues(alpha: 0.05),
-                                                    padding: const EdgeInsets.all(8),
-                                                  ),
+                                                Row(
+                                                  children: [
+                                                    IconButton(
+                                                      icon: const Icon(Icons.edit_rounded, color: Color(0xFF6366F1), size: 20),
+                                                      onPressed: () => _showEditPromoCodeDialog(promo),
+                                                      style: IconButton.styleFrom(
+                                                        backgroundColor: const Color(0xFF6366F1).withValues(alpha: 0.05),
+                                                        padding: const EdgeInsets.all(8),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    IconButton(
+                                                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                                                      onPressed: () => _deletePromoCode(code),
+                                                      style: IconButton.styleFrom(
+                                                        backgroundColor: Colors.red.withValues(alpha: 0.05),
+                                                        padding: const EdgeInsets.all(8),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ],
                                             ),
@@ -1258,7 +1463,9 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                                     borderRadius: BorderRadius.circular(6),
                                                   ),
                                                   child: Text(
-                                                    isExpired ? 'EXPIRED' : 'ACTIVE',
+                                                    isExpired 
+                                                        ? (isLimitReached ? 'EXPIRED' : 'DISABLED') 
+                                                        : 'ACTIVE',
                                                     style: GoogleFonts.inter(
                                                       fontSize: 9,
                                                       fontWeight: FontWeight.bold,

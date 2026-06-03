@@ -193,9 +193,10 @@ class SubscriptionService extends ChangeNotifier {
       final durationDays = promo['duration_days'] as int;
       final maxUses = promo['max_uses'] as int;
       final usesCount = promo['uses_count'] as int;
+      final isActive = promo['is_active'] as bool? ?? true;
 
-      // 2. Check usage limit
-      if (usesCount >= maxUses) {
+      // 2. Check usage limit and active status
+      if (!isActive || usesCount >= maxUses) {
         return {'success': false, 'message': 'This promo code has expired or reached its maximum usage limit.'};
       }
 
