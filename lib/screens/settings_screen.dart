@@ -1571,15 +1571,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (_adminTapCount >= 7) {
       _adminTapCount = 0;
       _checkAndOpenAdminPanel(context);
-    } else if (_adminTapCount >= 3) {
-      final tapsRemaining = 7 - _adminTapCount;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('You are now $tapsRemaining taps away from Admin settings.', style: GoogleFonts.inter()),
-          duration: const Duration(milliseconds: 500),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
     }
   }
 
@@ -1596,6 +1587,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
+    final email = user.email?.trim().toLowerCase() ?? '';
+    final superAdminEmail = 'divyanshkumarindia@gmail.com';
+
     // Show a loading indicator
     showDialog(
       context: context,
@@ -1603,33 +1597,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
-    bool isAdmin = false;
+    bool isAuthorizedAdmin = false;
 
-    try {
-      final response = await Supabase.instance.client
-          .from('user_data')
-          .select('data')
-          .eq('user_id', user.id)
-          .maybeSingle();
+    if (email == superAdminEmail) {
+      isAuthorizedAdmin = true;
+    } else {
+      try {
+        final response = await Supabase.instance.client
+            .from('user_data')
+            .select('data')
+            .eq('user_id', user.id)
+            .maybeSingle();
 
-      if (response != null && response['data'] != null) {
-        final data = Map<String, dynamic>.from(response['data'] as Map);
-        if (data['is_admin'] == true) {
-          isAdmin = true;
+        if (response != null && response['data'] != null) {
+          final data = Map<String, dynamic>.from(response['data'] as Map);
+          if (data['is_admin'] == true) {
+            isAuthorizedAdmin = true;
+          }
         }
+      } catch (_) {
+        // Security fallback: deny access on error
       }
-    } catch (_) {
-      // Ignore database check error, fallback to passcode verification
     }
 
     if (context.mounted) {
       Navigator.pop(context); // Dismiss loading dialog
     }
 
-    if (isAdmin) {
-      _navigateToAdminScreen();
-    } else {
+    if (isAuthorizedAdmin) {
       _promptAdminPasscode();
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Access Denied: You do not have administrator permissions.', style: GoogleFonts.inter()),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 

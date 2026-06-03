@@ -150,8 +150,13 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     } catch (e) {
       setState(() => _isLoadingCodes = false);
       final errorStr = e.toString().toLowerCase();
-      // Check if table missing error (42P01 is Postgres relation does not exist)
-      if (errorStr.contains('42p01') || errorStr.contains('does not exist') || errorStr.contains('relation "promo_codes"')) {
+      // Check if table missing error (42P01 is Postgres relation does not exist, PGRST205 is PostgREST schema cache missing)
+      if (errorStr.contains('42p01') || 
+          errorStr.contains('does not exist') || 
+          errorStr.contains('relation "promo_codes"') ||
+          errorStr.contains('pgrst205') ||
+          errorStr.contains('could not find the table') ||
+          errorStr.contains('schema cache')) {
         setState(() => _isPromoTableMissing = true);
       } else {
         _showErrorSnackBar('Error fetching promo codes: $e');
@@ -159,7 +164,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     }
   }
 
-  Future<void> _grantUserPlan(String userId, Map<String, dynamic> currentConfig, String plan, int durationDays) async {
+  Future<void> _grantUserPlan(String userId, Map<String, dynamic> currentConfig, String plan, int durationDays, bool isAdmin) async {
     try {
       final updatedConfig = Map<String, dynamic>.from(currentConfig);
 
@@ -172,12 +177,19 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
         updatedConfig['granted_until'] = until.toIso8601String();
       }
 
+      // Update admin privilege
+      if (isAdmin) {
+        updatedConfig['is_admin'] = true;
+      } else {
+        updatedConfig.remove('is_admin');
+      }
+
       await _supabase.from('user_data').update({
         'data': updatedConfig,
         'updated_at': DateTime.now().toIso8601String(),
       }).eq('user_id', userId);
 
-      _showSuccessSnackBar('Subscription successfully granted!');
+      _showSuccessSnackBar('User configuration updated successfully!');
       _fetchUsers();
 
       // If updating the currently logged-in user, refresh their session
@@ -278,6 +290,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
 
     String localPlan = configData['granted_plan'] ?? 'free';
     int localDuration = 30;
+    bool localIsAdmin = configData['is_admin'] == true;
 
     showModalBottomSheet(
       context: context,
@@ -360,8 +373,30 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                     }
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
               ],
+
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text('Admin Panel Access', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                subtitle: Text(
+                  email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
+                      ? 'Super Admin (Permanent)'
+                      : 'Allow this user to enter the Admin Panel and manage subscriptions.',
+                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                ),
+                value: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? true : localIsAdmin,
+                onChanged: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
+                    ? null
+                    : (val) {
+                        setDialogState(() {
+                          localIsAdmin = val;
+                        });
+                      },
+                activeThumbColor: const Color(0xFF6366F1),
+                activeTrackColor: const Color(0xFF6366F1).withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 24),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -374,7 +409,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(ctx);
-                      _grantUserPlan(userId, configData, localPlan, localDuration);
+                      _grantUserPlan(userId, configData, localPlan, localDuration, localIsAdmin);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF6366F1),
@@ -621,9 +656,39 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                   child: ListTile(
                                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                    title: Text(
-                                      displayName,
-                                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                                    title: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            displayName,
+                                            style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        if (uData['is_admin'] == true || email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com')
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
+                                                  ? Colors.red.withValues(alpha: 0.15)
+                                                  : const Color(0xFF6366F1).withValues(alpha: 0.15),
+                                              borderRadius: BorderRadius.circular(6),
+                                              border: Border.all(
+                                                color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
+                                                    ? Colors.red.withValues(alpha: 0.3)
+                                                    : const Color(0xFF6366F1).withValues(alpha: 0.3),
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? 'SUPER ADMIN' : 'ADMIN',
+                                              style: GoogleFonts.outfit(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? Colors.red : const Color(0xFF6366F1),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                     subtitle: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
