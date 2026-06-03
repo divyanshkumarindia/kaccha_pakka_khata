@@ -52,21 +52,31 @@ class AuthService {
             try {
               final userId = session.user.id;
               // Check if user_data row exists to avoid overwriting with empty data
-              // (Using maybeSingle to safely check existence)
               final existingData = await _supabase
                   .from('user_data')
                   .select()
                   .eq('user_id', userId)
                   .maybeSingle();
 
-              if (existingData == null) {
-                // Insert new row if missing
-                await _supabase.from('user_data').insert({
+              final currentData = existingData != null ? Map<String, dynamic>.from(existingData['data'] as Map? ?? {}) : <String, dynamic>{};
+              
+              // Sync if missing email or user_name
+              if (existingData == null || !currentData.containsKey('email') || !currentData.containsKey('user_name')) {
+                final email = session.user.email;
+                final userName = currentData['user_name'] ?? session.user.userMetadata?['full_name'] ?? email?.split('@').first ?? 'Unnamed User';
+                
+                final updatedData = {
+                  ...currentData,
+                  if (email != null) 'email': email,
+                  'user_name': userName,
+                };
+                
+                await _supabase.from('user_data').upsert({
                   'user_id': userId,
-                  'data': {}, // Initialize empty JSON
+                  'data': updatedData,
                   'updated_at': DateTime.now().toIso8601String(),
                 });
-                print("User Data row created for $userId");
+                print("User Data synced for $userId");
               }
             } catch (e) {
               // Silently ignore or log error (e.g., duplicated concurrent insert)

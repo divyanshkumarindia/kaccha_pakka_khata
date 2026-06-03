@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/subscription_service.dart';
 
@@ -25,6 +27,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   List<Map<String, dynamic>> _users = [];
   List<Map<String, dynamic>> _filteredUsers = [];
   List<Map<String, dynamic>> _promoCodes = [];
+  List<Map<String, dynamic>> _recentUsers = [];
 
   // Controllers
   final TextEditingController _searchController = TextEditingController();
@@ -110,6 +113,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     _tabController = TabController(length: 2, vsync: this);
     _searchController.addListener(_onSearchChanged);
     _loadAllData();
+    _loadRecentUsers();
   }
 
   @override
@@ -162,6 +166,323 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
       setState(() => _isLoadingUsers = false);
       _showErrorSnackBar('Error fetching users: $e');
     }
+  }
+
+  Future<void> _loadRecentUsers() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final recentStr = prefs.getString('admin_recent_users');
+      if (recentStr != null) {
+        final List<dynamic> decoded = jsonDecode(recentStr);
+        setState(() {
+          _recentUsers = decoded.map((item) => Map<String, dynamic>.from(item as Map)).toList();
+        });
+      }
+    } catch (e) {
+      debugPrint("Error loading recent users: $e");
+    }
+  }
+
+  Future<void> _saveRecentUser(Map<String, dynamic> userRow) async {
+    try {
+      final userId = userRow['user_id'] as String;
+      // Filter out duplicate
+      _recentUsers.removeWhere((item) => item['user_id'] == userId);
+      // Keep up to 5 recent users
+      _recentUsers.insert(0, userRow);
+      if (_recentUsers.length > 5) {
+        _recentUsers = _recentUsers.sublist(0, 5);
+      }
+      
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('admin_recent_users', jsonEncode(_recentUsers));
+      setState(() {});
+    } catch (e) {
+      debugPrint("Error saving recent user: $e");
+    }
+  }
+
+  Future<void> _removeRecentUser(String userId) async {
+    try {
+      _recentUsers.removeWhere((item) => item['user_id'] == userId);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('admin_recent_users', jsonEncode(_recentUsers));
+      setState(() {});
+    } catch (e) {
+      debugPrint("Error removing recent user: $e");
+    }
+  }
+
+  Widget _buildUserCard(Map<String, dynamic> row, {bool showRemoveRecent = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final uData = Map<String, dynamic>.from(row['data'] ?? {});
+    final displayName = uData['user_name'] ?? 'Unnamed User';
+    final email = uData['email'] ?? 'No email';
+    final activePlan = uData['granted_plan'] ?? 'free';
+    final untilStr = uData['granted_until'];
+    final userId = row['user_id'];
+    
+    String subInfo = 'Free tier';
+    if (activePlan != 'free' && untilStr != null) {
+      final until = DateTime.parse(untilStr);
+      if (DateTime.now().isBefore(until)) {
+        final daysLeft = until.difference(DateTime.now()).inDays;
+        subInfo = '${activePlan.toString().toUpperCase()} • $daysLeft days left';
+      }
+    }
+
+    final Color planColor = activePlan == 'premium' 
+        ? const Color(0xFFDB2777) 
+        : (activePlan == 'pro' ? const Color(0xFF6366F1) : const Color(0xFF64748B));
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+      elevation: 2,
+      shadowColor: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
+          width: 1.2,
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          _saveRecentUser(row);
+          _showUserGrantDialog(row);
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              _userAvatar(displayName, planColor),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            displayName,
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (uData['is_admin'] == true || email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com')
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
+                                  ? Colors.red.withValues(alpha: 0.1)
+                                  : const Color(0xFF6366F1).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
+                                    ? Colors.red.withValues(alpha: 0.2)
+                                    : const Color(0xFF6366F1).withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: Text(
+                              email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? 'SUPER ADMIN' : 'ADMIN',
+                              style: GoogleFonts.outfit(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? Colors.redAccent : const Color(0xFF6366F1),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      email,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: isDark ? Colors.white54 : Colors.grey.shade600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: planColor.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        subInfo,
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: planColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (showRemoveRecent)
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, color: Colors.redAccent, size: 18),
+                  onPressed: () => _removeRecentUser(userId),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.red.withValues(alpha: 0.05),
+                    padding: const EdgeInsets.all(4),
+                  ),
+                )
+              else
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: isDark ? Colors.white30 : Colors.grey.shade400,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserList() {
+    final query = _searchController.text.trim().toLowerCase();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (query.isNotEmpty) {
+      if (_filteredUsers.isEmpty) {
+        return Center(
+          child: Text(
+            'No users found.',
+            style: GoogleFonts.inter(color: Colors.grey),
+          ),
+        );
+      }
+      return ListView.builder(
+        itemCount: _filteredUsers.length,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemBuilder: (context, index) {
+          return _buildUserCard(_filteredUsers[index]);
+        },
+      );
+    }
+
+    // Query is empty: build structured sections
+    final admins = _users.where((u) {
+      final uData = Map<String, dynamic>.from(u['data'] ?? {});
+      final email = uData['email']?.toString().toLowerCase() ?? '';
+      return uData['is_admin'] == true || email == 'divyanshkumarindia@gmail.com';
+    }).toList();
+
+    final List<Widget> listItems = [];
+
+    // 1. Admins section
+    if (admins.isNotEmpty) {
+      listItems.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 8),
+          child: Row(
+            children: [
+              const Icon(Icons.admin_panel_settings_rounded, size: 18, color: Color(0xFF6366F1)),
+              const SizedBox(width: 8),
+              Text(
+                'ADMINS (${admins.length})',
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: isDark ? Colors.white60 : Colors.grey.shade700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      for (final admin in admins) {
+        listItems.add(_buildUserCard(admin));
+      }
+    }
+
+    // 2. Recent Inspected section
+    if (_recentUsers.isNotEmpty) {
+      listItems.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 8),
+          child: Row(
+            children: [
+              const Icon(Icons.history_rounded, size: 18, color: Color(0xFFDB2777)),
+              const SizedBox(width: 8),
+              Text(
+                'RECENTLY INSPECTED',
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: isDark ? Colors.white60 : Colors.grey.shade700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      for (final recent in _recentUsers) {
+        // Find if this user exists in the current _users list to get latest data, otherwise use cached
+        final match = _users.firstWhere(
+          (u) => u['user_id'] == recent['user_id'],
+          orElse: () => recent,
+        );
+        listItems.add(_buildUserCard(match, showRemoveRecent: true));
+      }
+    }
+
+    // 3. All Users section
+    if (_users.isNotEmpty) {
+      listItems.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 8),
+          child: Row(
+            children: [
+              const Icon(Icons.people_alt_rounded, size: 18, color: Colors.blueAccent),
+              const SizedBox(width: 8),
+              Text(
+                'ALL USERS (${_users.length})',
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: isDark ? Colors.white60 : Colors.grey.shade700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      for (final user in _users) {
+        listItems.add(_buildUserCard(user));
+      }
+    }
+
+    if (listItems.isEmpty) {
+      return Center(
+        child: Text(
+          'No users found.',
+          style: GoogleFonts.inter(color: Colors.grey),
+        ),
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      children: listItems,
+    );
   }
 
   Future<void> _fetchPromoCodes() async {
@@ -1013,142 +1334,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                 Expanded(
                   child: _isLoadingUsers
                       ? const Center(child: CircularProgressIndicator())
-                      : _filteredUsers.isEmpty
-                          ? Center(
-                              child: Text(
-                                'No users found.',
-                                style: GoogleFonts.inter(color: Colors.grey),
-                              ),
-                            )
-                          : ListView.builder(
-                              itemCount: _filteredUsers.length,
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              itemBuilder: (context, index) {
-                                final row = _filteredUsers[index];
-                                final uData = Map<String, dynamic>.from(row['data'] ?? {});
-                                final displayName = uData['user_name'] ?? 'Unnamed User';
-                                final email = uData['email'] ?? 'No email';
-                                final activePlan = uData['granted_plan'] ?? 'free';
-                                final untilStr = uData['granted_until'];
-                                
-                                String subInfo = 'Free tier';
-                                if (activePlan != 'free' && untilStr != null) {
-                                  final until = DateTime.parse(untilStr);
-                                  if (DateTime.now().isBefore(until)) {
-                                    final daysLeft = until.difference(DateTime.now()).inDays;
-                                    subInfo = '${activePlan.toString().toUpperCase()} • $daysLeft days left';
-                                  }
-                                }
-
-                                final Color planColor = activePlan == 'premium' 
-                                    ? const Color(0xFFDB2777) 
-                                    : (activePlan == 'pro' ? const Color(0xFF6366F1) : const Color(0xFF64748B));
-
-                                return Card(
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                                  elevation: 2,
-                                  shadowColor: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    side: BorderSide(
-                                      color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
-                                      width: 1.2,
-                                    ),
-                                  ),
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(16),
-                                    onTap: () => _showUserGrantDialog(row),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Row(
-                                        children: [
-                                          _userAvatar(displayName, planColor),
-                                          const SizedBox(width: 16),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: Text(
-                                                        displayName,
-                                                        style: GoogleFonts.outfit(
-                                                          fontWeight: FontWeight.bold,
-                                                          fontSize: 16,
-                                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
-                                                        ),
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                    ),
-                                                    if (uData['is_admin'] == true || email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com')
-                                                      Container(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                                        decoration: BoxDecoration(
-                                                          color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
-                                                              ? Colors.red.withValues(alpha: 0.1)
-                                                              : const Color(0xFF6366F1).withValues(alpha: 0.1),
-                                                          borderRadius: BorderRadius.circular(6),
-                                                          border: Border.all(
-                                                            color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
-                                                                ? Colors.red.withValues(alpha: 0.2)
-                                                                : const Color(0xFF6366F1).withValues(alpha: 0.2),
-                                                          ),
-                                                        ),
-                                                        child: Text(
-                                                          email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? 'SUPER ADMIN' : 'ADMIN',
-                                                          style: GoogleFonts.outfit(
-                                                            fontSize: 9,
-                                                            fontWeight: FontWeight.bold,
-                                                            color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? Colors.redAccent : const Color(0xFF6366F1),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                  ],
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  email,
-                                                  style: GoogleFonts.inter(
-                                                    fontSize: 12,
-                                                    color: isDark ? Colors.white54 : Colors.grey.shade600,
-                                                  ),
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                                const SizedBox(height: 6),
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                  decoration: BoxDecoration(
-                                                    color: planColor.withValues(alpha: 0.08),
-                                                    borderRadius: BorderRadius.circular(20),
-                                                  ),
-                                                  child: Text(
-                                                    subInfo,
-                                                    style: GoogleFonts.inter(
-                                                      fontSize: 11,
-                                                      color: planColor,
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Icon(
-                                            Icons.chevron_right_rounded,
-                                            color: isDark ? Colors.white30 : Colors.grey.shade400,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
+                      : _buildUserList(),
                 ),
               ],
             ),
