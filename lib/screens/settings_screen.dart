@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -1326,67 +1327,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showDeveloperInfo(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showDialog(
+    showGeneralDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            const Icon(Icons.code_rounded, color: Color(0xFF10B981)),
-            const SizedBox(width: 12),
-            Text('Developer Info',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Kaccha Pakka Khata',
-              style: GoogleFonts.outfit(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Version 1.0.0',
-              style: GoogleFonts.inter(
-                color:
-                    isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Developed by:',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              'Divyansh Kumar',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Close',
-                  style: GoogleFonts.outfit(color: const Color(0xFF10B981))),
-            ),
-          ),
-        ],
-      ),
+      barrierDismissible: true,
+      barrierLabel: 'Developer Info',
+      barrierColor: Colors.black.withValues(alpha: 0.65),
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, anim1, anim2) {
+        return const _CoolDeveloperInfoDialog();
+      },
     );
   }
 
@@ -2229,6 +2178,383 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CoolDeveloperInfoDialog extends StatefulWidget {
+  const _CoolDeveloperInfoDialog();
+
+  @override
+  State<_CoolDeveloperInfoDialog> createState() => _CoolDeveloperInfoDialogState();
+}
+
+class _CoolDeveloperInfoDialogState extends State<_CoolDeveloperInfoDialog>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 550),
+  );
+
+  late final Animation<double> _scaleAnimation = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutBack,
+  );
+
+  late final Animation<double> _fadeAnimation = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeIn,
+  );
+
+  late final List<Animation<double>> _opacityAnimations = List.generate(4, (index) {
+    final start = 0.2 + (index * 0.12);
+    final end = (start + 0.35).clamp(0.0, 1.0);
+    return CurvedAnimation(
+      parent: _controller,
+      curve: Interval(start, end, curve: Curves.easeOutCubic),
+    );
+  });
+
+  late final List<Animation<Offset>> _slideAnimations = List.generate(4, (index) {
+    final start = 0.2 + (index * 0.12);
+    final end = (start + 0.35).clamp(0.0, 1.0);
+    return Tween<Offset>(
+      begin: const Offset(0, 0.25),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Interval(start, end, curve: Curves.easeOutCubic),
+      ),
+    );
+  });
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    final primaryColor = const Color(0xFF10B981); // Emerald Green
+    final secondaryColor = const Color(0xFF3B82F6); // Blue
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textDark = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textLight = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+      child: Center(
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Dialog(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              child: Container(
+                width: 320,
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: isDark 
+                        ? Colors.white.withValues(alpha: 0.08) 
+                        : Colors.black.withValues(alpha: 0.04),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withValues(alpha: isDark ? 0.18 : 0.08),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: Stack(
+                    children: [
+                      // Decorative Blur Background Elements
+                      Positioned(
+                        top: -50,
+                        right: -50,
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: primaryColor.withValues(alpha: 0.08),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: -40,
+                        left: -40,
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: secondaryColor.withValues(alpha: 0.08),
+                          ),
+                        ),
+                      ),
+                      
+                      Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // 1. Avatar & Monogram Header
+                            SlideTransition(
+                              position: _slideAnimations[0],
+                              child: FadeTransition(
+                                opacity: _opacityAnimations[0],
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(3),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: LinearGradient(
+                                          colors: [primaryColor, secondaryColor],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                      ),
+                                      child: Container(
+                                        width: 72,
+                                        height: 72,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: cardBg,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            'DK',
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 28,
+                                              fontWeight: FontWeight.w900,
+                                              foreground: Paint()
+                                                ..shader = LinearGradient(
+                                                  colors: [primaryColor, secondaryColor],
+                                                ).createShader(
+                                                  const Rect.fromLTWH(0.0, 0.0, 72.0, 72.0),
+                                                ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Divyansh Kumar',
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w800,
+                                            color: textDark,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Icon(
+                                          Icons.verified_rounded,
+                                          color: primaryColor,
+                                          size: 20,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: primaryColor.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        'Lead Developer',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: primaryColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
+                            // 2. Application details card
+                            SlideTransition(
+                              position: _slideAnimations[1],
+                              child: FadeTransition(
+                                opacity: _opacityAnimations[1],
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                  decoration: BoxDecoration(
+                                    color: isDark 
+                                        ? const Color(0xFF0F172A).withValues(alpha: 0.4) 
+                                        : Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: isDark 
+                                          ? Colors.white.withValues(alpha: 0.04) 
+                                          : Colors.grey.shade200,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'App Name',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: textLight,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Kaccha Pakka Khata',
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: textDark,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Version',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: textLight,
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: isDark 
+                                                  ? Colors.white.withValues(alpha: 0.08) 
+                                                  : Colors.grey.shade200,
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              'v1.0.0',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                                color: textDark,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+
+                            // 3. Technical detail label
+                            SlideTransition(
+                              position: _slideAnimations[2],
+                              child: FadeTransition(
+                                opacity: _opacityAnimations[2],
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.terminal_rounded, size: 15, color: textLight),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Crafted with Flutter & Dart',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: textLight,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            // 4. Custom animated Close Button
+                            SlideTransition(
+                              position: _slideAnimations[3],
+                              child: FadeTransition(
+                                opacity: _opacityAnimations[3],
+                                child: InkWell(
+                                  onTap: () {
+                                    _controller.reverse().then((_) {
+                                      Navigator.pop(context);
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      gradient: LinearGradient(
+                                        colors: [primaryColor, secondaryColor],
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: primaryColor.withValues(alpha: 0.25),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'Close',
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
