@@ -33,6 +33,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
   final TextEditingController _maxUsesController = TextEditingController(text: '10');
+  final FocusNode _searchFocusNode = FocusNode();
 
   // Creation options
   String _selectedPlan = 'premium';
@@ -112,6 +113,9 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _searchController.addListener(_onSearchChanged);
+    _searchFocusNode.addListener(() {
+      setState(() {});
+    });
     _loadAllData();
     _loadRecentUsers();
   }
@@ -120,6 +124,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _codeController.dispose();
     _maxUsesController.dispose();
     super.dispose();
@@ -443,38 +448,25 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
       }
     }
 
-    // 3. All Users section
-    if (_users.isNotEmpty) {
-      listItems.add(
-        Padding(
-          padding: const EdgeInsets.only(top: 16, bottom: 8),
-          child: Row(
+    if (listItems.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.people_alt_rounded, size: 18, color: Colors.blueAccent),
-              const SizedBox(width: 8),
+              Icon(Icons.search_rounded, size: 48, color: isDark ? Colors.white30 : Colors.grey.shade400),
+              const SizedBox(height: 16),
               Text(
-                'ALL USERS (${_users.length})',
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: isDark ? Colors.white60 : Colors.grey.shade700,
-                  letterSpacing: 0.5,
+                'Search for a user by name or email, or tap the user icon to view all users.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: isDark ? Colors.white54 : Colors.grey.shade600,
+                  fontSize: 14,
                 ),
               ),
             ],
           ),
-        ),
-      );
-      for (final user in _users) {
-        listItems.add(_buildUserCard(user));
-      }
-    }
-
-    if (listItems.isEmpty) {
-      return Center(
-        child: Text(
-          'No users found.',
-          style: GoogleFonts.inter(color: Colors.grey),
         ),
       );
     }
@@ -482,6 +474,78 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       children: listItems,
+    );
+  }
+
+  void _showAllUsersBottomSheet() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return Column(
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white24 : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.people_rounded, color: Color(0xFF6366F1)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'All Users (${_users.length})',
+                        style: GoogleFonts.outfit(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: _users.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No users found.',
+                            style: GoogleFonts.inter(color: Colors.grey),
+                          ),
+                        )
+                      : ListView.builder(
+                          controller: scrollController,
+                          itemCount: _users.length,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                          itemBuilder: (context, index) {
+                            final row = _users[index];
+                            return _buildUserCard(row);
+                          },
+                        ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -1287,48 +1351,83 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
-                        width: 1.2,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: TextField(
+                            controller: _searchController,
+                            focusNode: _searchFocusNode,
+                            style: GoogleFonts.inter(fontSize: 14),
+                            decoration: InputDecoration(
+                              hintText: 'Search by ID, name or email...',
+                              hintStyle: GoogleFonts.inter(
+                                color: isDark ? Colors.white30 : Colors.grey.shade400,
+                                fontSize: 14,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search_rounded,
+                                color: isDark ? Colors.white54 : Colors.grey.shade400,
+                              ),
+                              suffixIcon: _searchController.text.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear_rounded, size: 18),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        _onSearchChanged();
+                                      },
+                                    )
+                                  : null,
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                          ),
+                        ),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                      AnimatedCrossFade(
+                        firstChild: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(width: 12),
+                            IconButton(
+                              icon: const Icon(Icons.people_rounded, color: Color(0xFF6366F1)),
+                              onPressed: _showAllUsersBottomSheet,
+                              style: IconButton.styleFrom(
+                                backgroundColor: const Color(0xFF6366F1).withValues(alpha: 0.08),
+                                padding: const EdgeInsets.all(12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  side: BorderSide(
+                                    color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
+                                    width: 1.2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      style: GoogleFonts.inter(fontSize: 14),
-                      decoration: InputDecoration(
-                        hintText: 'Search by ID, name or email...',
-                        hintStyle: GoogleFonts.inter(
-                          color: isDark ? Colors.white30 : Colors.grey.shade400,
-                          fontSize: 14,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search_rounded,
-                          color: isDark ? Colors.white54 : Colors.grey.shade400,
-                        ),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear_rounded, size: 18),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  _onSearchChanged();
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                        secondChild: const SizedBox.shrink(),
+                        crossFadeState: (_searchFocusNode.hasFocus || _searchController.text.isNotEmpty)
+                            ? CrossFadeState.showSecond
+                            : CrossFadeState.showFirst,
+                        duration: const Duration(milliseconds: 200),
                       ),
-                    ),
+                    ],
                   ),
                 ),
                 Expanded(
