@@ -167,14 +167,39 @@ class SubscriptionService extends ChangeNotifier {
           if (grantedPlanStr != null && grantedUntilStr != null) {
             final grantedUntil = DateTime.parse(grantedUntilStr);
             if (DateTime.now().isBefore(grantedUntil)) {
+              int? activeDays = grantedDurationDays;
+              if (activeDays == null) {
+                final daysLeft = grantedUntil.difference(DateTime.now()).inDays;
+                if (daysLeft > 0) {
+                  if (daysLeft > 10000) {
+                    activeDays = 99999;
+                  } else if (daysLeft <= 7) {
+                    activeDays = 7;
+                  } else if (daysLeft <= 30) {
+                    activeDays = 30;
+                  } else if (daysLeft <= 90) {
+                    activeDays = 90;
+                  } else if (daysLeft <= 365) {
+                    activeDays = 365;
+                  } else if (daysLeft <= 730) {
+                    activeDays = 730;
+                  } else if (daysLeft <= 1095) {
+                    activeDays = 1095;
+                  } else if (daysLeft <= 1825) {
+                    activeDays = 1825;
+                  } else {
+                    activeDays = 99999;
+                  }
+                }
+              }
               if (grantedPlanStr == 'premium') {
                 _currentPlan = SubscriptionPlan.premium;
                 _expirationDate = grantedUntil;
-                _activeDurationDays = grantedDurationDays;
+                _activeDurationDays = activeDays;
               } else if (grantedPlanStr == 'pro') {
                 _currentPlan = SubscriptionPlan.pro;
                 _expirationDate = grantedUntil;
-                _activeDurationDays = grantedDurationDays;
+                _activeDurationDays = activeDays;
               }
             }
           }

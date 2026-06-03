@@ -712,6 +712,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (onTap != null) {
       return InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
         child: tileContent,
       );
     }

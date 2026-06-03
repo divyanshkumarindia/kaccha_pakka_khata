@@ -56,6 +56,7 @@ class _PaywallDialogState extends State<PaywallDialog>
   int _selectedDurationIndex = 1; // Default to Yearly Plan
   bool _isPurchasing = false;
   final ScrollController _scrollController = ScrollController();
+  final List<GlobalKey> _cardKeys = List.generate(5, (_) => GlobalKey());
 
   // Duration choices for Pro Plan
   final List<_DurationOption> _proOptions = const [
@@ -193,20 +194,28 @@ class _PaywallDialogState extends State<PaywallDialog>
   }
 
   void _scrollToSelectedIfNeeded({bool animate = true}) {
-    if (_scrollController.hasClients) {
-      final double targetOffset = _selectedDurationIndex >= 2
-          ? _scrollController.position.maxScrollExtent
-          : 0.0;
-      if (animate) {
-        _scrollController.animateTo(
-          targetOffset,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOutCubic,
-        );
-      } else {
-        _scrollController.jumpTo(targetOffset);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_scrollController.hasClients) {
+        final key = _cardKeys[_selectedDurationIndex];
+        final context = key.currentContext;
+        if (context != null) {
+          if (animate) {
+            Scrollable.ensureVisible(
+              context,
+              alignment: 0.5,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOutCubic,
+            );
+          } else {
+            Scrollable.ensureVisible(
+              context,
+              alignment: 0.5,
+            );
+          }
+        }
       }
-    }
+    });
   }
 
   @override
@@ -896,121 +905,173 @@ class _PaywallDialogState extends State<PaywallDialog>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // 30-Day Free Trial Notice Banner
-                          if (selectedOption.isTrial)
+                          // Active Plan confirmation or checkout CTA button
+                          if (_ownsOption(selectedOption))
                             Container(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF10B981).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(18),
                                 border: Border.all(
-                                  color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                                  color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                                  width: 1.5,
                                 ),
                               ),
                               child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.celebration, color: Color(0xFF10B981), size: 18),
-                                  const SizedBox(width: 10),
+                                  const Icon(
+                                    Icons.verified_rounded,
+                                    color: Color(0xFF10B981),
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 12),
                                   Expanded(
-                                    child: Text(
-                                      '🎉 Includes a 30-Day Free Trial — no charge until trial ends!',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark ? const Color(0xFF34D399) : const Color(0xFF047857),
-                                      ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Active Subscription',
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w800,
+                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'You currently possess this plan.',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            color: isDark ? Colors.white70 : const Color(0xFF475569),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
                             )
-                          else
-                            Container(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
+                          else ...[
+                            // 30-Day Free Trial Notice Banner
+                            if (selectedOption.isTrial)
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                                  ),
                                 ),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.lock_open_rounded, color: Color(0xFFF59E0B), size: 18),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      '🔑 One-time activation for long-term multi-year access!',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFB45309),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.celebration, color: Color(0xFF10B981), size: 18),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        '🎉 Includes a 30-Day Free Trial — no charge until trial ends!',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? const Color(0xFF34D399) : const Color(0xFF047857),
+                                        ),
                                       ),
                                     ),
+                                  ],
+                                ),
+                              )
+                            else
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
                                   ),
-                                ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.lock_open_rounded, color: Color(0xFFF59E0B), size: 18),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        '🔑 One-time activation for long-term multi-year access!',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFB45309),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
 
-                          // Pulsating Checkout CTA Button
-                          AnimatedBuilder(
-                            animation: _pulseController,
-                            builder: (context, child) {
-                              final double scale = 1.0 + (_pulseController.value * 0.02);
-                              return Transform.scale(
-                                scale: _isPurchasing ? 1.0 : scale,
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(18),
-                                    gradient: LinearGradient(
-                                      colors: [primaryColor, secondaryColor],
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: primaryColor.withValues(alpha: 0.3),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
+                            // Pulsating Checkout CTA Button
+                            AnimatedBuilder(
+                              animation: _pulseController,
+                              builder: (context, child) {
+                                final double scale = 1.0 + (_pulseController.value * 0.02);
+                                return Transform.scale(
+                                  scale: _isPurchasing ? 1.0 : scale,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(18),
+                                      gradient: LinearGradient(
+                                        colors: [primaryColor, secondaryColor],
                                       ),
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: _isPurchasing ? null : _handlePurchase,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      foregroundColor: Colors.white,
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: primaryColor.withValues(alpha: 0.3),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
                                     ),
-                                    child: _isPurchasing
-                                        ? const SizedBox(
-                                            height: 24,
-                                            width: 24,
-                                            child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                              strokeWidth: 2.5,
+                                    child: ElevatedButton(
+                                      onPressed: _isPurchasing ? null : _handlePurchase,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shadowColor: Colors.transparent,
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(18),
+                                        ),
+                                      ),
+                                      child: _isPurchasing
+                                          ? const SizedBox(
+                                              height: 24,
+                                              width: 24,
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2.5,
+                                              ),
+                                            )
+                                          : Text(
+                                              selectedOption.isTrial
+                                                  ? 'Start 30-Day Free Trial'
+                                                  : 'Activate ${selectedOption.label}',
+                                              style: GoogleFonts.outfit(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w800,
+                                              ),
                                             ),
-                                          )
-                                        : Text(
-                                            selectedOption.isTrial
-                                                ? 'Start 30-Day Free Trial'
-                                                : 'Activate ${selectedOption.label}',
-                                            style: GoogleFonts.outfit(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
+                                );
+                              },
+                            ),
+                          ],
 
                           const SizedBox(height: 12),
 
@@ -1098,6 +1159,7 @@ class _PaywallDialogState extends State<PaywallDialog>
     final isSelected = _selectedDurationIndex == index;
 
     return InkWell(
+      key: _cardKeys[index],
       onTap: () {
         setState(() {
           _selectedDurationIndex = index;
@@ -1337,6 +1399,7 @@ class _PaywallDialogState extends State<PaywallDialog>
             final isSelected = _selectedDurationIndex == actualIndex;
 
             return Container(
+              key: _cardKeys[actualIndex],
               margin: const EdgeInsets.only(bottom: 10),
               child: InkWell(
                 onTap: () {
