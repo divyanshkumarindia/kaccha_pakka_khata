@@ -262,20 +262,63 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
   }
 
   Future<void> _deletePromoCode(String code) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Code', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content: Text('Are you sure you want to delete the promo code $code?'),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 28),
+            const SizedBox(width: 12),
+            Text(
+              'Delete Code',
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to delete the promo code $code? This action cannot be undone.',
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            color: isDark ? Colors.white70 : Colors.black87,
+          ),
+        ),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white60 : Colors.grey.shade600,
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(
+              'Delete',
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -297,14 +340,24 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(
+        content: Text(message, style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
   void _showSuccessSnackBar(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green),
+      SnackBar(
+        content: Text(message, style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+        backgroundColor: const Color(0xFF10B981),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
@@ -323,8 +376,8 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark ? const Color(0xFF111827) : Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => Padding(
           padding: EdgeInsets.only(
@@ -337,34 +390,78 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Grant Subscription Plan',
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Edit User Access',
+                    style: GoogleFonts.outfit(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    icon: const Icon(Icons.close_rounded),
+                    style: IconButton.styleFrom(
+                      backgroundColor: isDark ? Colors.white10 : Colors.grey.shade100,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                '$displayName ($email)',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: isDark ? Colors.white70 : Colors.black54,
-                ),
-              ),
-              const SizedBox(height: 4),
-              SelectableText(
-                'ID: $userId',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  color: isDark ? Colors.white38 : Colors.black38,
-                ),
-              ),
-              const Divider(height: 24),
+              const SizedBox(height: 16),
               
-              Text('Target Plan', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              // User Info Card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      email,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: isDark ? Colors.white60 : Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    SelectableText(
+                      'User ID: $userId',
+                      style: GoogleFonts.firaCode(
+                        fontSize: 10,
+                        color: isDark ? Colors.white30 : Colors.black38,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              Text(
+                'Target Subscription Plan',
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   _planOption(setDialogState, 'Free', 'free', localPlan, (v) => localPlan = v),
@@ -374,18 +471,34 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                   _planOption(setDialogState, 'Premium', 'premium', localPlan, (v) => localPlan = v),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               if (localPlan != 'free') ...[
-                Text('Duration', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
+                Text(
+                  'Subscription Duration',
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 10),
                 DropdownButtonFormField<int>(
                   initialValue: localDuration,
-                  dropdownColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+                  dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black87),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: isDark ? const Color(0xFF1F2937) : Colors.grey.shade100,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    fillColor: isDark ? const Color(0xFF1E293B) : Colors.grey.shade50,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.grey.shade200),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                    ),
                   ),
                   items: const [
                     DropdownMenuItem(value: 7, child: Text('7 Days')),
@@ -401,50 +514,83 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                     }
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
               ],
 
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text('Admin Panel Access', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-                subtitle: Text(
-                  email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
-                      ? 'Super Admin (Permanent)'
-                      : 'Allow this user to enter the Admin Panel and manage subscriptions.',
-                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+              Container(
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B).withValues(alpha: 0.5) : Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade200),
                 ),
-                value: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? true : localIsAdmin,
-                onChanged: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
-                    ? null
-                    : (val) {
-                        setDialogState(() {
-                          localIsAdmin = val;
-                        });
-                      },
-                activeThumbColor: const Color(0xFF6366F1),
-                activeTrackColor: const Color(0xFF6366F1).withValues(alpha: 0.5),
+                child: SwitchListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  title: Text(
+                    'Admin Panel Access',
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
+                  ),
+                  subtitle: Text(
+                    email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
+                        ? 'Super Admin (Permanent)'
+                        : 'Allow this user to enter the Admin Panel and manage subscriptions.',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: isDark ? Colors.white60 : Colors.grey.shade600,
+                    ),
+                  ),
+                  value: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? true : localIsAdmin,
+                  onChanged: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
+                      ? null
+                      : (val) {
+                          setDialogState(() {
+                            localIsAdmin = val;
+                          });
+                        },
+                  activeThumbColor: const Color(0xFF6366F1),
+                  activeTrackColor: const Color(0xFF6366F1).withValues(alpha: 0.4),
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Cancel'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white60 : Colors.grey.shade600,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      _grantUserPlan(userId, configData, localPlan, localDuration, localIsAdmin);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6366F1),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        _grantUserPlan(userId, configData, localPlan, localDuration, localIsAdmin);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6366F1),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: Text(
+                        'Save Changes',
+                        style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
                     ),
-                    child: const Text('Save Changes'),
                   ),
                 ],
               ),
@@ -585,6 +731,22 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     );
   }
 
+  Widget _userAvatar(String name, Color color) {
+    final firstChar = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : 'U';
+    return CircleAvatar(
+      radius: 22,
+      backgroundColor: color.withValues(alpha: 0.1),
+      child: Text(
+        firstChar,
+        style: GoogleFonts.outfit(
+          fontWeight: FontWeight.bold,
+          color: color,
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -619,27 +781,46 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Container(
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? Colors.white10 : Colors.grey.shade200,
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.02),
-                          blurRadius: 10,
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: TextField(
                       controller: _searchController,
+                      style: GoogleFonts.inter(fontSize: 14),
                       decoration: InputDecoration(
-                        hintText: 'Search user by ID, name or email...',
-                        hintStyle: GoogleFonts.inter(color: isDark ? Colors.white38 : Colors.black38),
-                        prefixIcon: const Icon(Icons.search_rounded),
+                        hintText: 'Search by ID, name or email...',
+                        hintStyle: GoogleFonts.inter(
+                          color: isDark ? Colors.white30 : Colors.grey.shade400,
+                          fontSize: 14,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: isDark ? Colors.white54 : Colors.grey.shade400,
+                        ),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear_rounded, size: 18),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  _onSearchChanged();
+                                },
+                              )
+                            : null,
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                     ),
                   ),
@@ -670,71 +851,113 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                   final until = DateTime.parse(untilStr);
                                   if (DateTime.now().isBefore(until)) {
                                     final daysLeft = until.difference(DateTime.now()).inDays;
-                                    subInfo = '${activePlan.toString().toUpperCase()} - $daysLeft days left';
+                                    subInfo = '${activePlan.toString().toUpperCase()} • $daysLeft days left';
                                   }
                                 }
 
                                 final Color planColor = activePlan == 'premium' 
                                     ? const Color(0xFFDB2777) 
-                                    : (activePlan == 'pro' ? const Color(0xFF6366F1) : Colors.grey);
+                                    : (activePlan == 'pro' ? const Color(0xFF6366F1) : const Color(0xFF64748B));
 
                                 return Card(
                                   margin: const EdgeInsets.only(bottom: 12),
                                   color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                  child: ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                    title: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            displayName,
-                                            style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        if (uData['is_admin'] == true || email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com')
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
-                                                  ? Colors.red.withValues(alpha: 0.15)
-                                                  : const Color(0xFF6366F1).withValues(alpha: 0.15),
-                                              borderRadius: BorderRadius.circular(6),
-                                              border: Border.all(
-                                                color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
-                                                    ? Colors.red.withValues(alpha: 0.3)
-                                                    : const Color(0xFF6366F1).withValues(alpha: 0.3),
-                                                width: 1,
-                                              ),
-                                            ),
-                                            child: Text(
-                                              email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? 'SUPER ADMIN' : 'ADMIN',
-                                              style: GoogleFonts.outfit(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                                color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? Colors.red : const Color(0xFF6366F1),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    side: BorderSide(
+                                      color: isDark ? Colors.white10 : Colors.grey.shade100,
                                     ),
-                                    subtitle: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(email, style: GoogleFonts.inter(fontSize: 12, color: Colors.grey)),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          subInfo,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12, 
-                                            color: planColor, 
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    trailing: const Icon(Icons.edit_rounded, size: 20),
+                                  ),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(16),
                                     onTap: () => _showUserGrantDialog(row),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Row(
+                                        children: [
+                                          _userAvatar(displayName, planColor),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        displayName,
+                                                        style: GoogleFonts.outfit(
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: 16,
+                                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                        ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ),
+                                                    if (uData['is_admin'] == true || email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com')
+                                                      Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                        decoration: BoxDecoration(
+                                                          color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
+                                                              ? Colors.red.withValues(alpha: 0.1)
+                                                              : const Color(0xFF6366F1).withValues(alpha: 0.1),
+                                                          borderRadius: BorderRadius.circular(6),
+                                                          border: Border.all(
+                                                            color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com'
+                                                                ? Colors.red.withValues(alpha: 0.2)
+                                                                : const Color(0xFF6366F1).withValues(alpha: 0.2),
+                                                          ),
+                                                        ),
+                                                        child: Text(
+                                                          email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? 'SUPER ADMIN' : 'ADMIN',
+                                                          style: GoogleFonts.outfit(
+                                                            fontSize: 9,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com' ? Colors.redAccent : const Color(0xFF6366F1),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  email,
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 12,
+                                                    color: isDark ? Colors.white54 : Colors.grey.shade600,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(height: 6),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                  decoration: BoxDecoration(
+                                                    color: planColor.withValues(alpha: 0.08),
+                                                    borderRadius: BorderRadius.circular(20),
+                                                  ),
+                                                  child: Text(
+                                                    subInfo,
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 11,
+                                                      color: planColor,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Icon(
+                                            Icons.chevron_right_rounded,
+                                            color: isDark ? Colors.white30 : Colors.grey.shade400,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 );
                               },
@@ -749,40 +972,64 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
               ? _buildSQLSetupView()
               : RefreshIndicator(
                   onRefresh: _fetchPromoCodes,
-                  child: Column(
+                  child: ListView(
                     children: [
                       // CREATE NEW PROMO CODE
                       Container(
                         margin: const EdgeInsets.all(16),
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: isDark ? Colors.white10 : Colors.grey.shade100,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
                             ),
                           ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Create Promo Code',
-                              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+                            Row(
+                              children: [
+                                const Icon(Icons.add_circle_outline_rounded, color: Color(0xFF6366F1), size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Create Promo Code',
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
                             TextField(
                               controller: _codeController,
                               textCapitalization: TextCapitalization.characters,
+                              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
                               decoration: InputDecoration(
-                                hintText: 'Enter code name (e.g. LIFETIMEPREM)',
-                                hintStyle: GoogleFonts.inter(color: isDark ? Colors.white38 : Colors.black38),
+                                labelText: 'Code Name',
+                                hintText: 'e.g. LIFETIMEPREM',
+                                hintStyle: GoogleFonts.inter(color: isDark ? Colors.white30 : Colors.grey.shade400, fontSize: 13),
+                                labelStyle: GoogleFonts.outfit(color: isDark ? Colors.white70 : Colors.grey.shade700),
                                 filled: true,
                                 fillColor: isDark ? const Color(0xFF0F172A) : Colors.grey.shade50,
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.grey.shade200),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -791,12 +1038,22 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                 Expanded(
                                   child: DropdownButtonFormField<String>(
                                     initialValue: _selectedPlan,
-                                    dropdownColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+                                    dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                    style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black87, fontSize: 14),
                                     decoration: InputDecoration(
                                       labelText: 'Grant Plan',
+                                      labelStyle: GoogleFonts.outfit(color: isDark ? Colors.white70 : Colors.grey.shade700),
                                       filled: true,
                                       fillColor: isDark ? const Color(0xFF0F172A) : Colors.grey.shade50,
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.grey.shade200),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                                      ),
                                     ),
                                     items: const [
                                       DropdownMenuItem(value: 'pro', child: Text('Pro')),
@@ -813,12 +1070,22 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                 Expanded(
                                   child: DropdownButtonFormField<int>(
                                     initialValue: _selectedDurationDays,
-                                    dropdownColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+                                    dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                    style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black87, fontSize: 14),
                                     decoration: InputDecoration(
                                       labelText: 'Duration',
+                                      labelStyle: GoogleFonts.outfit(color: isDark ? Colors.white70 : Colors.grey.shade700),
                                       filled: true,
                                       fillColor: isDark ? const Color(0xFF0F172A) : Colors.grey.shade50,
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.grey.shade200),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                                      ),
                                     ),
                                     items: const [
                                       DropdownMenuItem(value: 7, child: Text('7 Days')),
@@ -842,24 +1109,36 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                   child: TextField(
                                     controller: _maxUsesController,
                                     keyboardType: TextInputType.number,
+                                    style: GoogleFonts.inter(fontSize: 14),
                                     decoration: InputDecoration(
                                       labelText: 'Max Uses Limit',
+                                      labelStyle: GoogleFonts.outfit(color: isDark ? Colors.white70 : Colors.grey.shade700),
                                       filled: true,
                                       fillColor: isDark ? const Color(0xFF0F172A) : Colors.grey.shade50,
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.grey.shade200),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                                      ),
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
-                                ElevatedButton(
+                                ElevatedButton.icon(
                                   onPressed: _createPromoCode,
+                                  icon: const Icon(Icons.add_rounded, size: 18),
+                                  label: const Text('Create'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF6366F1),
                                     foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   ),
-                                  child: const Text('Create'),
                                 ),
                               ],
                             ),
@@ -868,80 +1147,161 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                       ),
 
                       // PROMO CODES LIST
-                      Expanded(
-                        child: _isLoadingCodes
-                            ? const Center(child: CircularProgressIndicator())
-                            : _promoCodes.isEmpty
-                                ? Center(
+                      _isLoadingCodes
+                          ? const SizedBox(
+                              height: 200,
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          : _promoCodes.isEmpty
+                              ? SizedBox(
+                                  height: 200,
+                                  child: Center(
                                     child: Text(
                                       'No custom promo codes active.',
                                       style: GoogleFonts.inter(color: Colors.grey),
                                     ),
-                                  )
-                                : ListView.builder(
-                                    itemCount: _promoCodes.length,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    itemBuilder: (context, index) {
-                                      final promo = _promoCodes[index];
-                                      final code = promo['code'];
-                                      final plan = promo['plan'];
-                                      final duration = promo['duration_days'];
-                                      final maxUses = promo['max_uses'];
-                                      final usesCount = promo['uses_count'];
+                                  ),
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: _promoCodes.length,
+                                  itemBuilder: (context, index) {
+                                    final promo = _promoCodes[index];
+                                    final code = promo['code'];
+                                    final plan = promo['plan'];
+                                    final duration = promo['duration_days'];
+                                    final maxUses = promo['max_uses'];
+                                    final usesCount = promo['uses_count'];
 
-                                      final isExpired = usesCount >= maxUses;
-                                      final durationText = duration >= 99999 ? 'Lifetime' : '$duration Days';
+                                    final isExpired = usesCount >= maxUses;
+                                    final durationText = duration >= 99999 ? 'Lifetime' : '$duration Days';
 
-                                      final Color planColor = plan == 'premium' 
-                                          ? const Color(0xFFDB2777) 
-                                          : const Color(0xFF6366F1);
+                                    final Color planColor = plan == 'premium' 
+                                        ? const Color(0xFFDB2777) 
+                                        : const Color(0xFF6366F1);
 
-                                      return Card(
-                                        margin: const EdgeInsets.only(bottom: 12),
-                                        color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                        child: ListTile(
-                                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                          title: Row(
-                                            children: [
-                                              Text(
-                                                code,
-                                                style: GoogleFonts.outfit(
-                                                  fontWeight: FontWeight.bold,
-                                                  decoration: isExpired ? TextDecoration.lineThrough : null,
+                                    return Card(
+                                      margin: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
+                                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        side: BorderSide(
+                                          color: isDark ? Colors.white10 : Colors.grey.shade100,
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      code,
+                                                      style: GoogleFonts.outfit(
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 16,
+                                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                        decoration: isExpired ? TextDecoration.lineThrough : null,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                      decoration: BoxDecoration(
+                                                        color: planColor.withValues(alpha: 0.1),
+                                                        borderRadius: BorderRadius.circular(6),
+                                                      ),
+                                                      child: Text(
+                                                        plan.toString().toUpperCase(),
+                                                        style: GoogleFonts.inter(
+                                                          fontSize: 9,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: planColor,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                decoration: BoxDecoration(
-                                                  color: planColor.withValues(alpha: 0.1),
-                                                  borderRadius: BorderRadius.circular(6),
-                                                ),
-                                                child: Text(
-                                                  plan.toString().toUpperCase(),
-                                                  style: GoogleFonts.inter(
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: planColor,
+                                                IconButton(
+                                                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                                                  onPressed: () => _deletePromoCode(code),
+                                                  style: IconButton.styleFrom(
+                                                    backgroundColor: Colors.red.withValues(alpha: 0.05),
+                                                    padding: const EdgeInsets.all(8),
                                                   ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          subtitle: Text(
-                                            'Duration: $durationText • Redeemed: $usesCount / $maxUses',
-                                            style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-                                          ),
-                                          trailing: IconButton(
-                                            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
-                                            onPressed: () => _deletePromoCode(code),
-                                          ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  'Duration: $durationText',
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 12,
+                                                    color: isDark ? Colors.white60 : Colors.grey.shade600,
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: isExpired 
+                                                        ? Colors.red.withValues(alpha: 0.1) 
+                                                        : Colors.green.withValues(alpha: 0.1),
+                                                    borderRadius: BorderRadius.circular(6),
+                                                  ),
+                                                  child: Text(
+                                                    isExpired ? 'EXPIRED' : 'ACTIVE',
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 9,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: isExpired ? Colors.redAccent : Colors.green,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.circular(4),
+                                                    child: LinearProgressIndicator(
+                                                      value: maxUses > 0 ? (usesCount / maxUses) : 0,
+                                                      backgroundColor: isDark ? Colors.white10 : Colors.grey.shade100,
+                                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                                        isExpired ? Colors.redAccent : const Color(0xFF6366F1),
+                                                      ),
+                                                      minHeight: 6,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Text(
+                                                  '$usesCount / $maxUses uses',
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: GoogleFonts.firaCode(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: isDark ? Colors.white38 : Colors.grey.shade500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
-                                      );
-                                    },
-                                  ),
-                      ),
+                                      ),
+                                    );
+                                  },
+                                ),
                     ],
                   ),
                 ),
