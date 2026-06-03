@@ -2446,9 +2446,16 @@ class _CoolDeveloperInfoDialogState extends State<_CoolDeveloperInfoDialog>
                               // Connect on LinkedIn Button
                               InkWell(
                                 onTap: () async {
-                                  final url = Uri.parse('https://www.linkedin.com/in/divyanshsinghindia');
-                                  if (await canLaunchUrl(url)) {
-                                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                                  final url = Uri.parse('https://www.linkedin.com/in/divyanshsinghindia/');
+                                  try {
+                                    await launchUrl(
+                                      url,
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                  } catch (e) {
+                                    try {
+                                      await launchUrl(url);
+                                    } catch (_) {}
                                   }
                                 },
                                 borderRadius: BorderRadius.circular(12),
