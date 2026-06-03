@@ -190,6 +190,11 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
 
   Future<void> _saveRecentUser(Map<String, dynamic> userRow) async {
     try {
+      final uData = Map<String, dynamic>.from(userRow['data'] ?? {});
+      final email = uData['email']?.toString().toLowerCase() ?? '';
+      final isAdmin = uData['is_admin'] == true || email == 'divyanshkumarindia@gmail.com';
+      if (isAdmin) return; // Admins are already in the main view, no need to add to recent
+
       final userId = userRow['user_id'] as String;
       // Filter out duplicate
       _recentUsers.removeWhere((item) => item['user_id'] == userId);
@@ -1320,124 +1325,135 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: Text(
-          'Admin Control Panel',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 20),
+    return GestureDetector(
+      onTap: () {
+        if (_searchFocusNode.hasFocus) {
+          _searchFocusNode.unfocus();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+        appBar: AppBar(
+          title: Text(
+            'Admin Control Panel',
+            style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          bottom: TabBar(
+            controller: _tabController,
+            labelColor: const Color(0xFF6366F1),
+            unselectedLabelColor: isDark ? Colors.white54 : Colors.black54,
+            indicatorColor: const Color(0xFF6366F1),
+            indicatorSize: TabBarIndicatorSize.tab,
+            tabs: const [
+              Tab(icon: Icon(Icons.people_alt_rounded), text: 'Manual Grants'),
+              Tab(icon: Icon(Icons.local_offer_rounded), text: 'Promo Codes'),
+            ],
+          ),
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        bottom: TabBar(
+        body: TabBarView(
           controller: _tabController,
-          labelColor: const Color(0xFF6366F1),
-          unselectedLabelColor: isDark ? Colors.white54 : Colors.black54,
-          indicatorColor: const Color(0xFF6366F1),
-          indicatorSize: TabBarIndicatorSize.tab,
-          tabs: const [
-            Tab(icon: Icon(Icons.people_alt_rounded), text: 'Manual Grants'),
-            Tab(icon: Icon(Icons.local_offer_rounded), text: 'Promo Codes'),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // TAB 1: USER MANUAL GRANTS
-          RefreshIndicator(
-            onRefresh: _fetchUsers,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
-                              width: 1.2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: TextField(
-                            controller: _searchController,
-                            focusNode: _searchFocusNode,
-                            style: GoogleFonts.inter(fontSize: 14),
-                            decoration: InputDecoration(
-                              hintText: 'Search by ID, name or email...',
-                              hintStyle: GoogleFonts.inter(
-                                color: isDark ? Colors.white30 : Colors.grey.shade400,
-                                fontSize: 14,
-                              ),
-                              prefixIcon: Icon(
-                                Icons.search_rounded,
-                                color: isDark ? Colors.white54 : Colors.grey.shade400,
-                              ),
-                              suffixIcon: _searchController.text.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear_rounded, size: 18),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        _onSearchChanged();
-                                      },
-                                    )
-                                  : null,
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                          ),
-                        ),
-                      ),
-                      AnimatedCrossFade(
-                        firstChild: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const SizedBox(width: 12),
-                            IconButton(
-                              icon: const Icon(Icons.people_rounded, color: Color(0xFF6366F1)),
-                              onPressed: _showAllUsersBottomSheet,
-                              style: IconButton.styleFrom(
-                                backgroundColor: const Color(0xFF6366F1).withValues(alpha: 0.08),
-                                padding: const EdgeInsets.all(12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  side: BorderSide(
-                                    color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
-                                    width: 1.2,
+          children: [
+            // TAB 1: USER MANUAL GRANTS
+            RefreshIndicator(
+              onRefresh: _fetchUsers,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: SizedBox(
+                      height: 52,
+                      child: Stack(
+                        children: [
+                          // User Icon Button (positioned behind on the right)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: IconButton(
+                                icon: const Icon(Icons.people_rounded, color: Color(0xFF6366F1)),
+                                onPressed: _showAllUsersBottomSheet,
+                                style: IconButton.styleFrom(
+                                  backgroundColor: const Color(0xFF6366F1).withValues(alpha: 0.08),
+                                  padding: const EdgeInsets.all(12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    side: BorderSide(
+                                      color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
+                                      width: 1.2,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                        secondChild: const SizedBox.shrink(),
-                        crossFadeState: (_searchFocusNode.hasFocus || _searchController.text.isNotEmpty)
-                            ? CrossFadeState.showSecond
-                            : CrossFadeState.showFirst,
-                        duration: const Duration(milliseconds: 200),
+                          ),
+                          // Search Container (animates right padding to overlay/unoverlay the user icon)
+                          AnimatedPositioned(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOut,
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            right: _searchFocusNode.hasFocus ? 0 : 60,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300,
+                                  width: 1.2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: TextField(
+                                controller: _searchController,
+                                focusNode: _searchFocusNode,
+                                style: GoogleFonts.inter(fontSize: 14),
+                                decoration: InputDecoration(
+                                  hintText: 'Search by ID, name or email...',
+                                  hintStyle: GoogleFonts.inter(
+                                    color: isDark ? Colors.white30 : Colors.grey.shade400,
+                                    fontSize: 14,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.search_rounded,
+                                    color: isDark ? Colors.white54 : Colors.grey.shade400,
+                                  ),
+                                  suffixIcon: _searchController.text.isNotEmpty
+                                      ? IconButton(
+                                          icon: const Icon(Icons.clear_rounded, size: 18),
+                                          onPressed: () {
+                                            _searchController.clear();
+                                            _onSearchChanged();
+                                          },
+                                        )
+                                      : null,
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: _isLoadingUsers
-                      ? const Center(child: CircularProgressIndicator())
-                      : _buildUserList(),
-                ),
-              ],
+                  Expanded(
+                    child: _isLoadingUsers
+                        ? const Center(child: CircularProgressIndicator())
+                        : _buildUserList(),
+                  ),
+                ],
+              ),
             ),
-          ),
 
           // TAB 2: PROMO CODES MANAGEMENT
           _isPromoTableMissing
@@ -1799,6 +1815,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                 ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
