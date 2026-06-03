@@ -438,7 +438,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _buildSettingTile(
                         context,
                         model.t('label_logout'),
-                        model.t('desc_logout'),
+                        '${model.t('desc_logout')}${Supabase.instance.client.auth.currentUser?.email != null ? ' (${Supabase.instance.client.auth.currentUser!.email})' : ''}',
                         Icons.logout_rounded,
                         const Color(0xFFEF4444),
                         () => _handleLogout(context),
@@ -1742,6 +1742,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _handleLogout(BuildContext context) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentUserEmail = Supabase.instance.client.auth.currentUser?.email ?? '';
 
     // Show confirmation dialog logic (reused from Auth logic usually, but simplified here)
     final confirm = await showDialog<bool>(
@@ -1751,8 +1752,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text('Logout?',
             style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content: Text('Are you sure you want to log out?',
-            style: GoogleFonts.inter()),
+        content: Text(
+          currentUserEmail.isNotEmpty
+              ? 'Are you sure you want to log out of $currentUserEmail?'
+              : 'Are you sure you want to log out?',
+          style: GoogleFonts.inter(),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
