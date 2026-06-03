@@ -392,12 +392,16 @@ class _PaywallDialogState extends State<PaywallDialog>
                   }
                 } else {
                   final msg = res['message'] as String;
-                  if (msg.contains('usage limit') || msg.contains('already redeemed')) {
+                  if (msg.toLowerCase().contains('limit') || 
+                      msg.toLowerCase().contains('redeemed') || 
+                      msg.toLowerCase().contains('exist') || 
+                      msg.toLowerCase().contains('invalid')) {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(msg, style: GoogleFonts.inter()),
                           backgroundColor: const Color(0xFFEF4444),
+                          behavior: SnackBarBehavior.floating,
                         ),
                       );
                     }

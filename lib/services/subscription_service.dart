@@ -186,7 +186,7 @@ class SubscriptionService extends ChangeNotifier {
           .maybeSingle();
 
       if (promo == null) {
-        return {'success': false, 'message': 'Promo code not found.'};
+        return {'success': false, 'message': 'Invalid promo code. This code does not exist.'};
       }
 
       final planStr = promo['plan'] as String;
@@ -196,7 +196,7 @@ class SubscriptionService extends ChangeNotifier {
 
       // 2. Check usage limit
       if (usesCount >= maxUses) {
-        return {'success': false, 'message': 'This promo code has reached its usage limit.'};
+        return {'success': false, 'message': 'This promo code has expired or reached its maximum usage limit.'};
       }
 
       // 3. Check if user already redeemed this code
