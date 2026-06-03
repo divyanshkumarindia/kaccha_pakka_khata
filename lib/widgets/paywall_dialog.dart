@@ -151,16 +151,67 @@ class _PaywallDialogState extends State<PaywallDialog>
     ),
   ];
 
+  bool _ownsOption(_DurationOption opt) {
+    final sub = Provider.of<SubscriptionService>(context, listen: false);
+    if (sub.isFree) return false;
+
+    // 1. Check if the tier (pro/premium) matches the option type
+    final isPremiumOption = opt.id.startsWith('premium');
+    if (isPremiumOption != sub.isPremium) return false;
+
+    // 2. Check by active product ID (RevenueCat)
+    if (sub.activeProductId != null) {
+      final activeId = sub.activeProductId!;
+      if (opt.id == activeId || activeId.contains(opt.id.split(':').first)) {
+        return true;
+      }
+    }
+
+    // 3. Check by active database override duration days
+    if (sub.activeDurationDays != null) {
+      final days = sub.activeDurationDays!;
+      String expectedOptionSuffix = '';
+      if (days <= 30) {
+        expectedOptionSuffix = 'monthly';
+      } else if (days <= 90) {
+        expectedOptionSuffix = 'monthly';
+      } else if (days <= 365) {
+        expectedOptionSuffix = 'yearly';
+      } else if (days <= 730) {
+        expectedOptionSuffix = '2_year';
+      } else if (days <= 1095) {
+        expectedOptionSuffix = '3_year';
+      } else {
+        expectedOptionSuffix = '5_year';
+      }
+      if (opt.id.contains(expectedOptionSuffix)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
 
     // Default selection logic based on current subscription state
     final sub = Provider.of<SubscriptionService>(context, listen: false);
-    if (sub.isPro) {
-      _isPremiumSelected = true; // Guide Pro users to upgrade to Premium
+    if (sub.isPremium) {
+      _isPremiumSelected = true;
+    } else if (sub.isPro) {
+      _isPremiumSelected = false;
     } else {
       _isPremiumSelected = false; // Guide Free users to Pro first
+    }
+
+    // Auto-select index based on owned plan duration/id
+    final optionsList = _isPremiumSelected ? _premiumOptions : _proOptions;
+    for (int i = 0; i < optionsList.length; i++) {
+      if (_ownsOption(optionsList[i])) {
+        _selectedDurationIndex = i;
+        break;
+      }
     }
 
     _animController = AnimationController(
@@ -586,6 +637,19 @@ class _PaywallDialogState extends State<PaywallDialog>
                               onTap: () {
                                 setState(() {
                                   _isPremiumSelected = false;
+                                  final optionsList = _proOptions;
+                                  int foundIndex = -1;
+                                  for (int i = 0; i < optionsList.length; i++) {
+                                    if (_ownsOption(optionsList[i])) {
+                                      foundIndex = i;
+                                      break;
+                                    }
+                                  }
+                                  if (foundIndex != -1) {
+                                    _selectedDurationIndex = foundIndex;
+                                  } else {
+                                    _selectedDurationIndex = 1;
+                                  }
                                 });
                               },
                               child: AnimatedContainer(
@@ -639,6 +703,19 @@ class _PaywallDialogState extends State<PaywallDialog>
                               onTap: () {
                                 setState(() {
                                   _isPremiumSelected = true;
+                                  final optionsList = _premiumOptions;
+                                  int foundIndex = -1;
+                                  for (int i = 0; i < optionsList.length; i++) {
+                                    if (_ownsOption(optionsList[i])) {
+                                      foundIndex = i;
+                                      break;
+                                    }
+                                  }
+                                  if (foundIndex != -1) {
+                                    _selectedDurationIndex = foundIndex;
+                                  } else {
+                                    _selectedDurationIndex = 1;
+                                  }
                                 });
                               },
                               child: AnimatedContainer(
@@ -1076,7 +1153,31 @@ class _PaywallDialogState extends State<PaywallDialog>
                           color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
-                      if (opt.badge != null)
+                      if (_ownsOption(opt))
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.check_circle, size: 12, color: Colors.white),
+                              const SizedBox(width: 4),
+                              Text(
+                                'CURRENT',
+                                style: GoogleFonts.inter(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (opt.badge != null)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
@@ -1293,7 +1394,31 @@ class _PaywallDialogState extends State<PaywallDialog>
                                     color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   ),
                                 ),
-                                if (opt.badge != null)
+                                if (_ownsOption(opt))
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF10B981),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.check_circle, size: 10, color: Colors.white),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'CURRENT',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 8,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.white,
+                                            letterSpacing: 0.4,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                else if (opt.badge != null)
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                     decoration: BoxDecoration(

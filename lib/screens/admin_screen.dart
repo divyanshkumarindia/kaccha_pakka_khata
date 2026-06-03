@@ -155,6 +155,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
   }
 
   Future<void> _fetchUsers() async {
+    if (!mounted) return;
     setState(() => _isLoadingUsers = true);
     try {
       final response = await _supabase
@@ -162,12 +163,14 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
           .select('user_id, data, updated_at')
           .order('updated_at', ascending: false);
 
+      if (!mounted) return;
       setState(() {
         _users = List<Map<String, dynamic>>.from(response);
         _filteredUsers = List.from(_users);
         _isLoadingUsers = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoadingUsers = false);
       _showErrorSnackBar('Error fetching users: $e');
     }
@@ -179,9 +182,11 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
       final recentStr = prefs.getString('admin_recent_users');
       if (recentStr != null) {
         final List<dynamic> decoded = jsonDecode(recentStr);
-        setState(() {
-          _recentUsers = decoded.map((item) => Map<String, dynamic>.from(item as Map)).toList();
-        });
+        if (mounted) {
+          setState(() {
+            _recentUsers = decoded.map((item) => Map<String, dynamic>.from(item as Map)).toList();
+          });
+        }
       }
     } catch (e) {
       debugPrint("Error loading recent users: $e");
@@ -206,7 +211,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
       
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('admin_recent_users', jsonEncode(_recentUsers));
-      setState(() {});
+      if (mounted) setState(() {});
     } catch (e) {
       debugPrint("Error saving recent user: $e");
     }
@@ -217,7 +222,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
       _recentUsers.removeWhere((item) => item['user_id'] == userId);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('admin_recent_users', jsonEncode(_recentUsers));
-      setState(() {});
+      if (mounted) setState(() {});
     } catch (e) {
       debugPrint("Error removing recent user: $e");
     }
@@ -237,7 +242,11 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
       final until = DateTime.parse(untilStr);
       if (DateTime.now().isBefore(until)) {
         final daysLeft = until.difference(DateTime.now()).inDays;
-        subInfo = '${activePlan.toString().toUpperCase()} • $daysLeft days left';
+        if (daysLeft > 10000) {
+          subInfo = '${activePlan.toString().toUpperCase()} • Lifetime';
+        } else {
+          subInfo = '${activePlan.toString().toUpperCase()} • $daysLeft days left';
+        }
       }
     }
 
@@ -555,6 +564,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
   }
 
   Future<void> _fetchPromoCodes() async {
+    if (!mounted) return;
     setState(() {
       _isLoadingCodes = true;
       _isPromoTableMissing = false;
@@ -565,11 +575,13 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
           .select()
           .order('created_at', ascending: false);
 
+      if (!mounted) return;
       setState(() {
         _promoCodes = List<Map<String, dynamic>>.from(response);
         _isLoadingCodes = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoadingCodes = false);
       final errorStr = e.toString().toLowerCase();
       // Check if table missing error (42P01 is Postgres relation does not exist, PGRST205 is PostgREST schema cache missing)
@@ -579,6 +591,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
           errorStr.contains('pgrst205') ||
           errorStr.contains('could not find the table') ||
           errorStr.contains('schema cache')) {
+        if (!mounted) return;
         setState(() => _isPromoTableMissing = true);
       } else {
         _showErrorSnackBar('Error fetching promo codes: $e');
@@ -593,10 +606,12 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
       if (plan == 'free') {
         updatedConfig.remove('granted_plan');
         updatedConfig.remove('granted_until');
+        updatedConfig.remove('granted_duration_days');
       } else {
         final until = DateTime.now().add(Duration(days: durationDays));
         updatedConfig['granted_plan'] = plan;
         updatedConfig['granted_until'] = until.toIso8601String();
+        updatedConfig['granted_duration_days'] = durationDays;
       }
 
       // Update admin privilege
@@ -611,8 +626,10 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
         'updated_at': DateTime.now().toIso8601String(),
       }).eq('user_id', userId);
 
-      _showSuccessSnackBar('User configuration updated successfully!');
-      _fetchUsers();
+      if (mounted) {
+        _showSuccessSnackBar('User configuration updated successfully!');
+        _fetchUsers();
+      }
 
       // If updating the currently logged-in user, refresh their session
       final currentUser = _supabase.auth.currentUser;
@@ -622,7 +639,9 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
         }
       }
     } catch (e) {
-      _showErrorSnackBar('Failed to update subscription: $e');
+      if (mounted) {
+        _showErrorSnackBar('Failed to update subscription: $e');
+      }
     }
   }
 
@@ -635,7 +654,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
       return;
     }
 
-    setState(() => _isLoadingCodes = true);
+    if (mounted) setState(() => _isLoadingCodes = true);
     try {
       await _supabase.from('promo_codes').insert({
         'code': code,
@@ -646,12 +665,16 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
         'created_at': DateTime.now().toIso8601String(),
       });
 
-      _codeController.clear();
-      _showSuccessSnackBar('Promo code $code created successfully!');
-      _fetchPromoCodes();
+      if (mounted) {
+        _codeController.clear();
+        _showSuccessSnackBar('Promo code $code created successfully!');
+        _fetchPromoCodes();
+      }
     } catch (e) {
-      setState(() => _isLoadingCodes = false);
-      _showErrorSnackBar('Failed to create promo code: $e');
+      if (mounted) {
+        setState(() => _isLoadingCodes = false);
+        _showErrorSnackBar('Failed to create promo code: $e');
+      }
     }
   }
 
@@ -720,14 +743,18 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
 
     if (confirm != true) return;
 
-    setState(() => _isLoadingCodes = true);
+    if (mounted) setState(() => _isLoadingCodes = true);
     try {
       await _supabase.from('promo_codes').delete().eq('code', code);
-      _showSuccessSnackBar('Promo code deleted.');
-      _fetchPromoCodes();
+      if (mounted) {
+        _showSuccessSnackBar('Promo code deleted.');
+        _fetchPromoCodes();
+      }
     } catch (e) {
-      setState(() => _isLoadingCodes = false);
-      _showErrorSnackBar('Failed to delete promo code: $e');
+      if (mounted) {
+        setState(() => _isLoadingCodes = false);
+        _showErrorSnackBar('Failed to delete promo code: $e');
+      }
     }
   }
 
@@ -896,18 +923,22 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
   }
 
   Future<void> _updatePromoCode(String code, int maxUses, bool isActive) async {
-    setState(() => _isLoadingCodes = true);
+    if (mounted) setState(() => _isLoadingCodes = true);
     try {
       await _supabase.from('promo_codes').update({
         'max_uses': maxUses,
         'is_active': isActive,
       }).eq('code', code);
 
-      _showSuccessSnackBar('Promo code $code updated successfully!');
-      _fetchPromoCodes();
+      if (mounted) {
+        _showSuccessSnackBar('Promo code $code updated successfully!');
+        _fetchPromoCodes();
+      }
     } catch (e) {
-      setState(() => _isLoadingCodes = false);
-      _showErrorSnackBar('Failed to update promo code: $e');
+      if (mounted) {
+        setState(() => _isLoadingCodes = false);
+        _showErrorSnackBar('Failed to update promo code: $e');
+      }
     }
   }
 
@@ -944,7 +975,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     final email = configData['email'] ?? 'No email';
 
     String localPlan = configData['granted_plan'] ?? 'free';
-    int localDuration = 30;
+    int localDuration = configData['granted_duration_days'] as int? ?? 30;
     bool localIsAdmin = configData['is_admin'] == true;
 
     showModalBottomSheet(
@@ -1079,6 +1110,8 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                     DropdownMenuItem(value: 30, child: Text('30 Days')),
                     DropdownMenuItem(value: 90, child: Text('90 Days')),
                     DropdownMenuItem(value: 365, child: Text('1 Year (365 Days)')),
+                    DropdownMenuItem(value: 730, child: Text('2 Years (730 Days)')),
+                    DropdownMenuItem(value: 1095, child: Text('3 Years (1095 Days)')),
                     DropdownMenuItem(value: 1825, child: Text('5 Years')),
                     DropdownMenuItem(value: 99999, child: Text('Lifetime')),
                   ],

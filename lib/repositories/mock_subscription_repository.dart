@@ -41,6 +41,13 @@ class MockSubscriptionRepository implements SubscriptionRepository {
   @override
   Future<SubscriptionPlan> restorePurchases() async => _mockPlan;
 
+  String? _mockProductId;
+
+  void setMockProductId(String? id) => _mockProductId = id;
+
+  @override
+  Future<String?> getActiveProductId() async => _mockProductId;
+
   @override
   Future<SubscriptionPlan> purchasePlan(SubscriptionPlan plan) async {
     setMockPlan(plan);
@@ -51,6 +58,7 @@ class MockSubscriptionRepository implements SubscriptionRepository {
   Future<SubscriptionPlan> purchaseProduct(String productId) async {
     final plan = productId.contains('pro') ? SubscriptionPlan.pro : SubscriptionPlan.premium;
     setMockPlan(plan);
+    setMockProductId(productId);
     return plan;
   }
 

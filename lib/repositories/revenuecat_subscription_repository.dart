@@ -148,6 +148,23 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
   }
 
   @override
+  Future<String?> getActiveProductId() async {
+    if (!_isInitialized) return null;
+
+    try {
+      final customerInfo = await Purchases.getCustomerInfo();
+      final activeEntitlements = customerInfo.entitlements.active;
+
+      if (activeEntitlements.isNotEmpty) {
+        return activeEntitlements.values.first.productIdentifier;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
   Future<SubscriptionPlan> restorePurchases() async {
     if (!_isInitialized) return SubscriptionPlan.free;
 

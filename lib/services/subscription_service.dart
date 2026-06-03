@@ -20,6 +20,8 @@ class SubscriptionService extends ChangeNotifier {
   SubscriptionPlan _currentPlan = SubscriptionPlan.free;
   bool _isTrialActive = false;
   DateTime? _expirationDate;
+  String? _activeProductId;
+  int? _activeDurationDays;
   bool _isInitialized = false;
   StreamSubscription<SubscriptionPlan>? _planSubscription;
 
@@ -30,6 +32,8 @@ class SubscriptionService extends ChangeNotifier {
   SubscriptionPlan get currentPlan => _currentPlan;
   bool get isTrialActive => _isTrialActive;
   DateTime? get expirationDate => _expirationDate;
+  String? get activeProductId => _activeProductId;
+  int? get activeDurationDays => _activeDurationDays;
   bool get isInitialized => _isInitialized;
 
   bool get isFree => _currentPlan == SubscriptionPlan.free;
@@ -95,12 +99,19 @@ class SubscriptionService extends ChangeNotifier {
   // ─── Lifecycle ─────────────────────────────────────────────
 
   /// Initialize the service: fetch current plan and listen for changes.
+  Future<void> _initImpl() async {
+    _currentPlan = await _repository.getCurrentPlan();
+    _isTrialActive = await _repository.isTrialActive();
+    _expirationDate = await _repository.getExpirationDate();
+    _activeProductId = await _repository.getActiveProductId();
+    _activeDurationDays = null;
+    await _checkDatabaseOverride();
+  }
+
+  /// Initialize the service: fetch current plan and listen for changes.
   Future<void> init() async {
     try {
-      _currentPlan = await _repository.getCurrentPlan();
-      _isTrialActive = await _repository.isTrialActive();
-      _expirationDate = await _repository.getExpirationDate();
-      await _checkDatabaseOverride();
+      await _initImpl();
       _isInitialized = true;
     } catch (e) {
       if (kDebugMode) debugPrint('SubscriptionService init error: $e');
@@ -114,10 +125,18 @@ class SubscriptionService extends ChangeNotifier {
     _planSubscription = _repository.planChanges.listen(
       (plan) async {
         _currentPlan = plan;
-        // Refresh trial + expiration info when plan changes
-        _repository.isTrialActive().then((v) => _isTrialActive = v);
-        _repository.getExpirationDate().then((v) => _expirationDate = v);
-        await _checkDatabaseOverride();
+        try {
+          final activeTrial = await _repository.isTrialActive();
+          final expDate = await _repository.getExpirationDate();
+          final prodId = await _repository.getActiveProductId();
+          _isTrialActive = activeTrial;
+          _expirationDate = expDate;
+          _activeProductId = prodId;
+          _activeDurationDays = null;
+          await _checkDatabaseOverride();
+        } catch (e) {
+          if (kDebugMode) debugPrint('SubscriptionService plan stream refresh error: $e');
+        }
         notifyListeners();
       },
       onError: (error, stackTrace) {
@@ -143,6 +162,7 @@ class SubscriptionService extends ChangeNotifier {
           final data = Map<String, dynamic>.from(response['data'] as Map);
           final grantedPlanStr = data['granted_plan'] as String?;
           final grantedUntilStr = data['granted_until'] as String?;
+          final grantedDurationDays = data['granted_duration_days'] as int?;
 
           if (grantedPlanStr != null && grantedUntilStr != null) {
             final grantedUntil = DateTime.parse(grantedUntilStr);
@@ -150,9 +170,11 @@ class SubscriptionService extends ChangeNotifier {
               if (grantedPlanStr == 'premium') {
                 _currentPlan = SubscriptionPlan.premium;
                 _expirationDate = grantedUntil;
+                _activeDurationDays = grantedDurationDays;
               } else if (grantedPlanStr == 'pro') {
                 _currentPlan = SubscriptionPlan.pro;
                 _expirationDate = grantedUntil;
+                _activeDurationDays = grantedDurationDays;
               }
             }
           }
@@ -238,6 +260,7 @@ class SubscriptionService extends ChangeNotifier {
 
       currentData['granted_plan'] = planStr;
       currentData['granted_until'] = grantedUntil.toIso8601String();
+      currentData['granted_duration_days'] = durationDays;
 
       await client.from('user_data').upsert({
         'user_id': user.id,
@@ -247,6 +270,8 @@ class SubscriptionService extends ChangeNotifier {
 
       _currentPlan = grantedPlan;
       _expirationDate = grantedUntil;
+      _activeDurationDays = durationDays;
+      _activeProductId = null;
       notifyListeners();
 
       return {
