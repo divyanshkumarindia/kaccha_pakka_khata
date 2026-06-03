@@ -103,49 +103,48 @@ class _PaywallDialogState extends State<PaywallDialog>
     ),
   ];
 
-  // Duration choices for Premium Plan
   final List<_DurationOption> _premiumOptions = const [
     _DurationOption(
       id: 'premium_monthly:premium-monthly-bp',
       label: 'Monthly Plan',
-      price: '₹299',
-      monthlyEquivalent: '₹299/mo',
+      price: '₹199',
+      monthlyEquivalent: '₹199/mo',
       isTrial: true,
       badge: '30 Days Free',
     ),
     _DurationOption(
       id: 'premium_yearly:premium-yearly-bp',
       label: 'Yearly Plan',
-      price: '₹3,199',
-      monthlyEquivalent: '₹266/mo',
-      originalPrice: '₹3,588',
+      price: '₹2,199',
+      monthlyEquivalent: '₹183/mo',
+      originalPrice: '₹2,388',
       isTrial: true,
       badge: '30 Days Free • Save 10%',
     ),
     _DurationOption(
       id: 'premium_2_year',
       label: '2 Years Access',
-      price: '₹4,799',
-      monthlyEquivalent: '₹199/mo',
-      originalPrice: '₹5,999',
+      price: '₹3,199',
+      monthlyEquivalent: '₹133/mo',
+      originalPrice: '₹3,999',
       isTrial: false,
       badge: 'Save 20%',
     ),
     _DurationOption(
       id: 'premium_3_year',
       label: '3 Years Access',
-      price: '₹5,999',
-      monthlyEquivalent: '₹166/mo',
-      originalPrice: '₹7,999',
+      price: '₹4,499',
+      monthlyEquivalent: '₹125/mo',
+      originalPrice: '₹5,999',
       isTrial: false,
       badge: 'Save 25%',
     ),
     _DurationOption(
       id: 'premium_5_year',
       label: '5 Years Access',
-      price: '₹6,999',
-      monthlyEquivalent: '116/mo',
-      originalPrice: '₹9,999',
+      price: '₹5,599',
+      monthlyEquivalent: '₹93/mo',
+      originalPrice: '₹7,999',
       isTrial: false,
       badge: 'Save 30% • BEST VALUE',
     ),
@@ -817,7 +816,7 @@ class _PaywallDialogState extends State<PaywallDialog>
       borderRadius: BorderRadius.circular(20),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         decoration: BoxDecoration(
           color: isSelected
               ? null
@@ -892,7 +891,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                       ),
                       if (opt.badge != null)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [primaryColor, secondaryColor],
@@ -911,7 +910,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                         ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 10),
                   RichText(
                     text: TextSpan(
                       style: GoogleFonts.inter(
@@ -1034,7 +1033,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                 borderRadius: BorderRadius.circular(18),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? null
@@ -1109,7 +1108,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                                 ),
                                 if (opt.badge != null)
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [primaryColor, secondaryColor],
@@ -1128,7 +1127,7 @@ class _PaywallDialogState extends State<PaywallDialog>
                                   ),
                               ],
                             ),
-                            const SizedBox(height: 5),
+                            const SizedBox(height: 10),
                             RichText(
                               text: TextSpan(
                                 style: GoogleFonts.inter(
