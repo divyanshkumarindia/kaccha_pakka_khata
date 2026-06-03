@@ -52,6 +52,34 @@ ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow read access to promo_codes" ON public.promo_codes
     FOR SELECT USING (true);
 
+-- Allow users to update uses_count when redeeming
+CREATE POLICY "Allow update access to promo_codes" ON public.promo_codes
+    FOR UPDATE USING (true);
+
+-- Allow admins to insert promo codes
+CREATE POLICY "Allow admin to insert promo_codes" ON public.promo_codes
+    FOR INSERT TO authenticated
+    WITH CHECK (
+      (auth.jwt() ->> 'email') = 'divyanshkumarindia@gmail.com'
+      OR EXISTS (
+        SELECT 1 FROM public.user_data
+        WHERE user_id = auth.uid()
+          AND (data->>'is_admin')::boolean = true
+      )
+    );
+
+-- Allow admins to delete promo codes
+CREATE POLICY "Allow admin to delete promo_codes" ON public.promo_codes
+    FOR DELETE TO authenticated
+    USING (
+      (auth.jwt() ->> 'email') = 'divyanshkumarindia@gmail.com'
+      OR EXISTS (
+        SELECT 1 FROM public.user_data
+        WHERE user_id = auth.uid()
+          AND (data->>'is_admin')::boolean = true
+      )
+    );
+
 -- Create user_promo_redemptions table
 CREATE TABLE IF NOT EXISTS public.user_promo_redemptions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
