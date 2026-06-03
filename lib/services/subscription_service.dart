@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/subscription.dart';
 import '../repositories/subscription_repository.dart';
 import '../widgets/paywall_dialog.dart';
@@ -99,6 +100,7 @@ class SubscriptionService extends ChangeNotifier {
       _currentPlan = await _repository.getCurrentPlan();
       _isTrialActive = await _repository.isTrialActive();
       _expirationDate = await _repository.getExpirationDate();
+      await _checkDatabaseOverride();
       _isInitialized = true;
     } catch (e) {
       if (kDebugMode) debugPrint('SubscriptionService init error: $e');
@@ -109,18 +111,152 @@ class SubscriptionService extends ChangeNotifier {
     // Cancel any previous listener before creating a new one (prevents duplicates)
     await _planSubscription?.cancel();
 
-    // Listen for live plan updates (purchase, renewal, expiry)
-    _planSubscription = _repository.planChanges.listen((plan) {
-      if (_currentPlan != plan) {
+    _planSubscription = _repository.planChanges.listen(
+      (plan) async {
         _currentPlan = plan;
         // Refresh trial + expiration info when plan changes
         _repository.isTrialActive().then((v) => _isTrialActive = v);
         _repository.getExpirationDate().then((v) => _expirationDate = v);
+        await _checkDatabaseOverride();
         notifyListeners();
-      }
-    });
+      },
+      onError: (error, stackTrace) {
+        if (kDebugMode) debugPrint('❌ SubscriptionService planChanges stream error: $error');
+      },
+    );
 
     notifyListeners();
+  }
+
+  Future<void> _checkDatabaseOverride() async {
+    try {
+      final client = Supabase.instance.client;
+      final user = client.auth.currentUser;
+      if (user != null) {
+        final response = await client
+            .from('user_data')
+            .select('data')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        if (response != null && response['data'] != null) {
+          final data = Map<String, dynamic>.from(response['data'] as Map);
+          final grantedPlanStr = data['granted_plan'] as String?;
+          final grantedUntilStr = data['granted_until'] as String?;
+
+          if (grantedPlanStr != null && grantedUntilStr != null) {
+            final grantedUntil = DateTime.parse(grantedUntilStr);
+            if (DateTime.now().isBefore(grantedUntil)) {
+              if (grantedPlanStr == 'premium') {
+                _currentPlan = SubscriptionPlan.premium;
+                _expirationDate = grantedUntil;
+              } else if (grantedPlanStr == 'pro') {
+                _currentPlan = SubscriptionPlan.pro;
+                _expirationDate = grantedUntil;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('Error checking database override: $e');
+    }
+  }
+
+  /// Redeems an in-app promo code in Supabase.
+  /// Returns a Map containing:
+  /// - `success`: bool
+  /// - `message`: String
+  /// - `plan`: SubscriptionPlan?
+  Future<Map<String, dynamic>> redeemPromoCode(String code) async {
+    final client = Supabase.instance.client;
+    final user = client.auth.currentUser;
+    if (user == null) {
+      return {'success': false, 'message': 'You must be logged in to redeem a code.'};
+    }
+
+    final sanitizedCode = code.trim().toUpperCase();
+
+    try {
+      // 1. Fetch promo code details
+      final promo = await client
+          .from('promo_codes')
+          .select()
+          .eq('code', sanitizedCode)
+          .maybeSingle();
+
+      if (promo == null) {
+        return {'success': false, 'message': 'Promo code not found.'};
+      }
+
+      final planStr = promo['plan'] as String;
+      final durationDays = promo['duration_days'] as int;
+      final maxUses = promo['max_uses'] as int;
+      final usesCount = promo['uses_count'] as int;
+
+      // 2. Check usage limit
+      if (usesCount >= maxUses) {
+        return {'success': false, 'message': 'This promo code has reached its usage limit.'};
+      }
+
+      // 3. Check if user already redeemed this code
+      final existingRedemption = await client
+          .from('user_promo_redemptions')
+          .select()
+          .eq('user_id', user.id)
+          .eq('code', sanitizedCode)
+          .maybeSingle();
+
+      if (existingRedemption != null) {
+        return {'success': false, 'message': 'You have already redeemed this promo code.'};
+      }
+
+      // 4. Perform the redemption
+      await client.from('user_promo_redemptions').insert({
+        'user_id': user.id,
+        'code': sanitizedCode,
+      });
+
+      await client
+          .from('promo_codes')
+          .update({'uses_count': usesCount + 1})
+          .eq('code', sanitizedCode);
+
+      final grantedPlan = planStr == 'premium' ? SubscriptionPlan.premium : SubscriptionPlan.pro;
+      final grantedUntil = DateTime.now().add(Duration(days: durationDays));
+
+      final configResponse = await client
+          .from('user_data')
+          .select('data')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+      final currentData = configResponse != null && configResponse['data'] != null
+          ? Map<String, dynamic>.from(configResponse['data'] as Map)
+          : <String, dynamic>{};
+
+      currentData['granted_plan'] = planStr;
+      currentData['granted_until'] = grantedUntil.toIso8601String();
+
+      await client.from('user_data').upsert({
+        'user_id': user.id,
+        'data': currentData,
+        'updated_at': DateTime.now().toIso8601String(),
+      }, onConflict: 'user_id');
+
+      _currentPlan = grantedPlan;
+      _expirationDate = grantedUntil;
+      notifyListeners();
+
+      return {
+        'success': true,
+        'message': 'Code redeemed successfully!',
+        'plan': grantedPlan,
+      };
+    } catch (e) {
+      if (kDebugMode) debugPrint('Promo redemption error: $e');
+      return {'success': false, 'message': 'Redemption failed: ${e.toString()}'};
+    }
   }
 
   /// Restore purchases (e.g. after reinstall or app reset).

@@ -148,6 +148,8 @@ class AccountingModel extends ChangeNotifier {
       'pageHeaderTitles': pageHeaderTitles,
       'live_draft': exportState(), // Save active draft!
       'last_updated_by': _clientId,
+      'user_name': _userName,
+      'email': Supabase.instance.client.auth.currentUser?.email,
     };
 
     // Offload JSON encoding to a background isolate to prevent UI jank

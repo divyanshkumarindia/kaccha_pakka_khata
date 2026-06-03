@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/subscription.dart';
 import '../services/subscription_service.dart';
 
@@ -266,6 +267,181 @@ class _PaywallDialogState extends State<PaywallDialog>
         setState(() => _isPurchasing = false);
       }
     }
+  }
+
+  void _showPromoCodeDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final controller = TextEditingController();
+    final primaryColor = _isPremiumSelected ? const Color(0xFFDB2777) : const Color(0xFF6366F1);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.local_offer_rounded, color: primaryColor),
+            const SizedBox(width: 12),
+            Text(
+              'Redeem Promo Code',
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Enter your Google Play promotional code below to redeem your offer.',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: isDark ? Colors.white70 : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black),
+              decoration: InputDecoration(
+                hintText: 'e.g. PLAYSTOREPROMO123',
+                hintStyle: GoogleFonts.inter(
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+                filled: true,
+                fillColor: isDark ? const Color(0xFF374151) : Colors.grey.shade100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.white10 : Colors.grey.shade300,
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.white10 : Colors.grey.shade300,
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: primaryColor,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: TextButton.icon(
+                onPressed: () async {
+                  final url = Uri.parse('https://play.google.com/redeem');
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+                icon: const Icon(Icons.store_rounded, size: 16),
+                label: Text(
+                  'Open Play Store Redeem Screen',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: primaryColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.outfit(
+                color: isDark ? Colors.white60 : Colors.grey.shade600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final code = controller.text.trim();
+              Navigator.pop(context);
+              
+              if (code.isNotEmpty) {
+                final subService = Provider.of<SubscriptionService>(context, listen: false);
+                final res = await subService.redeemPromoCode(code);
+                
+                if (res['success'] == true) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('🎉 Promo code redeemed! Plan upgraded to ${res['plan'] == SubscriptionPlan.premium ? 'Premium' : 'Pro'}.', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                        backgroundColor: const Color(0xFF10B981),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    Navigator.of(context).pop(true); // Close the paywall dialog
+                  }
+                } else {
+                  final msg = res['message'] as String;
+                  if (msg.contains('usage limit') || msg.contains('already redeemed')) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(msg, style: GoogleFonts.inter()),
+                          backgroundColor: const Color(0xFFEF4444),
+                        ),
+                      );
+                    }
+                  } else {
+                    // Fallback to Google Play Store deep-link redemption
+                    final url = Uri.parse('https://play.google.com/redeem?code=$code');
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                    } else {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Could not launch Play Store.', style: GoogleFonts.inter()),
+                            backgroundColor: const Color(0xFFEF4444),
+                          ),
+                        );
+                      }
+                    }
+                  }
+                }
+              } else {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please enter a valid code.', style: GoogleFonts.inter()),
+                      backgroundColor: const Color(0xFFEF4444),
+                    ),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: Text('Redeem', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -731,15 +907,22 @@ class _PaywallDialogState extends State<PaywallDialog>
 
                           const SizedBox(height: 12),
 
-                          // Quick Actions Row (Restore, Legal)
+                          // Quick Actions Row (Promo, Restore)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                'Play Store Purchase',
-                                style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  color: isDark ? Colors.white38 : Colors.black38,
+                              GestureDetector(
+                                onTap: _showPromoCodeDialog,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  child: Text(
+                                    'Redeem Promo Code',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: primaryColor,
+                                    ),
+                                  ),
                                 ),
                               ),
                               GestureDetector(

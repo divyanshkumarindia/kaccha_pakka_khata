@@ -36,6 +36,7 @@ dependencies:
   purchases_flutter: ^10.0.1
   purchases_ui_flutter: ^10.0.1
   image_picker: ^1.2.2
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

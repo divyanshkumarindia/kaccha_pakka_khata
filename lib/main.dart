@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -19,6 +20,23 @@ void main() async {
   debugPrint('🚀 App Launching...');
   WidgetsFlutterBinding.ensureInitialized();
   debugPrint('✅ WidgetsInitialized');
+
+  // Global uncaught Flutter error handler
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('❌ Uncaught Flutter Error: ${details.exception}');
+  };
+
+  // Global uncaught asynchronous error handler (handles microtasks and stream errors)
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    debugPrint('❌ Uncaught Asynchronous Error: $error');
+    final errStr = error.toString();
+    if (errStr.contains('AuthRetryableFetchException') || errStr.contains('AuthException')) {
+      debugPrint('ℹ️ Handled Supabase Auth fetch/network exception silently.');
+      return true; // Return true to mark it handled and prevent crashes/freezes
+    }
+    return false; // Return false for other errors
+  };
 
   try {
     await dotenv.load(fileName: ".env");
@@ -74,26 +92,31 @@ void main() async {
 
   // Supabase Auth State Change Listener — syncs OneSignal + RevenueCat
   try {
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      final AuthChangeEvent event = data.event;
-      final Session? session = data.session;
+    Supabase.instance.client.auth.onAuthStateChange.listen(
+      (data) {
+        final AuthChangeEvent event = data.event;
+        final Session? session = data.session;
 
-      try {
-        if (event == AuthChangeEvent.signedIn && session != null) {
-          final userId = session.user.id;
-          OneSignal.login(userId);
-          revenueCatRepo.loginUser(userId);
-          subscriptionService.init(); // Refresh subscription state
-          debugPrint('✅ OneSignal + RevenueCat login for user: $userId');
-        } else if (event == AuthChangeEvent.signedOut) {
-          OneSignal.logout();
-          subscriptionService.logoutUser();
-          debugPrint('✅ OneSignal + RevenueCat logout successful');
+        try {
+          if (event == AuthChangeEvent.signedIn && session != null) {
+            final userId = session.user.id;
+            OneSignal.login(userId);
+            revenueCatRepo.loginUser(userId);
+            subscriptionService.init(); // Refresh subscription state
+            debugPrint('✅ OneSignal + RevenueCat login for user: $userId');
+          } else if (event == AuthChangeEvent.signedOut) {
+            OneSignal.logout();
+            subscriptionService.logoutUser();
+            debugPrint('✅ OneSignal + RevenueCat logout successful');
+          }
+        } catch (e) {
+          debugPrint('❌ Auth sync error: $e');
         }
-      } catch (e) {
-        debugPrint('❌ Auth sync error: $e');
-      }
-    });
+      },
+      onError: (error, stackTrace) {
+        debugPrint('❌ Supabase Auth state change stream error: $error');
+      },
+    );
   } catch (e) {
     debugPrint('❌ Auth listener setup error: $e');
   }

@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../state/accounting_model.dart';
 import '../models/accounting.dart';
 import '../models/subscription.dart';
@@ -13,6 +15,7 @@ import '../services/auth_service.dart';
 import '../services/subscription_service.dart';
 import 'welcome_screen.dart';
 import 'backup_sync_screen.dart';
+import 'admin_screen.dart';
 import '../theme.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -25,6 +28,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   Map<UserType, String> displayTitles = {};
   Map<String, String> customPages = {}; // Store custom pages
+  int _adminTapCount = 0;
 
   @override
   void initState() {
@@ -187,6 +191,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.dashboard_customize_rounded,
                         const Color(0xFF8B5CF6), // Purple
                         () => _showHomePageLayoutDialog(context, model),
+                        isDark,
+                      ),
+                      _buildDivider(isDark),
+                      _buildSettingTile(
+                        context,
+                        'Redeem Promo Code',
+                        'Use a Google Play promotional offer code',
+                        Icons.local_offer_rounded,
+                        const Color(0xFFEC4899), // Pink/Magenta
+                        () => _showPromoCodeDialog(context),
                         isDark,
                       ),
                       _buildDivider(isDark),
@@ -402,6 +416,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.verified_rounded,
                         const Color(0xFF8B5CF6),
                         isDark,
+                        onTap: () => _handleVersionTap(context),
                       ),
                       _buildDivider(isDark),
                       _buildSettingTile(
@@ -655,8 +670,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildInfoTile(
-      String title, String value, IconData icon, Color iconColor, bool isDark) {
-    return Padding(
+      String title, String value, IconData icon, Color iconColor, bool isDark, {VoidCallback? onTap}) {
+    final tileContent = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
         children: [
@@ -693,6 +708,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        child: tileContent,
+      );
+    }
+    return tileContent;
   }
 
   Widget _buildDivider(bool isDark) {
@@ -1360,6 +1383,338 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Text('Close',
                   style: GoogleFonts.outfit(color: const Color(0xFF10B981))),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPromoCodeDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final controller = TextEditingController();
+    const primaryColor = Color(0xFF6366F1); // Indigo
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.local_offer_rounded, color: primaryColor),
+            const SizedBox(width: 12),
+            Text(
+              'Redeem Promo Code',
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Enter your Google Play promotional code below to redeem your offer.',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: isDark ? Colors.white70 : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black),
+              decoration: InputDecoration(
+                hintText: 'e.g. PLAYSTOREPROMO123',
+                hintStyle: GoogleFonts.inter(
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+                filled: true,
+                fillColor: isDark ? const Color(0xFF374151) : Colors.grey.shade100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.white10 : Colors.grey.shade300,
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.white10 : Colors.grey.shade300,
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: primaryColor,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: TextButton.icon(
+                onPressed: () async {
+                  final url = Uri.parse('https://play.google.com/redeem');
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+                icon: const Icon(Icons.store_rounded, size: 16),
+                label: Text(
+                  'Open Play Store Redeem Screen',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: primaryColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.outfit(
+                color: isDark ? Colors.white60 : Colors.grey.shade600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final code = controller.text.trim();
+              Navigator.pop(context);
+              
+              if (code.isNotEmpty) {
+                final subService = Provider.of<SubscriptionService>(context, listen: false);
+                final res = await subService.redeemPromoCode(code);
+                
+                if (res['success'] == true) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('🎉 Promo code redeemed! Plan upgraded to ${res['plan'] == SubscriptionPlan.premium ? 'Premium' : 'Pro'}.', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                        backgroundColor: const Color(0xFF10B981),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                } else {
+                  final msg = res['message'] as String;
+                  if (msg.contains('usage limit') || msg.contains('already redeemed')) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(msg, style: GoogleFonts.inter()),
+                          backgroundColor: const Color(0xFFEF4444),
+                        ),
+                      );
+                    }
+                  } else {
+                    // Fallback to Google Play Store deep-link redemption
+                    final url = Uri.parse('https://play.google.com/redeem?code=$code');
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                    } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Could not launch Play Store.', style: GoogleFonts.inter()),
+                            backgroundColor: const Color(0xFFEF4444),
+                          ),
+                        );
+                      }
+                    }
+                  }
+                }
+              } else {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please enter a valid code.', style: GoogleFonts.inter()),
+                      backgroundColor: const Color(0xFFEF4444),
+                    ),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: Text('Redeem', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleVersionTap(BuildContext context) {
+    setState(() {
+      _adminTapCount++;
+    });
+
+    if (_adminTapCount >= 7) {
+      _adminTapCount = 0;
+      _checkAndOpenAdminPanel(context);
+    } else if (_adminTapCount >= 3) {
+      final tapsRemaining = 7 - _adminTapCount;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('You are now $tapsRemaining taps away from Admin settings.', style: GoogleFonts.inter()),
+          duration: const Duration(milliseconds: 500),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _checkAndOpenAdminPanel(BuildContext context) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('You must be logged in to access Admin panel.', style: GoogleFonts.inter()),
+          backgroundColor: const Color(0xFFEF4444),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // Show a loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    bool isAdmin = false;
+
+    try {
+      final response = await Supabase.instance.client
+          .from('user_data')
+          .select('data')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+      if (response != null && response['data'] != null) {
+        final data = Map<String, dynamic>.from(response['data'] as Map);
+        if (data['is_admin'] == true) {
+          isAdmin = true;
+        }
+      }
+    } catch (_) {
+      // Ignore database check error, fallback to passcode verification
+    }
+
+    if (context.mounted) {
+      Navigator.pop(context); // Dismiss loading dialog
+    }
+
+    if (isAdmin) {
+      _navigateToAdminScreen();
+    } else {
+      _promptAdminPasscode();
+    }
+  }
+
+  void _navigateToAdminScreen() {
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const AdminScreen()),
+    );
+  }
+
+  void _promptAdminPasscode() {
+    final controller = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Enter Developer Passcode',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
+        content: TextField(
+          controller: controller,
+          obscureText: true,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black),
+          decoration: InputDecoration(
+            hintText: 'Enter Passcode',
+            hintStyle: GoogleFonts.inter(color: isDark ? Colors.white38 : Colors.black38),
+            filled: true,
+            fillColor: isDark ? const Color(0xFF374151) : Colors.grey.shade100,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.outfit(
+                color: isDark ? Colors.white60 : Colors.grey.shade600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final passcode = controller.text.trim();
+              Navigator.pop(context);
+              final expectedPasscode = dotenv.env['ADMIN_PASSCODE'];
+              if (expectedPasscode == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Admin passcode not configured in environment.', style: GoogleFonts.inter()),
+                    backgroundColor: const Color(0xFFEF4444),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                return;
+              }
+              if (passcode == expectedPasscode) {
+                _navigateToAdminScreen();
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Incorrect passcode.', style: GoogleFonts.inter()),
+                    backgroundColor: const Color(0xFFEF4444),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF3B82F6),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: Text('Verify', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
           ),
         ],
       ),

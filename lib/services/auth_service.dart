@@ -40,42 +40,47 @@ class AuthService {
   }
 
   void _initializeAuthListener() {
-    _supabase.auth.onAuthStateChange.listen((data) async {
-      final AuthChangeEvent event = data.event;
-      final Session? session = data.session;
+    _supabase.auth.onAuthStateChange.listen(
+      (data) async {
+        final AuthChangeEvent event = data.event;
+        final Session? session = data.session;
 
-      // Listen for Sign In (including initial session and post-signup)
-      if (event == AuthChangeEvent.signedIn ||
-          event == AuthChangeEvent.initialSession) {
-        if (session != null) {
-          try {
-            final userId = session.user.id;
-            // Check if user_data row exists to avoid overwriting with empty data
-            // (Using maybeSingle to safely check existence)
-            final existingData = await _supabase
-                .from('user_data')
-                .select()
-                .eq('user_id', userId)
-                .maybeSingle();
+        // Listen for Sign In (including initial session and post-signup)
+        if (event == AuthChangeEvent.signedIn ||
+            event == AuthChangeEvent.initialSession) {
+          if (session != null) {
+            try {
+              final userId = session.user.id;
+              // Check if user_data row exists to avoid overwriting with empty data
+              // (Using maybeSingle to safely check existence)
+              final existingData = await _supabase
+                  .from('user_data')
+                  .select()
+                  .eq('user_id', userId)
+                  .maybeSingle();
 
-            if (existingData == null) {
-              // Insert new row if missing
-              await _supabase.from('user_data').insert({
-                'user_id': userId,
-                'data': {}, // Initialize empty JSON
-                'updated_at': DateTime.now().toIso8601String(),
-              });
-              print("User Data row created for $userId");
-            }
-          } catch (e) {
-            // Silently ignore or log error (e.g., duplicated concurrent insert)
-            if (kDebugMode && e is! SocketException) {
-              debugPrint("Error syncing user_data: $e");
+              if (existingData == null) {
+                // Insert new row if missing
+                await _supabase.from('user_data').insert({
+                  'user_id': userId,
+                  'data': {}, // Initialize empty JSON
+                  'updated_at': DateTime.now().toIso8601String(),
+                });
+                print("User Data row created for $userId");
+              }
+            } catch (e) {
+              // Silently ignore or log error (e.g., duplicated concurrent insert)
+              if (kDebugMode && e is! SocketException) {
+                debugPrint("Error syncing user_data: $e");
+              }
             }
           }
         }
-      }
-    });
+      },
+      onError: (error, stackTrace) {
+        if (kDebugMode) debugPrint("❌ AuthService auth listener error: $error");
+      },
+    );
   }
 
   // Get current user
