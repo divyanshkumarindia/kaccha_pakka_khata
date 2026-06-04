@@ -1374,28 +1374,34 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     final color = value == 'premium' ? const Color(0xFFDB2777) : (value == 'pro' ? const Color(0xFF6366F1) : Colors.grey);
     
     return Expanded(
-      child: InkWell(
-        onTap: () {
-          setDialogState(() {
-            onChanged(value);
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? color : Colors.grey.withValues(alpha: 0.3),
-              width: 2,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            setDialogState(() {
+              onChanged(value);
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? color : Colors.grey.withValues(alpha: 0.3),
+                width: 2,
+              ),
             ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: GoogleFonts.outfit(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? color : Colors.grey,
+            alignment: Alignment.center,
+            child: Text(
+              label,
+              style: GoogleFonts.outfit(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? color : Colors.grey,
+              ),
             ),
           ),
         ),
