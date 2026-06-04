@@ -98,12 +98,12 @@ void main() async {
         final Session? session = data.session;
 
         try {
-          if (event == AuthChangeEvent.signedIn && session != null) {
+          if ((event == AuthChangeEvent.signedIn || event == AuthChangeEvent.initialSession) && session != null) {
             final userId = session.user.id;
             OneSignal.login(userId);
             revenueCatRepo.loginUser(userId);
             subscriptionService.init(); // Refresh subscription state
-            debugPrint('✅ OneSignal + RevenueCat login for user: $userId');
+            debugPrint('✅ OneSignal + RevenueCat login/session restored for user: $userId');
           } else if (event == AuthChangeEvent.signedOut) {
             OneSignal.logout();
             subscriptionService.logoutUser();

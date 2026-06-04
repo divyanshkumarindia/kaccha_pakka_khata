@@ -422,7 +422,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _buildSettingTile(
                         context,
                         model.t('label_developer'),
-                        'Divyansh Kumar',
+                        'Divyansh Singh',
                         Icons.code_rounded,
                         const Color(0xFF64748B),
                         () => _showDeveloperInfo(context),
@@ -1946,6 +1946,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       height: 1.4,
                     ),
                   ),
+                  () {
+                    String durationText = '';
+                    if (sub.expirationDate != null) {
+                      final exp = sub.expirationDate!;
+                      final difference = exp.difference(DateTime.now());
+                      final daysLeft = difference.inDays + 1;
+                      if (daysLeft > 10000) {
+                        durationText = 'Lifetime Access';
+                      } else if (daysLeft > 0) {
+                        durationText = '$daysLeft days left';
+                      }
+                    }
+                    if (durationText.isNotEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.timer_rounded, color: Colors.white, size: 14),
+                              const SizedBox(width: 6),
+                              Text(
+                                durationText,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  }(),
                   const SizedBox(height: 16),
                   Row(
                     children: [

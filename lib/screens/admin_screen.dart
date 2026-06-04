@@ -616,7 +616,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     }
   }
 
-  Future<void> _grantUserPlan(String userId, Map<String, dynamic> currentConfig, String plan, int durationDays, bool isAdmin) async {
+  Future<void> _grantUserPlan(String userId, Map<String, dynamic> currentConfig, String plan, int durationDays, bool isAdmin, [String mode = 'overwrite']) async {
     try {
       final updatedConfig = Map<String, dynamic>.from(currentConfig);
 
@@ -625,10 +625,25 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
         updatedConfig.remove('granted_until');
         updatedConfig.remove('granted_duration_days');
       } else {
-        final until = DateTime.now().add(Duration(days: durationDays));
+        DateTime until;
+        int finalDurationDays = durationDays;
+        
+        if (mode == 'add' && currentConfig['granted_until'] != null && currentConfig['granted_plan'] == plan) {
+          final currentUntil = DateTime.parse(currentConfig['granted_until'] as String);
+          if (currentUntil.isAfter(DateTime.now())) {
+            final remainingDays = currentUntil.difference(DateTime.now()).inDays + 1;
+            finalDurationDays = remainingDays + durationDays;
+            until = currentUntil.add(Duration(days: durationDays));
+          } else {
+            until = DateTime.now().add(Duration(days: durationDays));
+          }
+        } else {
+          until = DateTime.now().add(Duration(days: durationDays));
+        }
+
         updatedConfig['granted_plan'] = plan;
         updatedConfig['granted_until'] = until.toIso8601String();
-        updatedConfig['granted_duration_days'] = durationDays;
+        updatedConfig['granted_duration_days'] = finalDurationDays;
       }
 
       // Update admin privilege
@@ -1022,6 +1037,12 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     }
     bool localIsAdmin = configData['is_admin'] == true;
 
+    final predefinedDurations = [7, 30, 90, 365, 730, 1095, 1825, 99999];
+    bool isCustomDuration = !predefinedDurations.contains(localDuration);
+    int dropdownValue = isCustomDuration ? -1 : localDuration;
+    final customDurationController = TextEditingController(text: isCustomDuration ? localDuration.toString() : '');
+    String durationMode = 'overwrite'; // 'overwrite' or 'add'
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1133,7 +1154,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<int>(
-                  initialValue: localDuration,
+                  initialValue: dropdownValue,
                   dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                   style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black87),
                   decoration: InputDecoration(
@@ -1158,13 +1179,105 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                     DropdownMenuItem(value: 1095, child: Text('3 Years (1095 Days)')),
                     DropdownMenuItem(value: 1825, child: Text('5 Years')),
                     DropdownMenuItem(value: 99999, child: Text('Lifetime')),
+                    DropdownMenuItem(value: -1, child: Text('Custom Days...')),
                   ],
                   onChanged: (val) {
                     if (val != null) {
-                      setDialogState(() => localDuration = val);
+                      setDialogState(() {
+                        dropdownValue = val;
+                        if (val == -1) {
+                          isCustomDuration = true;
+                          if (customDurationController.text.isEmpty) {
+                            customDurationController.text = '30';
+                          }
+                        } else {
+                          isCustomDuration = false;
+                          localDuration = val;
+                        }
+                      });
                     }
                   },
                 ),
+                if (isCustomDuration) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: customDurationController,
+                    keyboardType: TextInputType.number,
+                    style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black87),
+                    decoration: InputDecoration(
+                      labelText: 'Custom Days Count',
+                      labelStyle: GoogleFonts.inter(color: isDark ? Colors.white60 : Colors.grey.shade600),
+                      hintText: 'e.g. 5, 45, 120',
+                      filled: true,
+                      fillColor: isDark ? const Color(0xFF1E293B) : Colors.grey.shade50,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.grey.shade200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                      ),
+                    ),
+                    onChanged: (val) {
+                      final parsed = int.tryParse(val) ?? 0;
+                      setDialogState(() {
+                        localDuration = parsed;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ChoiceChip(
+                          label: Text(
+                            'Overwrite/Set',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: durationMode == 'overwrite' ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
+                            ),
+                          ),
+                          selected: durationMode == 'overwrite',
+                          selectedColor: const Color(0xFF6366F1),
+                          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.grey.shade100,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setDialogState(() {
+                                durationMode = 'overwrite';
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ChoiceChip(
+                          label: Text(
+                            'Add to Current',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: durationMode == 'add' ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
+                            ),
+                          ),
+                          selected: durationMode == 'add',
+                          selectedColor: const Color(0xFF6366F1),
+                          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.grey.shade100,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setDialogState(() {
+                                durationMode = 'add';
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 20),
               ],
 
@@ -1227,8 +1340,12 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
+                        int finalDuration = localDuration;
+                        if (isCustomDuration) {
+                          finalDuration = int.tryParse(customDurationController.text) ?? 30;
+                        }
                         Navigator.pop(ctx);
-                        _grantUserPlan(userId, configData, localPlan, localDuration, localIsAdmin);
+                        _grantUserPlan(userId, configData, localPlan, finalDuration, localIsAdmin, durationMode);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6366F1),

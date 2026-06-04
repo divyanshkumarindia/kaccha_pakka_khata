@@ -256,7 +256,11 @@ class _PaywallDialogState extends State<PaywallDialog>
     _animController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToSelectedIfNeeded(animate: false);
+      Future.delayed(const Duration(milliseconds: 250), () {
+        if (mounted) {
+          _scrollToSelectedIfNeeded(animate: true);
+        }
+      });
     });
   }
 
