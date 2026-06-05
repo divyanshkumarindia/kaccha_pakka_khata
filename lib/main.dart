@@ -179,10 +179,24 @@ class MyApp extends StatelessWidget {
             ),
             useMaterial3: true,
           ),
-          builder: (context, child) => GestureDetector(
-            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-            child: child,
-          ),
+          builder: (context, child) {
+            final fontSize = context.select<AccountingModel, String>((m) => m.fontSize);
+            double factor = 1.0;
+            if (fontSize == 'small') {
+              factor = 0.85;
+            } else if (fontSize == 'large') {
+              factor = 1.15;
+            }
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: TextScaler.linear(factor),
+              ),
+              child: GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: child,
+              ),
+            );
+          },
       home: StreamBuilder<AuthState>(
         stream: AuthService().authStateChanges,
         builder: (context, snapshot) {

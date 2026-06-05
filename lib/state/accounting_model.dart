@@ -1064,6 +1064,9 @@ class AccountingModel extends ChangeNotifier {
   bool _hasSkippedNameSetup = false;
   bool get hasSkippedNameSetup => _hasSkippedNameSetup;
 
+  String _fontSize = 'medium'; // 'small', 'medium', 'large'
+  String get fontSize => _fontSize;
+
   Future<void> loadSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -1079,6 +1082,7 @@ class AccountingModel extends ChangeNotifier {
           prefs.getString(_uk('default_report_format')) ?? 'Basic';
       _userName = prefs.getString(_uk('user_name'));
       _hasSkippedNameSetup = prefs.getBool(_uk('skipped_name_setup')) ?? false;
+      _fontSize = prefs.getString(_uk('font_size')) ?? 'medium';
 
       // Load opening balance titles and descriptions
       for (String type in ['cash', 'bank', 'other']) {
@@ -1193,6 +1197,13 @@ class AccountingModel extends ChangeNotifier {
         .then((p) => p.setBool(_uk('skipped_name_setup'), skipped));
   }
 
+  void setFontSize(String size) {
+    _fontSize = size;
+    notifyListeners();
+    SharedPreferences.getInstance()
+        .then((p) => p.setString(_uk('font_size'), size));
+  }
+
   Future<void> backupData() async {
     // Force a push to cloud
     await saveToPrefs();
@@ -1231,6 +1242,7 @@ class AccountingModel extends ChangeNotifier {
       _defaultReportFormat = 'Basic';
       _userName = null;
       _hasSkippedNameSetup = false;
+      _fontSize = 'medium';
       _homePageOrder = []; // Reset order
 
       // Reset accounting data

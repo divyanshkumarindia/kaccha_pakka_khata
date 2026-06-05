@@ -244,10 +244,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _buildSettingTile(
                         context,
                         model.t('label_font_size'),
-                        model.t('desc_font_size'),
+                        _getFontSizeLabel(model.fontSize),
                         Icons.text_fields_rounded,
                         const Color(0xFF10B981), // Emerald
-                        () => _showComingSoonSnackBar(context),
+                        () => _showFontSizeDialog(context, model),
                         isDark,
                       ),
                     ],
@@ -1701,6 +1701,206 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
     }
+  }
+
+  String _getFontSizeLabel(String size) {
+    switch (size) {
+      case 'small':
+        return 'Small';
+      case 'medium':
+        return 'Medium (Default)';
+      case 'large':
+        return 'Large';
+      default:
+        return 'Medium (Default)';
+    }
+  }
+
+  void _showFontSizeDialog(BuildContext context, AccountingModel model) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    String tempSize = model.fontSize;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          double factor = 1.0;
+          if (tempSize == 'small') {
+            factor = 0.85;
+          } else if (tempSize == 'large') {
+            factor = 1.15;
+          }
+
+          return AlertDialog(
+            backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Text(
+              model.t('label_font_size'),
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Text Preview box
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF374151) : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? Colors.white10 : Colors.grey.shade300,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Preview Text',
+                        style: GoogleFonts.inter(
+                          fontSize: 12 * factor,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Kaccha Pakka Khata',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.outfit(
+                          fontSize: 20 * factor,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Premium Digital Ledger',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 14 * factor,
+                          color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                
+                // Option: Small
+                _buildFontSizeOption(
+                  context,
+                  'Small',
+                  'small',
+                  tempSize,
+                  (val) {
+                    setState(() {
+                      tempSize = val;
+                    });
+                  },
+                ),
+                
+                // Option: Medium
+                _buildFontSizeOption(
+                  context,
+                  'Medium (Default)',
+                  'medium',
+                  tempSize,
+                  (val) {
+                    setState(() {
+                      tempSize = val;
+                    });
+                  },
+                ),
+                
+                // Option: Large
+                _buildFontSizeOption(
+                  context,
+                  'Large',
+                  'large',
+                  tempSize,
+                  (val) {
+                    setState(() {
+                      tempSize = val;
+                    });
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  model.t('btn_cancel'),
+                  style: GoogleFonts.inter(
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  model.setFontSize(tempSize);
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981), // Emerald green
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  model.t('btn_save'),
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildFontSizeOption(
+    BuildContext context,
+    String title,
+    String value,
+    String current,
+    Function(String) onTap,
+  ) {
+    final isSelected = value == current;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF374151) : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isSelected
+              ? const Color(0xFF10B981) // Emerald accent for font size
+              : (isDark ? Colors.white10 : Colors.grey.shade300),
+          width: isSelected ? 2 : 1,
+        ),
+      ),
+      child: ListTile(
+        title: Text(
+          title,
+          style: GoogleFonts.inter(
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
+        trailing: isSelected
+            ? const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981))
+            : null,
+        onTap: () => onTap(value),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
   }
 
   // Helper to interpret theme mode
