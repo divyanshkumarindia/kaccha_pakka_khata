@@ -38,6 +38,8 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   // Creation options
   String _selectedPlan = 'premium';
   int _selectedDurationDays = 30;
+  bool _isPromoCustomDuration = false;
+  final TextEditingController _promoCustomDurationController = TextEditingController();
 
   final String _setupSql = '''-- Create promo_codes table
 CREATE TABLE IF NOT EXISTS public.promo_codes (
@@ -127,6 +129,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     _searchFocusNode.dispose();
     _codeController.dispose();
     _maxUsesController.dispose();
+    _promoCustomDurationController.dispose();
     super.dispose();
   }
 
@@ -686,12 +689,22 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
       return;
     }
 
+    int duration = _selectedDurationDays;
+    if (_isPromoCustomDuration) {
+      final customVal = int.tryParse(_promoCustomDurationController.text.trim()) ?? 0;
+      if (customVal <= 0) {
+        _showErrorSnackBar('Please enter a valid number of days.');
+        return;
+      }
+      duration = customVal;
+    }
+
     if (mounted) setState(() => _isLoadingCodes = true);
     try {
       await _supabase.from('promo_codes').insert({
         'code': code,
         'plan': _selectedPlan,
-        'duration_days': _selectedDurationDays,
+        'duration_days': duration,
         'max_uses': maxUses,
         'uses_count': 0,
         'created_at': DateTime.now().toIso8601String(),
@@ -1726,6 +1739,7 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                               children: [
                                 Expanded(
                                   child: DropdownButtonFormField<String>(
+                                    key: ValueKey(_selectedPlan),
                                     initialValue: _selectedPlan,
                                     dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                                     style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black87, fontSize: 14),
@@ -1758,7 +1772,8 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: DropdownButtonFormField<int>(
-                                    initialValue: _selectedDurationDays,
+                                    key: ValueKey(_isPromoCustomDuration ? -1 : _selectedDurationDays),
+                                    initialValue: _isPromoCustomDuration ? -1 : _selectedDurationDays,
                                     dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                                     style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black87, fontSize: 14),
                                     decoration: InputDecoration(
@@ -1780,17 +1795,53 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
                                       DropdownMenuItem(value: 7, child: Text('7 Days')),
                                       DropdownMenuItem(value: 30, child: Text('30 Days')),
                                       DropdownMenuItem(value: 365, child: Text('1 Year')),
+                                      DropdownMenuItem(value: 730, child: Text('2 Years')),
+                                      DropdownMenuItem(value: 1095, child: Text('3 Years')),
                                       DropdownMenuItem(value: 99999, child: Text('Lifetime')),
+                                      DropdownMenuItem(value: -1, child: Text('Custom Days...')),
                                     ],
                                     onChanged: (val) {
                                       if (val != null) {
-                                        setState(() => _selectedDurationDays = val);
+                                        setState(() {
+                                          if (val == -1) {
+                                            _isPromoCustomDuration = true;
+                                            if (_promoCustomDurationController.text.isEmpty) {
+                                              _promoCustomDurationController.text = '30';
+                                            }
+                                          } else {
+                                            _isPromoCustomDuration = false;
+                                            _selectedDurationDays = val;
+                                          }
+                                        });
                                       }
                                     },
                                   ),
                                 ),
                               ],
                             ),
+                            if (_isPromoCustomDuration) ...[
+                              const SizedBox(height: 12),
+                              TextField(
+                                controller: _promoCustomDurationController,
+                                keyboardType: TextInputType.number,
+                                style: GoogleFonts.inter(fontSize: 14),
+                                decoration: InputDecoration(
+                                  labelText: 'Custom Promo Duration (Days)',
+                                  labelStyle: GoogleFonts.outfit(color: isDark ? Colors.white70 : Colors.grey.shade700),
+                                  filled: true,
+                                  fillColor: isDark ? const Color(0xFF0F172A) : Colors.grey.shade50,
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: isDark ? Colors.white10 : Colors.grey.shade200),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                                  ),
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 12),
                             Row(
                               children: [

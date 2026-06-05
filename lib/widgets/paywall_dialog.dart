@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/subscription.dart';
 import '../services/subscription_service.dart';
 
@@ -381,7 +380,7 @@ class _PaywallDialogState extends State<PaywallDialog>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Enter your Google Play promotional code below to redeem your offer.',
+              'Enter your promo code below to upgrade your plan.',
               style: GoogleFonts.inter(
                 fontSize: 13,
                 color: isDark ? Colors.white70 : Colors.black87,
@@ -393,7 +392,7 @@ class _PaywallDialogState extends State<PaywallDialog>
               autofocus: true,
               style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black),
               decoration: InputDecoration(
-                hintText: 'e.g. PLAYSTOREPROMO123',
+                hintText: 'e.g. PROMO30, FREE1MONTH',
                 hintStyle: GoogleFonts.inter(
                   color: isDark ? Colors.white38 : Colors.black38,
                 ),
@@ -419,29 +418,6 @@ class _PaywallDialogState extends State<PaywallDialog>
                     color: primaryColor,
                     width: 2,
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: TextButton.icon(
-                onPressed: () async {
-                  final url = Uri.parse('https://play.google.com/redeem');
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  }
-                },
-                icon: const Icon(Icons.store_rounded, size: 16),
-                label: Text(
-                  'Open Play Store Redeem Screen',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-                style: TextButton.styleFrom(
-                  foregroundColor: primaryColor,
                 ),
               ),
             ),
@@ -479,34 +455,14 @@ class _PaywallDialogState extends State<PaywallDialog>
                   }
                 } else {
                   final msg = res['message'] as String;
-                  if (msg.toLowerCase().contains('limit') || 
-                      msg.toLowerCase().contains('redeemed') || 
-                      msg.toLowerCase().contains('exist') || 
-                      msg.toLowerCase().contains('invalid')) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(msg, style: GoogleFonts.inter()),
-                          backgroundColor: const Color(0xFFEF4444),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    }
-                  } else {
-                    // Fallback to Google Play Store deep-link redemption
-                    final url = Uri.parse('https://play.google.com/redeem?code=$code');
-                    if (await canLaunchUrl(url)) {
-                      await launchUrl(url, mode: LaunchMode.externalApplication);
-                    } else {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Could not launch Play Store.', style: GoogleFonts.inter()),
-                            backgroundColor: const Color(0xFFEF4444),
-                          ),
-                        );
-                      }
-                    }
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(msg, style: GoogleFonts.inter()),
+                        backgroundColor: const Color(0xFFEF4444),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
                   }
                 }
               } else {

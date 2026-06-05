@@ -158,8 +158,34 @@ class SubscriptionService extends ChangeNotifier {
             .eq('user_id', user.id)
             .maybeSingle();
 
+        final isSuperAdmin = user.email?.toLowerCase() == 'divyanshkumarindia@gmail.com';
+        Map<String, dynamic>? data;
         if (response != null && response['data'] != null) {
-          final data = Map<String, dynamic>.from(response['data'] as Map);
+          data = Map<String, dynamic>.from(response['data'] as Map);
+        }
+
+        if (isSuperAdmin && (data == null || !data.containsKey('granted_plan'))) {
+          // Default super admin to premium lifetime
+          final lifetimeUntil = DateTime.now().add(const Duration(days: 99999)).toIso8601String();
+          final updatedData = data != null ? Map<String, dynamic>.from(data) : <String, dynamic>{};
+          updatedData['granted_plan'] = 'premium';
+          updatedData['granted_until'] = lifetimeUntil;
+          updatedData['granted_duration_days'] = 99999;
+          updatedData['is_admin'] = true;
+
+          await client.from('user_data').upsert({
+            'user_id': user.id,
+            'data': updatedData,
+            'updated_at': DateTime.now().toIso8601String(),
+          }, onConflict: 'user_id');
+
+          _currentPlan = SubscriptionPlan.premium;
+          _expirationDate = DateTime.parse(lifetimeUntil);
+          _activeDurationDays = 99999;
+          return;
+        }
+
+        if (data != null) {
           final grantedPlanStr = data['granted_plan'] as String?;
           final grantedUntilStr = data['granted_until'] as String?;
           final grantedDurationDays = data['granted_duration_days'] as int?;
