@@ -353,7 +353,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _buildSettingTile(
                         context,
                         model.t('label_export'),
-                        model.t('desc_export'),
+                        model.t('desc_export') + ' (Coming Soon)',
                         Icons.file_download_rounded,
                         const Color(0xFFEC4899), // Pink
                         () => _showComingSoonSnackBar(context),
@@ -370,6 +370,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         isDark,
                         isDestructive: true,
                         customIconColor: const Color(0xFFEF4444),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // AI Smart Features
+                  _buildSectionHeader(
+                      'AI Smart Features', Icons.auto_awesome_rounded, isDark),
+                  _buildSettingsCard(
+                    isDark,
+                    [
+                      _buildSettingTile(
+                        context,
+                        'AI Bill Auto-Scanner',
+                        'Scan bill/receipt photos to auto-fill records (Coming Soon)',
+                        Icons.document_scanner_rounded,
+                        const Color(0xFF8B5CF6), // Purple
+                        () => _showComingSoonSnackBar(context),
+                        isDark,
                       ),
                     ],
                   ),
