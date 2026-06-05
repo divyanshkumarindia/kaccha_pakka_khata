@@ -164,7 +164,11 @@ class SubscriptionService extends ChangeNotifier {
           data = Map<String, dynamic>.from(response['data'] as Map);
         }
 
-        if (isSuperAdmin && (data == null || !data.containsKey('granted_plan'))) {
+        final hasExplicitChoice = data != null && data['super_admin_explicit_choice'] == true;
+        final currentPlanStr = data?['granted_plan'] as String?;
+        final isFreeOrNone = currentPlanStr == null || currentPlanStr == 'free' || currentPlanStr == '';
+
+        if (isSuperAdmin && !hasExplicitChoice && isFreeOrNone) {
           // Default super admin to premium lifetime
           final lifetimeUntil = DateTime.now().add(const Duration(days: 99999)).toIso8601String();
           final updatedData = data != null ? Map<String, dynamic>.from(data) : <String, dynamic>{};
@@ -172,6 +176,9 @@ class SubscriptionService extends ChangeNotifier {
           updatedData['granted_until'] = lifetimeUntil;
           updatedData['granted_duration_days'] = 99999;
           updatedData['is_admin'] = true;
+          if (updatedData['email'] == null) {
+            updatedData['email'] = 'divyanshkumarindia@gmail.com';
+          }
 
           await client.from('user_data').upsert({
             'user_id': user.id,

@@ -236,9 +236,19 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     final uData = Map<String, dynamic>.from(row['data'] ?? {});
     final displayName = uData['user_name'] ?? 'Unnamed User';
     final email = uData['email'] ?? 'No email';
-    final activePlan = uData['granted_plan'] ?? 'free';
-    final untilStr = uData['granted_until'];
+    
+    final isSuperAdmin = email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com';
+    final hasExplicitChoice = uData['super_admin_explicit_choice'] == true;
+    
+    String activePlan = uData['granted_plan'] ?? 'free';
+    dynamic untilStr = uData['granted_until'];
     final userId = row['user_id'];
+
+    if (isSuperAdmin && !hasExplicitChoice && (activePlan == 'free' || activePlan == '')) {
+      activePlan = 'premium';
+      untilStr = DateTime.now().add(const Duration(days: 99999)).toIso8601String();
+      uData['granted_duration_days'] = 99999;
+    }
     
     String durationLabel(int days) {
       if (days > 10000) return 'Lifetime';
@@ -622,6 +632,10 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
   Future<void> _grantUserPlan(String userId, Map<String, dynamic> currentConfig, String plan, int durationDays, bool isAdmin, [String mode = 'overwrite']) async {
     try {
       final updatedConfig = Map<String, dynamic>.from(currentConfig);
+      final email = currentConfig['email']?.toString().toLowerCase() ?? '';
+      if (email == 'divyanshkumarindia@gmail.com') {
+        updatedConfig['super_admin_explicit_choice'] = true;
+      }
 
       if (plan == 'free') {
         updatedConfig.remove('granted_plan');
@@ -1019,9 +1033,16 @@ CREATE POLICY "Allow users to insert their own redemptions" ON public.user_promo
     final displayName = configData['user_name'] ?? 'Unnamed User';
     final email = configData['email'] ?? 'No email';
 
+    final isSuperAdmin = email.toString().toLowerCase() == 'divyanshkumarindia@gmail.com';
+    final hasExplicitChoice = configData['super_admin_explicit_choice'] == true;
+
     String localPlan = configData['granted_plan'] ?? 'free';
     int localDuration = 30;
-    if (configData['granted_duration_days'] != null) {
+    
+    if (isSuperAdmin && !hasExplicitChoice && (localPlan == 'free' || localPlan == '')) {
+      localPlan = 'premium';
+      localDuration = 99999;
+    } else if (configData['granted_duration_days'] != null) {
       localDuration = configData['granted_duration_days'] as int;
     } else if (configData['granted_until'] != null) {
       final until = DateTime.parse(configData['granted_until'] as String);
