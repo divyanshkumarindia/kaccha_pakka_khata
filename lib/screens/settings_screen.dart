@@ -1734,14 +1734,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           return AlertDialog(
             backgroundColor: isDark ? const Color(0xFF1F2937) : Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             title: Text(
               model.t('label_font_size'),
               style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+            content: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 // Text Preview box
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -1825,7 +1828,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
               ],
-            ),
+            ),),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
